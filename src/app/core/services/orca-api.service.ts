@@ -23,7 +23,7 @@ export class OrcaApiService {
     if (host === 'localhost' || host === '127.0.0.1') {
       return 'http://localhost:8082/api';
     }
-    return 'http://92.5.56.244:8082/api';
+    return 'http://92.5.39.41:8082/api';
   }
 
   registerAppUserProfile(input: AppUserRegistrationPayload): Observable<AppUser> {
