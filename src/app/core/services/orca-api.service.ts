@@ -14,9 +14,17 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class OrcaApiService {
-  private readonly apiBase = '/api';
+  private readonly apiBase = this.resolveApiBase();
 
   constructor(private readonly http: HttpClient) {}
+
+  private resolveApiBase(): string {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8082/api';
+    }
+    return 'http://92.5.56.244:8082/api';
+  }
 
   registerAppUserProfile(input: AppUserRegistrationPayload): Observable<AppUser> {
     return this.http.post<AppUser>(`${this.apiBase}/app-users/register`, input);
