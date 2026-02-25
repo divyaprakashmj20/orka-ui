@@ -1,0 +1,112 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Register</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="login-page">
+    <ion-card class="login-card">
+      <ion-card-header>
+        <ion-card-title>Create account</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form class="login-form" (ngSubmit)="register()">
+          <ion-item>
+            <ion-label position="stacked">Full Name</ion-label>
+            <ion-input
+              [(ngModel)]="form.name"
+              name="name"
+              placeholder="Your name"
+              required
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Phone (optional)</ion-label>
+            <ion-input
+              type="tel"
+              autocomplete="tel"
+              [(ngModel)]="form.phone"
+              name="phone"
+              placeholder="+91..."
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Hotel Group Code (for group admin signup)</ion-label>
+            <ion-input
+              [(ngModel)]="form.hotelGroupCode"
+              name="hotelGroupCode"
+              placeholder="groupname-001"
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Hotel Code (for hotel admin/staff signup)</ion-label>
+            <ion-input
+              [(ngModel)]="form.hotelCode"
+              name="hotelCode"
+              placeholder="hotelname-123"
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input
+              type="email"
+              autocomplete="email"
+              [(ngModel)]="form.email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="form.password"
+              name="password"
+              placeholder="At least 6 characters"
+              required
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Confirm Password</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="form.confirmPassword"
+              name="confirmPassword"
+              placeholder="Re-enter password"
+              required
+            />
+          </ion-item>
+
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+
+          <ion-button expand="block" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Creating account...' : 'Create Account' }}
+          </ion-button>
+        </form>
+
+        <div class="auth-links">
+          <ion-note>
+            Already have an account?
+            <a routerLink="/login">Sign in</a>
+          </ion-note>
+          <ion-note>
+            Use one code only. Group admins use hotel group code, hotel admins/staff use hotel code.
+          </ion-note>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

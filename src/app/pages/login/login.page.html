@@ -1,0 +1,70 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="login-page">
+    <ion-card class="login-card">
+      <ion-card-header>
+        <ion-card-title>Sign in to Orka</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form class="login-form" (ngSubmit)="login()">
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              [(ngModel)]="form.email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="current-password"
+              [(ngModel)]="form.password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+          </ion-item>
+
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+
+          <ion-button expand="block" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Signing in...' : 'Sign In' }}
+          </ion-button>
+        </form>
+
+        <div class="setup-note">
+          <ion-note>
+            Paste your Firebase Web App config into
+            <code>src/app/core/firebase/firebase.config.ts</code>
+          </ion-note>
+        </div>
+
+        <div class="auth-links">
+          <ion-note>
+            New here?
+            <a routerLink="/register">Create an account</a>
+          </ion-note>
+          <ion-note>
+            Forgot your password?
+            <a routerLink="/forgot-password">Reset it</a>
+          </ion-note>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,0 +1,102 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" />
+    </ion-buttons>
+    <ion-title>Employees</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="crud-page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ form.id ? 'Edit Employee' : 'Create Employee' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form class="form-grid" (ngSubmit)="save()">
+          <label>
+            <span>Name</span>
+            <input [(ngModel)]="form.name" name="name" required />
+          </label>
+          <label>
+            <span>Role</span>
+            <select [(ngModel)]="form.role" name="role" required>
+              <option [ngValue]="null">Select role</option>
+              @for (role of employeeRoles; track role) {
+                <option [ngValue]="role">{{ role }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Access Role</span>
+            <select [(ngModel)]="form.accessRole" name="accessRole" required>
+              <option [ngValue]="null">Select access role</option>
+              @for (role of accessRoles; track role) {
+                <option [ngValue]="role">{{ role }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Phone</span>
+            <input [(ngModel)]="form.phone" name="phone" />
+          </label>
+          <label>
+            <span>Hotel</span>
+            <select [(ngModel)]="form.hotelId" name="hotelId" required>
+              <option [ngValue]="null">Select hotel</option>
+              @for (hotel of hotels(); track hotel.id ?? hotel.name) {
+                <option [ngValue]="hotel.id ?? null">{{ hotel.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="checkbox-row">
+            <input [(ngModel)]="form.active" name="active" type="checkbox" />
+            <span>Active</span>
+          </label>
+
+          <div class="form-actions">
+            <ion-button type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
+            </ion-button>
+            <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+          </div>
+        </form>
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Records</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        @if (loading()) {
+          <p>Loading...</p>
+        } @else {
+          <ion-list inset="true">
+            @for (item of items(); track item.id ?? item.name) {
+              <ion-item>
+                <ion-label>
+                  <h2>{{ item.name }}</h2>
+                  <p>{{ item.role || '-' }} • {{ item.accessRole || '-' }}</p>
+                  <p>Phone: {{ item.phone || '-' }} • {{ item.active ? 'Active' : 'Inactive' }}</p>
+                  <p>Hotel: {{ item.hotel?.name || ('#' + (item.hotel?.id ?? '?')) }}</p>
+                  <div class="inline-actions">
+                    <button type="button" (click)="edit(item)">Edit</button>
+                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+                  </div>
+                </ion-label>
+              </ion-item>
+            } @empty {
+              <ion-item><ion-label>No employees found.</ion-label></ion-item>
+            }
+          </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

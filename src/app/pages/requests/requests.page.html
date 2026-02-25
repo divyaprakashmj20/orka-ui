@@ -1,0 +1,132 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" />
+    </ion-buttons>
+    <ion-title>Requests</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="crud-page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ form.id ? 'Edit Request' : 'Create Request' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form class="form-grid" (ngSubmit)="save()">
+          <label>
+            <span>Hotel</span>
+            <select [(ngModel)]="form.hotelId" name="hotelId" required>
+              <option [ngValue]="null">Select hotel</option>
+              @for (hotel of hotels(); track hotel.id ?? hotel.name) {
+                <option [ngValue]="hotel.id ?? null">{{ hotel.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Room</span>
+            <select [(ngModel)]="form.roomId" name="roomId" required>
+              <option [ngValue]="null">Select room</option>
+              @for (room of rooms(); track room.id ?? room.number) {
+                <option [ngValue]="room.id ?? null">{{ roomLabel(room) }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Type</span>
+            <select [(ngModel)]="form.type" name="type" required>
+              <option [ngValue]="null">Select type</option>
+              @for (type of requestTypes; track type) {
+                <option [ngValue]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select [(ngModel)]="form.status" name="status">
+              <option [ngValue]="null">Unset</option>
+              @for (status of requestStatuses; track status) {
+                <option [ngValue]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
+          <label class="span-2">
+            <span>Message</span>
+            <textarea [(ngModel)]="form.message" name="message" rows="3"></textarea>
+          </label>
+          <label>
+            <span>Assignee (optional)</span>
+            <select [(ngModel)]="form.assigneeId" name="assigneeId">
+              <option [ngValue]="null">Unassigned</option>
+              @for (employee of employees(); track employee.id ?? employee.name) {
+                <option [ngValue]="employee.id ?? null">{{ employee.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Rating</span>
+            <input [(ngModel)]="form.rating" name="rating" type="number" min="1" max="5" />
+          </label>
+          <label>
+            <span>Created At</span>
+            <input [(ngModel)]="form.createdAt" name="createdAt" type="datetime-local" />
+          </label>
+          <label>
+            <span>Accepted At</span>
+            <input [(ngModel)]="form.acceptedAt" name="acceptedAt" type="datetime-local" />
+          </label>
+          <label>
+            <span>Completed At</span>
+            <input [(ngModel)]="form.completedAt" name="completedAt" type="datetime-local" />
+          </label>
+          <label class="span-2">
+            <span>Comments</span>
+            <textarea [(ngModel)]="form.comments" name="comments" rows="2"></textarea>
+          </label>
+
+          <div class="form-actions span-2">
+            <ion-button type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
+            </ion-button>
+            <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+          </div>
+        </form>
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Records</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        @if (loading()) {
+          <p>Loading...</p>
+        } @else {
+          <ion-list inset="true">
+            @for (item of items(); track item.id ?? $index) {
+              <ion-item>
+                <ion-label>
+                  <h2>Request #{{ item.id ?? '?' }} • {{ item.type || 'UNKNOWN' }}</h2>
+                  <p>Status: {{ item.status || '-' }} • Hotel: {{ item.hotel?.name || '-' }}</p>
+                  <p>Room: {{ item.room?.number || '-' }} • Assignee: {{ item.assignee?.name || 'Unassigned' }}</p>
+                  <p>{{ item.message || 'No message' }}</p>
+                  <div class="inline-actions">
+                    <button type="button" (click)="edit(item)">Edit</button>
+                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+                  </div>
+                </ion-label>
+              </ion-item>
+            } @empty {
+              <ion-item><ion-label>No requests found.</ion-label></ion-item>
+            }
+          </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

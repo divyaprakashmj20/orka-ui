@@ -1,0 +1,86 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" />
+    </ion-buttons>
+    <ion-title>Rooms</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="crud-page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ form.id ? 'Edit Room' : 'Create Room' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form class="form-grid" (ngSubmit)="save()">
+          <label>
+            <span>Room Number</span>
+            <input [(ngModel)]="form.number" name="number" required />
+          </label>
+          <label>
+            <span>Floor</span>
+            <input
+              [(ngModel)]="form.floor"
+              name="floor"
+              type="number"
+              [ngModelOptions]="{ standalone: false }"
+            />
+          </label>
+          <label>
+            <span>Hotel</span>
+            <select [(ngModel)]="form.hotelId" name="hotelId" required>
+              <option [ngValue]="null">Select hotel</option>
+              @for (hotel of hotels(); track hotel.id ?? hotel.name) {
+                <option [ngValue]="hotel.id ?? null">
+                  {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <div class="form-actions">
+            <ion-button type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
+            </ion-button>
+            <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+          </div>
+        </form>
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Records</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        @if (loading()) {
+          <p>Loading...</p>
+        } @else {
+          <ion-list inset="true">
+            @for (item of items(); track item.id ?? item.number) {
+              <ion-item>
+                <ion-label>
+                  <h2>Room {{ item.number }}</h2>
+                  <p>Floor: {{ item.floor ?? '-' }}</p>
+                  <p>Hotel: {{ item.hotel?.name || ('#' + (item.hotel?.id ?? '?')) }}</p>
+                  <div class="inline-actions">
+                    <button type="button" (click)="edit(item)">Edit</button>
+                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+                  </div>
+                </ion-label>
+              </ion-item>
+            } @empty {
+              <ion-item><ion-label>No rooms found.</ion-label></ion-item>
+            }
+          </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

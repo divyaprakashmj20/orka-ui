@@ -1,0 +1,113 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" />
+    </ion-buttons>
+    <ion-title>Pending User Approvals</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="crud-page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Pending App Users</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-actions">
+          <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+        </div>
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+        @if (loading()) {
+          <p>Loading...</p>
+        } @else {
+          <ion-list inset="true">
+            @for (user of pendingUsers(); track user.id ?? user.firebaseUid) {
+              <ion-item>
+                <ion-label>
+                  <h2>{{ user.name }} ({{ user.email }})</h2>
+                  <p>Requested Hotel Group: {{ user.requestedHotelGroup?.name || '-' }}</p>
+                  <p>Requested Hotel: {{ user.requestedHotel?.name || '-' }}</p>
+
+                  @if (user.id != null) {
+                    <div class="approval-grid">
+                      <label>
+                        <span>Role</span>
+                        <select
+                          [(ngModel)]="drafts[user.id].accessRole"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="onRoleChange(user.id)"
+                        >
+                          @for (role of roleOptionsForUser(user); track role) {
+                            <option [ngValue]="role">{{ role }}</option>
+                          }
+                        </select>
+                      </label>
+
+                      @if (needsGroupAssignment(drafts[user.id].accessRole)) {
+                        <label>
+                          <span>Assign Hotel Group</span>
+                          <select
+                            [(ngModel)]="drafts[user.id].assignedHotelGroupId"
+                            [ngModelOptions]="{ standalone: true }"
+                          >
+                            <option [ngValue]="null">Select group</option>
+                            @for (group of assignableHotelGroups(); track group.id ?? group.name) {
+                              <option [ngValue]="group.id ?? null">
+                                {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
+                              </option>
+                            }
+                          </select>
+                        </label>
+                      }
+
+                      @if (needsHotelAssignment(drafts[user.id].accessRole)) {
+                        <label>
+                          <span>Assign Hotel</span>
+                          <select
+                            [(ngModel)]="drafts[user.id].assignedHotelId"
+                            [ngModelOptions]="{ standalone: true }"
+                          >
+                            <option [ngValue]="null">Select hotel</option>
+                            @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
+                              <option [ngValue]="hotel.id ?? null">
+                                {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
+                              </option>
+                            }
+                          </select>
+                        </label>
+                      }
+
+                      <div class="form-actions span-2">
+                        <ion-button
+                          type="button"
+                          [disabled]="isBusy(user.id)"
+                          (click)="approve(user)"
+                        >
+                          Approve
+                        </ion-button>
+                        <ion-button
+                          type="button"
+                          fill="outline"
+                          color="danger"
+                          [disabled]="isBusy(user.id)"
+                          (click)="reject(user)"
+                        >
+                          Reject
+                        </ion-button>
+                      </div>
+                    </div>
+                  }
+                </ion-label>
+              </ion-item>
+            } @empty {
+              <ion-item><ion-label>No pending users.</ion-label></ion-item>
+            }
+          </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

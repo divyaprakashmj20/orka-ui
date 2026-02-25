@@ -1,0 +1,23 @@
+.page-wrap {
+  padding: 16px;
+}
+
+.hero-card {
+  background: var(--ion-color-light, #f4f5f8);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-card h2 {
+  margin: 0 0 8px;
+}
+
+.hero-card p {
+  margin: 0;
+}
+
+.subtle {
+  opacity: 0.75;
+  margin-top: 8px;
+}

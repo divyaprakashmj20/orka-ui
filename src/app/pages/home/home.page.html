@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>orka-ui</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="logout()" [disabled]="loggingOut()">
+        {{ loggingOut() ? 'Signing out...' : 'Logout' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">orka-ui</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="page-wrap">
+    <div class="hero-card">
+      <h2>Backend-driven admin starter</h2>
+      <p class="subtle">Signed in as: <strong>{{ userEmail() }}</strong></p>
+      <p>
+        UI pages are mapped to your Spring controllers in the sibling <code>orca</code> backend project.
+      </p>
+      <p class="subtle">Base API expected: <code>http://localhost:8080/api</code></p>
+      @if (authError()) {
+        <p class="error-text">{{ authError() }}</p>
+      }
+    </div>
+
+    <ion-list inset="true">
+      @for (section of sections; track section.path) {
+        <ion-item [routerLink]="section.path" detail="true">
+          <ion-label>
+            <h2>{{ section.title }}</h2>
+            <p>{{ section.note }}</p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  </div>
+</ion-content>
