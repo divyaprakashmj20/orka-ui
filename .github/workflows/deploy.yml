@@ -81,5 +81,5 @@ jobs:
             cat >/opt/orka/firebase-config.json <<'EOF'
             ${{ secrets.FIREBASE_CONFIG_JSON }}
             EOF
-            sudo docker compose -f /opt/orka/docker-compose.yml pull orka-ui
-            sudo docker compose -f /opt/orka/docker-compose.yml up -d orka-ui
+            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml pull orka-ui
+            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml up -d orka-ui
