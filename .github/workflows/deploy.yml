@@ -19,6 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install binfmt (better QEMU)
+        run: |
+          docker run --privileged --rm tonistiigi/binfmt --install all
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
