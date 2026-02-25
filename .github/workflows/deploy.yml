@@ -72,7 +72,7 @@ jobs:
           username: ${{ secrets.OCI_USER }}
           port: ${{ secrets.OCI_PORT }}
           key: ${{ secrets.OCI_SSH_KEY }}
-          source: deploy/docker-compose.yml
+          source: deploy/docker-compose.yml,Caddyfile
           target: /tmp/orka-deploy
           overwrite: true
 
@@ -87,6 +87,7 @@ jobs:
             set -e
             sudo mkdir -p /opt/orka
             sudo mv /tmp/orka-deploy/deploy/docker-compose.yml /opt/orka/docker-compose.yml || true
+            sudo mv /tmp/orka-deploy/Caddyfile /opt/orka/Caddyfile || true
             sudo chown -R $USER:$USER /opt/orka
             cat >/opt/orka/.env <<'EOF'
             POSTGRES_DB=orka
@@ -100,8 +101,8 @@ jobs:
             cat >/opt/orka/firebase-config.json <<'EOF'
             ${{ secrets.FIREBASE_CONFIG_JSON }}
             EOF
-            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml pull orka-ui
-            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml up -d orka-ui
+            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml pull orka-ui caddy
+            sudo docker compose --env-file /opt/orka/.env -f /opt/orka/docker-compose.yml up -d orka-ui caddy
       - name: Copy docker-compose to VM
         uses: appleboy/scp-action@v0.1.7
         with:
