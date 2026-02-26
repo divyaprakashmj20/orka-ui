@@ -36,6 +36,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -49,6 +55,14 @@
                 }
               ],
               "outputHashing": "all"
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -66,6 +80,9 @@
             },
             "development": {
               "buildTarget": "orka-ui:build:development"
+            },
+            "local": {
+              "buildTarget": "orka-ui:build:local"
             }
           },
           "defaultConfiguration": "development"

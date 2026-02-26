@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   AppUser,
   AppUserApprovalPayload,
   AppUserRegistrationPayload,
+  DeviceTokenRegisterPayload,
+  DeviceTokenUnregisterPayload,
   Employee,
   Hotel,
   HotelGroup,
@@ -14,17 +17,9 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class OrcaApiService {
-  private readonly apiBase = this.resolveApiBase();
+  private readonly apiBase = environment.apiBase;
 
   constructor(private readonly http: HttpClient) {}
-
-  private resolveApiBase(): string {
-    const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') {
-      return 'http://localhost:8082/api';
-    }
-    return 'https://orka-service.duckdns.org/api';
-  }
 
   registerAppUserProfile(input: AppUserRegistrationPayload): Observable<AppUser> {
     return this.http.post<AppUser>(`${this.apiBase}/app-users/register`, input);
@@ -48,6 +43,14 @@ export class OrcaApiService {
 
   updateAppUser(id: number, input: Partial<AppUser>): Observable<AppUser> {
     return this.http.put<AppUser>(`${this.apiBase}/app-users/${id}`, input);
+  }
+
+  registerDeviceToken(input: DeviceTokenRegisterPayload): Observable<void> {
+    return this.http.post<void>(`${this.apiBase}/device-tokens/register`, input);
+  }
+
+  unregisterDeviceToken(input: DeviceTokenUnregisterPayload): Observable<void> {
+    return this.http.post<void>(`${this.apiBase}/device-tokens/unregister`, input);
   }
 
   listHotelGroups(): Observable<HotelGroup[]> {

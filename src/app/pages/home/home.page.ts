@@ -12,6 +12,7 @@ import {
   IonToolbar
 } from '@ionic/angular/standalone';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { PushNotificationsService } from '../../core/notifications/push-notifications.service';
 
 @Component({
   selector: 'app-home-page',
@@ -33,6 +34,7 @@ import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 })
 export class HomePage {
   private readonly auth = inject(FirebaseAuthService);
+  private readonly pushNotifications = inject(PushNotificationsService);
   private readonly router = inject(Router);
 
   protected readonly loggingOut = signal(false);
@@ -52,6 +54,7 @@ export class HomePage {
     try {
       this.loggingOut.set(true);
       this.authError.set('');
+      await this.pushNotifications.unregisterCurrentDeviceToken();
       await this.auth.signOutAndWaitForState();
       await this.router.navigateByUrl('/login', { replaceUrl: true });
     } catch {

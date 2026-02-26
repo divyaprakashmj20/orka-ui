@@ -104,6 +104,16 @@ export interface AppUserApprovalPayload {
   assignedHotelId?: number | null;
 }
 
+export interface DeviceTokenRegisterPayload {
+  firebaseUid: string;
+  fcmToken: string;
+  platform: 'ANDROID' | 'IOS' | 'WEB';
+}
+
+export interface DeviceTokenUnregisterPayload {
+  fcmToken: string;
+}
+
 export interface HotelGroupRef {
   id?: number;
   name?: string;

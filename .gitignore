@@ -45,3 +45,7 @@ Thumbs.db
 
 # Local runtime config
 /public/firebase-config.json
+
+./android
+android
+commands.txt

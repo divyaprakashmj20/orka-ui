@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
   IonBackButton,
@@ -28,6 +29,7 @@ import {
   ServiceRequest
 } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { PushEventsService } from '../../core/notifications/push-events.service';
 
 type RequestForm = {
   id: number | null;
@@ -69,6 +71,8 @@ type RequestForm = {
   styleUrl: './requests.page.scss'
 })
 export class RequestsPage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly pushEvents = inject(PushEventsService);
   protected readonly items = signal<ServiceRequest[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
   protected readonly rooms = signal<Room[]>([]);
@@ -83,6 +87,14 @@ export class RequestsPage implements OnInit {
   constructor(private readonly api: OrcaApiService) {}
 
   ngOnInit(): void {
+    this.pushEvents.events$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        if (event.kind === 'NEW_REQUEST') {
+          this.loadRequests();
+        }
+      });
+
     this.refreshAll();
   }
 
