@@ -48,16 +48,6 @@ export interface Room {
   hotel?: HotelRef | null;
 }
 
-export interface Employee {
-  id?: number;
-  name: string;
-  role?: EmployeeRole | null;
-  accessRole?: AccessRole | null;
-  phone?: string | null;
-  active?: boolean;
-  hotel?: HotelRef | null;
-}
-
 export interface ServiceRequest {
   id?: number;
   hotel?: HotelRef | null;
@@ -68,7 +58,7 @@ export interface ServiceRequest {
   createdAt?: string | null;
   acceptedAt?: string | null;
   completedAt?: string | null;
-  assignee?: EmployeeRef | null;
+  assignee?: AppUserRef | null;
   rating?: number | null;
   comments?: string | null;
 }
@@ -81,6 +71,8 @@ export interface AppUser {
   phone?: string | null;
   status?: AppUserStatus | null;
   accessRole?: AccessRole | null;
+  employeeRole?: EmployeeRole | null;
+  active?: boolean;
   requestedHotel?: HotelRef | null;
   requestedHotelGroup?: HotelGroupRef | null;
   assignedHotelGroup?: HotelGroupRef | null;
@@ -100,6 +92,8 @@ export interface AppUserRegistrationPayload {
 
 export interface AppUserApprovalPayload {
   accessRole: AccessRole;
+  employeeRole?: EmployeeRole | null;
+  active?: boolean | null;
   assignedHotelGroupId?: number | null;
   assignedHotelId?: number | null;
 }
@@ -136,11 +130,10 @@ export interface RoomRef {
   hotel?: HotelRef | null;
 }
 
-export interface EmployeeRef {
+export interface AppUserRef {
   id?: number;
   name?: string;
-  role?: EmployeeRole | null;
+  employeeRole?: EmployeeRole | null;
   accessRole?: AccessRole | null;
   active?: boolean;
-  hotel?: HotelRef | null;
 }

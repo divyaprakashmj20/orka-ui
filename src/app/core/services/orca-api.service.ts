@@ -8,7 +8,6 @@ import {
   AppUserRegistrationPayload,
   DeviceTokenRegisterPayload,
   DeviceTokenUnregisterPayload,
-  Employee,
   Hotel,
   HotelGroup,
   Room,
@@ -93,20 +92,6 @@ export class OrcaApiService {
 
   deleteRoom(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiBase}/rooms/${id}`);
-  }
-
-  listEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(`${this.apiBase}/employees`);
-  }
-
-  saveEmployee(input: Employee): Observable<Employee> {
-    return input.id == null
-      ? this.http.post<Employee>(`${this.apiBase}/employees`, input)
-      : this.http.put<Employee>(`${this.apiBase}/employees/${input.id}`, input);
-  }
-
-  deleteEmployee(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiBase}/employees/${id}`);
   }
 
   listRequests(): Observable<ServiceRequest[]> {

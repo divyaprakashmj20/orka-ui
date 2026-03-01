@@ -14,6 +14,13 @@ type PushPlugin = {
   addListener: (eventName: string, listener: (event: any) => void) => Promise<any>;
 };
 
+type CapacitorAppPlugin = {
+  addListener: (
+    eventName: 'appStateChange',
+    listener: (state: { isActive: boolean }) => void
+  ) => Promise<any>;
+};
+
 @Injectable({ providedIn: 'root' })
 export class PushNotificationsService {
   private readonly auth = inject(FirebaseAuthService);
@@ -52,6 +59,7 @@ export class PushNotificationsService {
         return;
       }
       this.pushPlugin = loaded.plugin;
+      await this.registerAppStateListener();
 
       await this.registerListeners();
 
@@ -130,6 +138,26 @@ export class PushNotificationsService {
         void this.router.navigateByUrl('/requests');
       });
     });
+  }
+
+  private async registerAppStateListener(): Promise<void> {
+    try {
+      const module = await import('@capacitor/app');
+      const appPlugin = module.App as unknown as CapacitorAppPlugin;
+      await appPlugin.addListener('appStateChange', (state) => {
+        if (!state.isActive) {
+          return;
+        }
+        this.zone.run(() => {
+          this.events.emit({
+            kind: 'APP_RESUMED',
+            source: 'resume'
+          });
+        });
+      });
+    } catch (error) {
+      console.warn('Capacitor App plugin is not installed. Resume refresh hook disabled.', error);
+    }
   }
 
   private async handleAuthStateChange(user: User | null): Promise<void> {

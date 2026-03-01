@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>orka-ui</ion-title>
+    <ion-title>Orka Console</ion-title>
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="logout()" [disabled]="loggingOut()">
         {{ loggingOut() ? 'Signing out...' : 'Logout' }}
@@ -12,32 +12,145 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">orka-ui</ion-title>
+      <ion-title size="large">Orka Console</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div class="page-wrap">
-    <div class="hero-card">
-      <h2>Backend-driven admin starter</h2>
-      <p class="subtle">Signed in as: <strong>{{ userEmail() }}</strong></p>
-      <p>
-        UI pages are mapped to your Spring controllers in the sibling <code>orca</code> backend project.
-      </p>
-      <p class="subtle">Base API expected: <code>http://localhost:8080/api</code></p>
-      @if (authError()) {
-        <p class="error-text">{{ authError() }}</p>
-      }
-    </div>
+  <div class="dashboard-shell">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">Hospitality Operations</p>
+        <h1>Run the hotel from one place.</h1>
+        <p class="summary">{{ summaryText() }}</p>
+      </div>
 
-    <ion-list inset="true">
-      @for (section of sections; track section.path) {
-        <ion-item [routerLink]="section.path" detail="true">
-          <ion-label>
-            <h2>{{ section.title }}</h2>
-            <p>{{ section.note }}</p>
-          </ion-label>
-        </ion-item>
-      }
-    </ion-list>
+      <div class="profile-panel">
+        <ion-chip class="role-chip">{{ roleLabel() }}</ion-chip>
+        <p class="meta-label">Signed in as</p>
+        <p class="meta-value">{{ userEmail() }}</p>
+        <p class="meta-label">Scope</p>
+        <p class="meta-value">{{ scopeLabel() }}</p>
+      </div>
+    </section>
+
+    @if (isSuperAdmin()) {
+      <section class="palette-panel">
+        <div class="palette-header">
+          <div>
+            <p class="eyebrow">Temporary Palette Lab</p>
+            <h2>Theme controls</h2>
+            <p class="summary">
+              Drag the hue slider to shift the shared app palette. The values below mirror the CSS
+              variables in `src/styles.scss`.
+            </p>
+          </div>
+          <span class="palette-hue-badge">Hue {{ paletteHue() }}</span>
+        </div>
+
+        <label class="palette-slider">
+          <span>Accent hue</span>
+          <input
+            type="range"
+            min="0"
+            max="360"
+            [value]="paletteHue()"
+            (input)="updatePaletteHue(($any($event.target).value))"
+          />
+        </label>
+
+        <div class="palette-grid">
+          @for (token of paletteReadout(); track token.label) {
+            <div class="palette-token">
+              <span class="palette-swatch" [style.background]="token.swatch"></span>
+              <div>
+                <p>{{ token.label }}</p>
+                <strong>{{ token.value }}</strong>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (availableTabs().length > 1) {
+      <ion-segment
+        class="dashboard-tabs"
+        [value]="activeTab()"
+        (ionChange)="setTab($event.detail.value)"
+      >
+        @for (tab of availableTabs(); track tab) {
+          <ion-segment-button [value]="tab">
+            {{ tab }}
+          </ion-segment-button>
+        }
+      </ion-segment>
+    }
+
+    <section class="section-head">
+      <div>
+        <p class="eyebrow">Workspace</p>
+        <h2>
+          @if (activeTab() === 'overview') {
+            Recommended actions
+          } @else if (activeTab() === 'operations') {
+            Daily operations
+          } @else {
+            Administrative controls
+          }
+        </h2>
+      </div>
+      <p class="section-count">{{ currentSections().length }} tool(s)</p>
+    </section>
+
+    @if (loadingProfile()) {
+      <div class="empty-state">
+        <p>Loading your workspace...</p>
+      </div>
+    } @else if (currentSections().length) {
+      <section class="card-grid">
+        @for (section of currentSections(); track section.path) {
+          <a class="nav-card" [routerLink]="section.path">
+            <div class="nav-icon">
+              <ion-icon [name]="section.icon" />
+            </div>
+            <div class="nav-copy">
+              <h3>{{ section.title }}</h3>
+              <p>{{ section.note }}</p>
+            </div>
+            <span class="nav-action">Open</span>
+          </a>
+        }
+      </section>
+    } @else {
+      <div class="empty-state">
+        <p>No tools are available for this role yet.</p>
+      </div>
+    }
+
+    @if (authError()) {
+      <div class="status-card error">
+        <p>{{ authError() }}</p>
+      </div>
+    }
+
+    <div class="status-row">
+      <div class="status-card">
+        <p class="eyebrow">Notifications</p>
+        <h3>Push-ready workflow</h3>
+        <p>
+          New guest requests can notify hotel staff instantly, while background resume now refreshes
+          the active request queue.
+        </p>
+      </div>
+
+      <div class="status-card">
+        <p class="eyebrow">Next step</p>
+        <h3>Move from CRUD to operations</h3>
+        <p>
+          The next UI milestone is a real request board with accept/complete flows and role-specific
+          actions.
+        </p>
+      </div>
+    </div>
   </div>
 </ion-content>

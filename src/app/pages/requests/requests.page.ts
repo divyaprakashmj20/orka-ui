@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
@@ -19,7 +19,7 @@ import {
   IonToolbar
 } from '@ionic/angular/standalone';
 import {
-  Employee,
+  AppUser,
   Hotel,
   REQUEST_STATUSES,
   REQUEST_TYPES,
@@ -28,8 +28,10 @@ import {
   Room,
   ServiceRequest
 } from '../../core/models/orca.models';
-import { OrcaApiService } from '../../core/services/orca-api.service';
 import { PushEventsService } from '../../core/notifications/push-events.service';
+import { OrcaApiService } from '../../core/services/orca-api.service';
+import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { firstValueFrom } from 'rxjs';
 
 type RequestForm = {
   id: number | null;
@@ -73,16 +75,33 @@ type RequestForm = {
 export class RequestsPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly pushEvents = inject(PushEventsService);
+  private readonly auth = inject(FirebaseAuthService);
+
   protected readonly items = signal<ServiceRequest[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
   protected readonly rooms = signal<Room[]>([]);
-  protected readonly employees = signal<Employee[]>([]);
+  protected readonly assignees = signal<AppUser[]>([]);
+  protected readonly currentAppUser = signal<AppUser | null>(null);
   protected readonly requestTypes = REQUEST_TYPES;
   protected readonly requestStatuses = REQUEST_STATUSES;
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected form: RequestForm = this.emptyForm();
+  protected readonly visibleRooms = computed(() => {
+    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
+    if (hotelId == null) {
+      return this.rooms();
+    }
+    return this.rooms().filter((room) => room.hotel?.id === hotelId);
+  });
+  protected readonly visibleAssignees = computed(() => {
+    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
+    if (hotelId == null) {
+      return this.assignees();
+    }
+    return this.assignees().filter((user) => user.assignedHotel?.id === hotelId);
+  });
 
   constructor(private readonly api: OrcaApiService) {}
 
@@ -90,12 +109,12 @@ export class RequestsPage implements OnInit {
     this.pushEvents.events$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
-        if (event.kind === 'NEW_REQUEST') {
+        if (event.kind === 'NEW_REQUEST' || event.kind === 'APP_RESUMED') {
           this.loadRequests();
         }
       });
 
-    this.refreshAll();
+    void this.loadCurrentAppUserAndRefresh();
   }
 
   protected refreshAll(): void {
@@ -108,9 +127,18 @@ export class RequestsPage implements OnInit {
       next: (rooms) => this.rooms.set(rooms),
       error: () => this.error.set('Failed to load room lookup.')
     });
-    this.api.listEmployees().subscribe({
-      next: (employees) => this.employees.set(employees),
-      error: () => this.error.set('Failed to load employee lookup.')
+    this.api.listAppUsers().subscribe({
+      next: (users) =>
+        this.assignees.set(
+          users.filter(
+            (user) =>
+              user.active !== false &&
+              (user.accessRole === 'HOTEL_ADMIN' ||
+                user.accessRole === 'ADMIN' ||
+                user.accessRole === 'STAFF')
+          )
+        ),
+      error: () => this.error.set('Failed to load assignee lookup.')
     });
   }
 
@@ -130,7 +158,8 @@ export class RequestsPage implements OnInit {
   }
 
   protected save(): void {
-    if (this.form.hotelId == null || this.form.roomId == null || !this.form.type) {
+    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
+    if (hotelId == null || this.form.roomId == null || !this.form.type) {
       this.error.set('Hotel, room, and request type are required.');
       return;
     }
@@ -140,7 +169,7 @@ export class RequestsPage implements OnInit {
 
     const payload: ServiceRequest = {
       id: this.form.id ?? undefined,
-      hotel: { id: this.form.hotelId },
+      hotel: { id: hotelId },
       room: { id: this.form.roomId },
       type: this.form.type,
       message: this.form.message.trim() || null,
@@ -197,18 +226,52 @@ export class RequestsPage implements OnInit {
   }
 
   protected resetForm(): void {
-    this.form = this.emptyForm();
+    this.form = this.emptyForm(this.fixedHotelId());
   }
 
   protected roomLabel(room: Room): string {
-    const hotelName = room.hotel?.name ? `${room.hotel.name} • ` : '';
+    const hotelName = room.hotel?.name ? `${room.hotel.name} - ` : '';
     return `${hotelName}Room ${room.number}`;
   }
 
-  private emptyForm(): RequestForm {
+  protected assigneeLabel(user: AppUser): string {
+    const role = user.employeeRole ?? user.accessRole ?? 'STAFF';
+    return `${user.name} (${role.replaceAll('_', ' ')})`;
+  }
+
+  protected showHotelSelector(): boolean {
+    return this.fixedHotelId() == null;
+  }
+
+  protected fixedHotelName(): string {
+    return this.currentAppUser()?.assignedHotel?.name ?? 'Assigned hotel';
+  }
+
+  private async loadCurrentAppUserAndRefresh(): Promise<void> {
+    try {
+      const firebaseUser = this.auth.currentUser() ?? (await firstValueFrom(this.auth.authState$));
+      if (firebaseUser) {
+        this.currentAppUser.set(await firstValueFrom(this.api.getAppUserByFirebaseUid(firebaseUser.uid)));
+        this.form = this.emptyForm(this.fixedHotelId());
+      }
+    } catch {
+      this.currentAppUser.set(null);
+    } finally {
+      this.refreshAll();
+    }
+  }
+
+  private fixedHotelId(): number | null {
+    const role = this.currentAppUser()?.accessRole;
+    return role === 'HOTEL_ADMIN' || role === 'STAFF'
+      ? (this.currentAppUser()?.assignedHotel?.id ?? null)
+      : null;
+  }
+
+  private emptyForm(hotelId: number | null = null): RequestForm {
     return {
       id: null,
-      hotelId: null,
+      hotelId,
       roomId: null,
       type: null,
       message: '',

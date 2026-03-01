@@ -11,9 +11,6 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
@@ -42,10 +39,7 @@ type HotelGroupForm = {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonList,
-    IonItem,
-    IonLabel
+    IonButton
   ],
   templateUrl: './hotel-groups.page.html',
   styleUrl: './hotel-groups.page.scss'

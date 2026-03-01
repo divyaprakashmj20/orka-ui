@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonBackButton,
@@ -11,13 +11,12 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import { Hotel, Room } from '../../core/models/orca.models';
+import { firstValueFrom } from 'rxjs';
+import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { AppUser, Hotel, Room } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 
 type RoomForm = {
@@ -43,17 +42,16 @@ type RoomForm = {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonList,
-    IonItem,
-    IonLabel
+    IonButton
   ],
   templateUrl: './rooms.page.html',
   styleUrl: './rooms.page.scss'
 })
 export class RoomsPage implements OnInit {
+  private readonly auth = inject(FirebaseAuthService);
   protected readonly items = signal<Room[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
+  protected readonly currentAppUser = signal<AppUser | null>(null);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
@@ -62,7 +60,7 @@ export class RoomsPage implements OnInit {
   constructor(private readonly api: OrcaApiService) {}
 
   ngOnInit(): void {
-    this.refreshAll();
+    void this.loadCurrentAppUserAndRefresh();
   }
 
   protected refreshAll(): void {
@@ -90,7 +88,8 @@ export class RoomsPage implements OnInit {
 
   protected save(): void {
     const roomNumber = this.form.number.trim();
-    if (!roomNumber || this.form.hotelId == null) {
+    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
+    if (!roomNumber || hotelId == null) {
       this.error.set('Room number and hotel are required.');
       return;
     }
@@ -101,7 +100,7 @@ export class RoomsPage implements OnInit {
       id: this.form.id ?? undefined,
       number: roomNumber,
       floor: this.form.floor,
-      hotel: { id: this.form.hotelId }
+      hotel: { id: hotelId }
     };
 
     this.api.saveRoom(payload).subscribe({
@@ -140,10 +139,38 @@ export class RoomsPage implements OnInit {
   }
 
   protected resetForm(): void {
-    this.form = this.emptyForm();
+    this.form = this.emptyForm(this.fixedHotelId());
   }
 
-  private emptyForm(): RoomForm {
-    return { id: null, number: '', floor: null, hotelId: null };
+  protected showHotelSelector(): boolean {
+    return this.fixedHotelId() == null;
+  }
+
+  protected fixedHotelName(): string {
+    return this.currentAppUser()?.assignedHotel?.name ?? 'Assigned hotel';
+  }
+
+  private async loadCurrentAppUserAndRefresh(): Promise<void> {
+    try {
+      const firebaseUser = this.auth.currentUser() ?? (await firstValueFrom(this.auth.authState$));
+      if (firebaseUser) {
+        this.currentAppUser.set(await firstValueFrom(this.api.getAppUserByFirebaseUid(firebaseUser.uid)));
+        this.form = this.emptyForm(this.fixedHotelId());
+      }
+    } catch {
+      this.currentAppUser.set(null);
+    } finally {
+      this.refreshAll();
+    }
+  }
+
+  private fixedHotelId(): number | null {
+    return this.currentAppUser()?.accessRole === 'HOTEL_ADMIN'
+      ? (this.currentAppUser()?.assignedHotel?.id ?? null)
+      : null;
+  }
+
+  private emptyForm(hotelId: number | null = null): RoomForm {
+    return { id: null, number: '', floor: null, hotelId };
   }
 }

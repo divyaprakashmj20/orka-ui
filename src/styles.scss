@@ -17,9 +17,303 @@ body {
   height: 100%;
 }
 
+:root {
+  --orka-hue: 20;
+  --orka-font: 'Segoe UI', 'Aptos', 'Trebuchet MS', sans-serif;
+  --orka-ink: hsl(193 33% 12%);
+  --orka-muted: hsl(190 12% 42%);
+  --orka-line: hsl(190 18% 16% / 0.12);
+  --orka-accent: hsl(var(--orka-hue) 61% 46%);
+  --orka-accent-deep: hsl(var(--orka-hue) 66% 34%);
+  --orka-accent-soft: hsl(var(--orka-hue) 80% 92%);
+  --orka-secondary: hsl(calc(var(--orka-hue) + 142) 39% 32%);
+  --orka-secondary-soft: hsl(calc(var(--orka-hue) + 142) 42% 93%);
+  --orka-surface: hsl(34 55% 95%);
+  --orka-surface-strong: hsl(35 67% 98%);
+  --orka-console-surface: hsl(37 54% 98% / 0.9);
+  --orka-bg-start: hsl(30 42% 91%);
+  --orka-bg-mid: hsl(38 59% 96%);
+  --orka-bg-end: hsl(42 53% 98%);
+  --orka-glow-left: hsl(var(--orka-hue) 70% 55% / 0.16);
+  --orka-glow-right: hsl(calc(var(--orka-hue) + 142) 52% 42% / 0.12);
+  --orka-card-shadow: 0 16px 36px hsl(190 18% 16% / 0.08);
+}
+
 body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--orka-font);
+  background: linear-gradient(180deg, var(--orka-bg-start) 0%, var(--orka-bg-mid) 42%, var(--orka-bg-end) 100%);
+  color: var(--orka-ink);
+}
+
+.console-page {
+  --console-ink: var(--orka-ink);
+  --console-muted: var(--orka-muted);
+  --console-line: var(--orka-line);
+  --console-surface: var(--orka-console-surface);
+  min-height: 100%;
+  padding: 18px 16px 30px;
+  background:
+    radial-gradient(circle at top left, var(--orka-glow-left), transparent 26%),
+    radial-gradient(circle at top right, var(--orka-glow-right), transparent 24%),
+    linear-gradient(180deg, var(--orka-bg-start) 0%, var(--orka-bg-mid) 48%, var(--orka-bg-end) 100%);
+  color: var(--console-ink);
+}
+
+.console-hero {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 26px;
+  border: 1px solid var(--console-line);
+  background: linear-gradient(135deg, hsl(0 0% 100% / 0.92), hsl(var(--orka-hue) 75% 97% / 0.96));
+  box-shadow: var(--orka-card-shadow);
+}
+
+.console-eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orka-accent-deep);
+}
+
+.console-hero h1,
+.console-hero h2 {
+  margin: 8px 0 10px;
+  font-size: clamp(1.8rem, 4.2vw, 3rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.console-hero p,
+.console-note {
+  margin: 0;
+  color: var(--console-muted);
+  line-height: 1.5;
+}
+
+.console-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.console-card {
+  border-radius: 24px;
+  border: 1px solid var(--console-line);
+  background: var(--console-surface);
+  box-shadow: var(--orka-card-shadow);
+}
+
+.console-card ion-card-header {
+  padding-bottom: 0;
+}
+
+.console-card ion-card-title {
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+.console-card .section-copy {
+  margin: 6px 0 0;
+  color: var(--console-muted);
+}
+
+.console-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.console-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.console-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: hsl(190 18% 16% / 0.06);
+  color: var(--console-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.console-form {
+  display: grid;
+  gap: 14px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-grid label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--console-ink);
+}
+
+.form-grid label > span {
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--console-line);
+  border-radius: 14px;
+  background: hsl(0 0% 100% / 0.88);
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.form-grid textarea {
+  resize: vertical;
+}
+
+.form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.console-list {
+  display: grid;
+  gap: 12px;
+}
+
+.console-record {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid hsl(190 18% 16% / 0.08);
+  background: hsl(0 0% 100% / 0.76);
+}
+
+.console-record h3 {
+  margin: 0 0 8px;
+  font-size: 1.02rem;
+}
+
+.console-record p {
+  margin: 4px 0 0;
+  color: var(--console-muted);
+  line-height: 1.45;
+}
+
+.record-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.inline-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inline-actions button {
+  border: 1px solid hsl(190 18% 16% / 0.12);
+  background: hsl(0 0% 100% / 0.92);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.inline-actions button.danger {
+  border-color: rgba(185, 28, 28, 0.18);
+  color: #b42318;
+}
+
+.error-text {
+  margin: 6px 0 0;
+  color: #b42318;
+}
+
+.empty-text {
+  margin: 0;
+  color: var(--console-muted);
+}
+
+.login-page {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 22px 16px;
+  background:
+    radial-gradient(circle at top left, var(--orka-glow-left), transparent 28%),
+    radial-gradient(circle at bottom right, var(--orka-glow-right), transparent 24%),
+    linear-gradient(180deg, var(--orka-bg-start) 0%, var(--orka-bg-mid) 52%, var(--orka-bg-end) 100%);
+}
+
+.login-card {
+  width: min(100%, 480px);
+  border-radius: 28px;
+  border: 1px solid var(--orka-line);
+  background: hsl(0 0% 100% / 0.9);
+  box-shadow: 0 22px 44px hsl(190 18% 16% / 0.1);
+}
+
+.login-card ion-card-header {
+  padding-bottom: 0;
+}
+
+.login-card ion-card-title {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.04em;
+  color: var(--orka-ink);
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-form ion-item {
+  --background: hsl(0 0% 100% / 0.72);
+  --border-color: var(--orka-line);
+  --highlight-color-focused: var(--orka-accent);
+  border-radius: 16px;
+}
+
+.setup-note,
+.auth-links {
+  margin-top: 16px;
+}
+
+.auth-links {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-links a,
+.setup-note code {
+  color: var(--orka-accent-deep);
 }
 
 .crud-page {
@@ -102,4 +396,11 @@ body {
 .checkbox-row input[type='checkbox'] {
   width: auto;
   margin: 0;
+}
+
+@media (min-width: 900px) {
+  .console-grid {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
 }

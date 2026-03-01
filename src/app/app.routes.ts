@@ -35,6 +35,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/app-users/app-users.page').then((m) => m.AppUsersPage)
   },
   {
+    path: 'staff',
+    canActivate: [hotelAdminGuard],
+    loadComponent: () => import('./pages/staff/staff.page').then((m) => m.StaffPage)
+  },
+  {
     path: 'hotel-groups',
     canActivate: [superAdminGuard],
     loadComponent: () =>
@@ -49,11 +54,6 @@ export const routes: Routes = [
     path: 'rooms',
     canActivate: [hotelAdminGuard],
     loadComponent: () => import('./pages/rooms/rooms.page').then((m) => m.RoomsPage)
-  },
-  {
-    path: 'employees',
-    canActivate: [hotelAdminGuard],
-    loadComponent: () => import('./pages/employees/employees.page').then((m) => m.EmployeesPage)
   },
   {
     path: 'requests',

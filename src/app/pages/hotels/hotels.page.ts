@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonBackButton,
@@ -11,13 +11,12 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import { Hotel, HotelGroup } from '../../core/models/orca.models';
+import { firstValueFrom } from 'rxjs';
+import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { AppUser, Hotel, HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 
 type HotelForm = {
@@ -45,17 +44,16 @@ type HotelForm = {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonList,
-    IonItem,
-    IonLabel
+    IonButton
   ],
   templateUrl: './hotels.page.html',
   styleUrl: './hotels.page.scss'
 })
 export class HotelsPage implements OnInit {
+  private readonly auth = inject(FirebaseAuthService);
   protected readonly items = signal<Hotel[]>([]);
   protected readonly hotelGroups = signal<HotelGroup[]>([]);
+  protected readonly currentAppUser = signal<AppUser | null>(null);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
@@ -64,7 +62,7 @@ export class HotelsPage implements OnInit {
   constructor(private readonly api: OrcaApiService) {}
 
   ngOnInit(): void {
-    this.refreshAll();
+    void this.loadCurrentAppUserAndRefresh();
   }
 
   protected refreshAll(): void {
@@ -92,7 +90,8 @@ export class HotelsPage implements OnInit {
 
   protected save(): void {
     const name = this.form.name.trim();
-    if (!name || this.form.hotelGroupId == null) {
+    const hotelGroupId = this.fixedHotelGroupId() ?? this.form.hotelGroupId;
+    if (!name || hotelGroupId == null) {
       this.error.set('Name and hotel group are required.');
       return;
     }
@@ -106,7 +105,7 @@ export class HotelsPage implements OnInit {
       code: this.form.code.trim() || null,
       city: this.form.city.trim() || null,
       country: this.form.country.trim() || null,
-      hotelGroup: { id: this.form.hotelGroupId }
+      hotelGroup: { id: hotelGroupId }
     };
 
     this.api.saveHotel(payload).subscribe({
@@ -142,22 +141,50 @@ export class HotelsPage implements OnInit {
     }
     this.api.deleteHotel(item.id).subscribe({
       next: () => this.loadHotels(),
-      error: () => this.error.set('Delete failed. Hotel may be referenced by rooms/employees/requests.')
+      error: () => this.error.set('Delete failed. Hotel may be referenced by rooms/users/requests.')
     });
   }
 
   protected resetForm(): void {
-    this.form = this.emptyForm();
+    this.form = this.emptyForm(this.fixedHotelGroupId());
   }
 
-  private emptyForm(): HotelForm {
+  protected showHotelGroupSelector(): boolean {
+    return this.currentAppUser()?.accessRole === 'SUPERADMIN';
+  }
+
+  protected fixedHotelGroupName(): string {
+    return this.currentAppUser()?.assignedHotelGroup?.name ?? 'Assigned hotel group';
+  }
+
+  private async loadCurrentAppUserAndRefresh(): Promise<void> {
+    try {
+      const firebaseUser = this.auth.currentUser() ?? (await firstValueFrom(this.auth.authState$));
+      if (firebaseUser) {
+        this.currentAppUser.set(await firstValueFrom(this.api.getAppUserByFirebaseUid(firebaseUser.uid)));
+        this.form = this.emptyForm(this.fixedHotelGroupId());
+      }
+    } catch {
+      this.currentAppUser.set(null);
+    } finally {
+      this.refreshAll();
+    }
+  }
+
+  private fixedHotelGroupId(): number | null {
+    return this.currentAppUser()?.accessRole === 'SUPERADMIN'
+      ? null
+      : (this.currentAppUser()?.assignedHotelGroup?.id ?? null);
+  }
+
+  private emptyForm(hotelGroupId: number | null = null): HotelForm {
     return {
       id: null,
       name: '',
       code: '',
       city: '',
       country: '',
-      hotelGroupId: null
+      hotelGroupId
     };
   }
 }

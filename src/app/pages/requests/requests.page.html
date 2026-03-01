@@ -15,20 +15,27 @@
       </ion-card-header>
       <ion-card-content>
         <form class="form-grid" (ngSubmit)="save()">
-          <label>
-            <span>Hotel</span>
-            <select [(ngModel)]="form.hotelId" name="hotelId" required>
-              <option [ngValue]="null">Select hotel</option>
-              @for (hotel of hotels(); track hotel.id ?? hotel.name) {
-                <option [ngValue]="hotel.id ?? null">{{ hotel.name }}</option>
-              }
-            </select>
-          </label>
+          @if (showHotelSelector()) {
+            <label>
+              <span>Hotel</span>
+              <select [(ngModel)]="form.hotelId" name="hotelId" required>
+                <option [ngValue]="null">Select hotel</option>
+                @for (hotel of hotels(); track hotel.id ?? hotel.name) {
+                  <option [ngValue]="hotel.id ?? null">{{ hotel.name }}</option>
+                }
+              </select>
+            </label>
+          } @else {
+            <label>
+              <span>Hotel</span>
+              <input [value]="fixedHotelName()" readonly />
+            </label>
+          }
           <label>
             <span>Room</span>
             <select [(ngModel)]="form.roomId" name="roomId" required>
               <option [ngValue]="null">Select room</option>
-              @for (room of rooms(); track room.id ?? room.number) {
+              @for (room of visibleRooms(); track room.id ?? room.number) {
                 <option [ngValue]="room.id ?? null">{{ roomLabel(room) }}</option>
               }
             </select>
@@ -59,8 +66,8 @@
             <span>Assignee (optional)</span>
             <select [(ngModel)]="form.assigneeId" name="assigneeId">
               <option [ngValue]="null">Unassigned</option>
-              @for (employee of employees(); track employee.id ?? employee.name) {
-                <option [ngValue]="employee.id ?? null">{{ employee.name }}</option>
+              @for (assignee of visibleAssignees(); track assignee.id ?? assignee.name) {
+                <option [ngValue]="assignee.id ?? null">{{ assigneeLabel(assignee) }}</option>
               }
             </select>
           </label>

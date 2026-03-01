@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
-export type PushRequestEventKind = 'NEW_REQUEST';
-export type PushEventSource = 'foreground' | 'tap';
+export type PushRequestEventKind = 'NEW_REQUEST' | 'APP_RESUMED';
+export type PushEventSource = 'foreground' | 'tap' | 'resume';
 
 export interface PushRequestEvent {
   kind: PushRequestEventKind;

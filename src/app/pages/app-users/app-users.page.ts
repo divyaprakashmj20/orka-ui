@@ -11,9 +11,6 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
@@ -23,6 +20,8 @@ import {
   AccessRole,
   AppUser,
   AppUserApprovalPayload,
+  EMPLOYEE_ROLES,
+  EmployeeRole,
   Hotel,
   HotelGroup
 } from '../../core/models/orca.models';
@@ -31,6 +30,8 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
 
 type Draft = {
   accessRole: AccessRole;
+  employeeRole: EmployeeRole | null;
+  active: boolean;
   assignedHotelGroupId: number | null;
   assignedHotelId: number | null;
 };
@@ -51,10 +52,7 @@ type Draft = {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonList,
-    IonItem,
-    IonLabel
+    IonButton
   ],
   templateUrl: './app-users.page.html',
   styleUrl: './app-users.page.scss'
@@ -66,6 +64,7 @@ export class AppUsersPage implements OnInit {
   protected readonly pendingUsers = signal<AppUser[]>([]);
   protected readonly hotelGroups = signal<HotelGroup[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
+  protected readonly employeeRoles = EMPLOYEE_ROLES;
   protected readonly loading = signal(false);
   protected readonly error = signal('');
   protected readonly busyIds = signal<number[]>([]);
@@ -125,6 +124,8 @@ export class AppUsersPage implements OnInit {
 
     const payload: AppUserApprovalPayload = {
       accessRole: draft.accessRole,
+      employeeRole: this.needsEmployeeRole(draft.accessRole) ? draft.employeeRole : null,
+      active: draft.active,
       assignedHotelGroupId: this.needsGroupAssignment(draft.accessRole)
         ? draft.assignedHotelGroupId
         : null,
@@ -137,6 +138,10 @@ export class AppUsersPage implements OnInit {
     }
     if (this.needsHotelAssignment(draft.accessRole) && payload.assignedHotelId == null) {
       this.error.set('Select a hotel for this role.');
+      return;
+    }
+    if (this.needsEmployeeRole(draft.accessRole) && payload.employeeRole == null) {
+      this.error.set('Select an operational role for this user.');
       return;
     }
     if (!this.canActorApproveSelection(actor, user, payload)) {
@@ -192,6 +197,9 @@ export class AppUsersPage implements OnInit {
     }
     if (!this.needsHotelAssignment(draft.accessRole)) {
       draft.assignedHotelId = null;
+    }
+    if (!this.needsEmployeeRole(draft.accessRole)) {
+      draft.employeeRole = null;
     }
   }
 
@@ -255,6 +263,10 @@ export class AppUsersPage implements OnInit {
     return role === 'HOTEL_ADMIN' || role === 'STAFF';
   }
 
+  protected needsEmployeeRole(role: AccessRole): boolean {
+    return role === 'STAFF';
+  }
+
   private async loadCurrentAppUserAndRefresh(): Promise<void> {
     this.loading.set(true);
     this.error.set('');
@@ -289,6 +301,8 @@ export class AppUsersPage implements OnInit {
       const scopedHotelId = this.defaultAssignedHotelId(actor, user);
       this.drafts[user.id] = {
         accessRole: defaultRole,
+        employeeRole: this.defaultEmployeeRole(defaultRole, user),
+        active: true,
         assignedHotelGroupId: scopedGroupId,
         assignedHotelId: scopedHotelId
       };
@@ -432,6 +446,13 @@ export class AppUsersPage implements OnInit {
       return actor.assignedHotel?.id ?? null;
     }
     return user.requestedHotel?.id ?? null;
+  }
+
+  private defaultEmployeeRole(role: AccessRole, user: AppUser): EmployeeRole | null {
+    if (role === 'STAFF') {
+      return user.employeeRole ?? 'HOUSEKEEPING';
+    }
+    return null;
   }
 
   private isSuperAdmin(user: AppUser): boolean {
