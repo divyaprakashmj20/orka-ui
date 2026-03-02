@@ -83,12 +83,9 @@
 
                 <div class="request-card-details">
                   <span><strong>Assignee:</strong> {{ assigneeName(item) }}</span>
-                  <span><strong>Assignee Role:</strong> {{ assigneeRole(item) }}</span>
-                  <span class="request-type-meta"><strong>Type:</strong> {{ typeLabel(item) }}</span>
                   <p class="request-comment-line"><strong>Comment:</strong> {{ item.message || 'No guest note provided.' }}</p>
-                  <span><strong>Created:</strong> {{ dateTimeLabel(item.createdAt) }}</span>
-                  <span><strong>Accepted:</strong> {{ dateTimeLabel(item.acceptedAt) }}</span>
-                  <span><strong>Completed:</strong> {{ dateTimeLabel(item.completedAt) }}</span>
+                  <span><strong>{{ elapsedMetricLabel(item) }}:</strong> {{ elapsedMetricValue(item) }}</span>
+                  <span class="request-primary-time"><strong>{{ primaryTimeHeading(item) }}:</strong> {{ primaryTimeLabel(item) }}</span>
                 </div>
 
                 <div class="request-card-actions">

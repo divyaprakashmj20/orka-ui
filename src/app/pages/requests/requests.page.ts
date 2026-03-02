@@ -260,6 +260,68 @@ export class RequestsPage implements OnInit {
     return date.toLocaleString();
   }
 
+  protected primaryTimeLabel(item: ServiceRequest): string {
+    if (item.status === 'COMPLETED' && item.completedAt) {
+      return this.dateTimeLabel(item.completedAt);
+    }
+    if (item.status === 'ACCEPTED' && item.acceptedAt) {
+      return this.dateTimeLabel(item.acceptedAt);
+    }
+    return this.dateTimeLabel(item.createdAt);
+  }
+
+  protected primaryTimeHeading(item: ServiceRequest): string {
+    if (item.status === 'COMPLETED' && item.completedAt) {
+      return 'Completed';
+    }
+    if (item.status === 'ACCEPTED' && item.acceptedAt) {
+      return 'Accepted';
+    }
+    return 'Created';
+  }
+
+  protected elapsedMetricLabel(item: ServiceRequest): string {
+    if (item.status === 'COMPLETED' && item.createdAt && item.completedAt) {
+      return 'Time to completion';
+    }
+    return 'Elapsed time';
+  }
+
+  protected elapsedMetricValue(item: ServiceRequest): string {
+    const createdAt = item.createdAt ? new Date(item.createdAt) : null;
+    if (!createdAt || Number.isNaN(createdAt.getTime())) {
+      return '-';
+    }
+
+    const end =
+      item.status === 'COMPLETED' && item.completedAt
+        ? new Date(item.completedAt)
+        : new Date();
+
+    if (Number.isNaN(end.getTime())) {
+      return '-';
+    }
+
+    const diffMs = Math.max(0, end.getTime() - createdAt.getTime());
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts: string[] = [];
+    if (days > 0) {
+      parts.push(`${days}d`);
+    }
+    if (hours > 0) {
+      parts.push(`${hours}h`);
+    }
+    if (minutes > 0 || parts.length === 0) {
+      parts.push(`${minutes}m`);
+    }
+
+    return parts.join(' ');
+  }
+
   protected filterLabel(filter: RequestBoardFilter): string {
     return filter === 'ALL' ? 'All' : filter;
   }
