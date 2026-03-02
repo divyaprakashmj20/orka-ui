@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import {
   IonBackButton,
   IonButton,
@@ -12,48 +11,30 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonItem,
-  IonLabel,
-  IonList,
+  IonSegment,
+  IonSegmentButton,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
+import { firstValueFrom } from 'rxjs';
+import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import {
   AppUser,
-  Hotel,
   REQUEST_STATUSES,
-  REQUEST_TYPES,
+  RequestWritePayload,
   RequestStatus,
-  RequestType,
-  Room,
   ServiceRequest
 } from '../../core/models/orca.models';
 import { PushEventsService } from '../../core/notifications/push-events.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
-import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
-import { firstValueFrom } from 'rxjs';
 
-type RequestForm = {
-  id: number | null;
-  hotelId: number | null;
-  roomId: number | null;
-  type: RequestType | null;
-  message: string;
-  status: RequestStatus | null;
-  createdAt: string;
-  acceptedAt: string;
-  completedAt: string;
-  assigneeId: number | null;
-  rating: number | null;
-  comments: string;
-};
+type RequestBoardFilter = 'ALL' | RequestStatus;
 
 @Component({
   selector: 'app-requests-page',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -65,9 +46,8 @@ type RequestForm = {
     IonCardTitle,
     IonCardContent,
     IonButton,
-    IonList,
-    IonItem,
-    IonLabel
+    IonSegment,
+    IonSegmentButton
   ],
   templateUrl: './requests.page.html',
   styleUrl: './requests.page.scss'
@@ -78,29 +58,36 @@ export class RequestsPage implements OnInit {
   private readonly auth = inject(FirebaseAuthService);
 
   protected readonly items = signal<ServiceRequest[]>([]);
-  protected readonly hotels = signal<Hotel[]>([]);
-  protected readonly rooms = signal<Room[]>([]);
-  protected readonly assignees = signal<AppUser[]>([]);
   protected readonly currentAppUser = signal<AppUser | null>(null);
-  protected readonly requestTypes = REQUEST_TYPES;
-  protected readonly requestStatuses = REQUEST_STATUSES;
   protected readonly loading = signal(false);
-  protected readonly saving = signal(false);
+  protected readonly acting = signal(false);
   protected readonly error = signal('');
-  protected form: RequestForm = this.emptyForm();
-  protected readonly visibleRooms = computed(() => {
-    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
-    if (hotelId == null) {
-      return this.rooms();
+  protected readonly activeFilter = signal<RequestBoardFilter>('ALL');
+  protected readonly selectedRequest = signal<ServiceRequest | null>(null);
+  protected readonly requestStatuses = REQUEST_STATUSES;
+  protected readonly boardFilters: RequestBoardFilter[] = ['ALL', ...REQUEST_STATUSES];
+  protected readonly filteredItems = computed(() => {
+    const filter = this.activeFilter();
+    if (filter === 'ALL') {
+      return this.sortedRequests(this.items());
     }
-    return this.rooms().filter((room) => room.hotel?.id === hotelId);
+    return this.sortedRequests(this.items().filter((item) => item.status === filter));
   });
-  protected readonly visibleAssignees = computed(() => {
-    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
-    if (hotelId == null) {
-      return this.assignees();
+  protected readonly requestCounts = computed(() => {
+    const counts: Record<RequestBoardFilter, number> = {
+      ALL: this.items().length,
+      NEW: 0,
+      ACCEPTED: 0,
+      COMPLETED: 0,
+      CANCELLED: 0
+    };
+
+    for (const item of this.items()) {
+      const status = item.status ?? 'NEW';
+      counts[status] += 1;
     }
-    return this.assignees().filter((user) => user.assignedHotel?.id === hotelId);
+
+    return counts;
   });
 
   constructor(private readonly api: OrcaApiService) {}
@@ -119,27 +106,6 @@ export class RequestsPage implements OnInit {
 
   protected refreshAll(): void {
     this.loadRequests();
-    this.api.listHotels().subscribe({
-      next: (hotels) => this.hotels.set(hotels),
-      error: () => this.error.set('Failed to load hotel lookup.')
-    });
-    this.api.listRooms().subscribe({
-      next: (rooms) => this.rooms.set(rooms),
-      error: () => this.error.set('Failed to load room lookup.')
-    });
-    this.api.listAppUsers().subscribe({
-      next: (users) =>
-        this.assignees.set(
-          users.filter(
-            (user) =>
-              user.active !== false &&
-              (user.accessRole === 'HOTEL_ADMIN' ||
-                user.accessRole === 'ADMIN' ||
-                user.accessRole === 'STAFF')
-          )
-        ),
-      error: () => this.error.set('Failed to load assignee lookup.')
-    });
   }
 
   protected loadRequests(): void {
@@ -147,7 +113,11 @@ export class RequestsPage implements OnInit {
     this.error.set('');
     this.api.listRequests().subscribe({
       next: (items) => {
-        this.items.set(items);
+        this.items.set(this.sortedRequests(items));
+        const currentSelectedId = this.selectedRequest()?.id;
+        if (currentSelectedId != null) {
+          this.selectedRequest.set(items.find((item) => item.id === currentSelectedId) ?? null);
+        }
         this.loading.set(false);
       },
       error: () => {
@@ -157,94 +127,141 @@ export class RequestsPage implements OnInit {
     });
   }
 
-  protected save(): void {
-    const hotelId = this.fixedHotelId() ?? this.form.hotelId;
-    if (hotelId == null || this.form.roomId == null || !this.form.type) {
-      this.error.set('Hotel, room, and request type are required.');
-      return;
+  protected setFilter(filter: RequestBoardFilter): void {
+    this.activeFilter.set(filter);
+  }
+
+  protected openRequest(item: ServiceRequest): void {
+    this.selectedRequest.set(item);
+  }
+
+  protected closeRequest(): void {
+    this.selectedRequest.set(null);
+  }
+
+  protected canAccept(item: ServiceRequest): boolean {
+    return item.id != null && item.status === 'NEW' && this.currentAppUser()?.id != null;
+  }
+
+  protected canComplete(item: ServiceRequest): boolean {
+    if (item.id == null || item.status !== 'ACCEPTED') {
+      return false;
     }
-
-    this.saving.set(true);
-    this.error.set('');
-
-    const payload: ServiceRequest = {
-      id: this.form.id ?? undefined,
-      hotel: { id: hotelId },
-      room: { id: this.form.roomId },
-      type: this.form.type,
-      message: this.form.message.trim() || null,
-      status: this.form.status ?? null,
-      createdAt: this.toApiDateTime(this.form.createdAt),
-      acceptedAt: this.toApiDateTime(this.form.acceptedAt),
-      completedAt: this.toApiDateTime(this.form.completedAt),
-      assignee: this.form.assigneeId == null ? null : { id: this.form.assigneeId },
-      rating: this.form.rating,
-      comments: this.form.comments.trim() || null
-    };
-
-    this.api.saveRequest(payload).subscribe({
-      next: () => {
-        this.form = this.emptyForm();
-        this.saving.set(false);
-        this.loadRequests();
-      },
-      error: () => {
-        this.error.set('Save failed. Verify linked hotel/room/assignee IDs exist.');
-        this.saving.set(false);
-      }
-    });
+    const currentUser = this.currentAppUser();
+    if (!currentUser?.id) {
+      return false;
+    }
+    return item.assignee?.id === currentUser.id || currentUser.accessRole === 'HOTEL_ADMIN' || currentUser.accessRole === 'ADMIN';
   }
 
-  protected edit(item: ServiceRequest): void {
-    this.form = {
-      id: item.id ?? null,
-      hotelId: item.hotel?.id ?? null,
-      roomId: item.room?.id ?? null,
-      type: item.type ?? null,
-      message: item.message ?? '',
-      status: item.status ?? null,
-      createdAt: this.toInputDateTime(item.createdAt),
-      acceptedAt: this.toInputDateTime(item.acceptedAt),
-      completedAt: this.toInputDateTime(item.completedAt),
-      assigneeId: item.assignee?.id ?? null,
-      rating: item.rating ?? null,
-      comments: item.comments ?? ''
-    };
-  }
-
-  protected remove(item: ServiceRequest): void {
+  protected canReopen(item: ServiceRequest): boolean {
     if (item.id == null) {
+      return false;
+    }
+    const currentUser = this.currentAppUser();
+    return (
+      (item.status === 'COMPLETED' || item.status === 'CANCELLED') &&
+      (currentUser?.accessRole === 'HOTEL_ADMIN' || currentUser?.accessRole === 'ADMIN')
+    );
+  }
+
+  protected accept(item: ServiceRequest): void {
+    const currentUser = this.currentAppUser();
+    if (!this.canAccept(item) || !currentUser?.id) {
       return;
     }
-    if (!window.confirm(`Delete request #${item.id}?`)) {
-      return;
-    }
-    this.api.deleteRequest(item.id).subscribe({
-      next: () => this.loadRequests(),
-      error: () => this.error.set('Delete failed.')
+
+    const payload = this.buildRequestPayload(item, {
+      status: 'ACCEPTED',
+      assigneeId: currentUser.id,
+      acceptedAt: item.acceptedAt ?? new Date().toISOString(),
+      completedAt: null
     });
+    this.saveAction(payload, item.id!);
   }
 
-  protected resetForm(): void {
-    this.form = this.emptyForm(this.fixedHotelId());
+  protected complete(item: ServiceRequest): void {
+    if (!this.canComplete(item)) {
+      return;
+    }
+
+    const payload = this.buildRequestPayload(item, {
+      status: 'COMPLETED',
+      completedAt: new Date().toISOString()
+    });
+    this.saveAction(payload, item.id!);
   }
 
-  protected roomLabel(room: Room): string {
-    const hotelName = room.hotel?.name ? `${room.hotel.name} - ` : '';
-    return `${hotelName}Room ${room.number}`;
+  protected reopen(item: ServiceRequest): void {
+    if (!this.canReopen(item)) {
+      return;
+    }
+
+    const payload = this.buildRequestPayload(item, {
+      status: 'NEW',
+      completedAt: null,
+      acceptedAt: null,
+      assigneeId: null
+    });
+    this.saveAction(payload, item.id!);
   }
 
-  protected assigneeLabel(user: AppUser): string {
-    const role = user.employeeRole ?? user.accessRole ?? 'STAFF';
-    return `${user.name} (${role.replaceAll('_', ' ')})`;
+  protected statusLabel(item: ServiceRequest): string {
+    return item.status ?? 'NEW';
   }
 
-  protected showHotelSelector(): boolean {
-    return this.fixedHotelId() == null;
+  protected typeLabel(item: ServiceRequest): string {
+    return item.type?.replaceAll('_', ' ') ?? 'Unspecified';
   }
 
-  protected fixedHotelName(): string {
-    return this.currentAppUser()?.assignedHotel?.name ?? 'Assigned hotel';
+  protected roomLabel(item: ServiceRequest): string {
+    const room = item.room?.number ? `Room ${item.room.number}` : 'Room unknown';
+    const hotel = item.hotel?.name;
+    return hotel ? `${hotel} • ${room}` : room;
+  }
+
+  protected assigneeLabel(item: ServiceRequest): string {
+    if (!item.assignee?.name) {
+      return 'Unassigned';
+    }
+    const role = item.assignee.employeeRole ?? item.assignee.accessRole;
+    return role ? `${item.assignee.name} • ${role.replaceAll('_', ' ')}` : item.assignee.name;
+  }
+
+  protected assigneeName(item: ServiceRequest): string {
+    return item.assignee?.name || 'Unassigned';
+  }
+
+  protected assigneeRole(item: ServiceRequest): string {
+    const role = item.assignee?.employeeRole ?? item.assignee?.accessRole;
+    return role ? role.replaceAll('_', ' ') : 'No role';
+  }
+
+  protected timeLabel(item: ServiceRequest): string {
+    const value = item.completedAt ?? item.acceptedAt ?? item.createdAt;
+    if (!value) {
+      return 'No timestamp';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toLocaleString();
+  }
+
+  protected dateTimeLabel(value: string | null | undefined): string {
+    if (!value) {
+      return '-';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toLocaleString();
+  }
+
+  protected filterLabel(filter: RequestBoardFilter): string {
+    return filter === 'ALL' ? 'All' : filter;
   }
 
   private async loadCurrentAppUserAndRefresh(): Promise<void> {
@@ -252,7 +269,6 @@ export class RequestsPage implements OnInit {
       const firebaseUser = this.auth.currentUser() ?? (await firstValueFrom(this.auth.authState$));
       if (firebaseUser) {
         this.currentAppUser.set(await firstValueFrom(this.api.getAppUserByFirebaseUid(firebaseUser.uid)));
-        this.form = this.emptyForm(this.fixedHotelId());
       }
     } catch {
       this.currentAppUser.set(null);
@@ -261,41 +277,57 @@ export class RequestsPage implements OnInit {
     }
   }
 
-  private fixedHotelId(): number | null {
-    const role = this.currentAppUser()?.accessRole;
-    return role === 'HOTEL_ADMIN' || role === 'STAFF'
-      ? (this.currentAppUser()?.assignedHotel?.id ?? null)
-      : null;
+  private saveAction(payload: RequestWritePayload, requestId: number): void {
+    this.acting.set(true);
+    this.error.set('');
+    this.api.saveRequest(payload, requestId).subscribe({
+      next: (saved) => {
+        this.acting.set(false);
+        const updated = this.items().map((item) => (item.id === requestId ? saved : item));
+        this.items.set(this.sortedRequests(updated));
+        this.selectedRequest.set(saved);
+      },
+      error: () => {
+        this.acting.set(false);
+        this.error.set('Request update failed. Refresh and try again.');
+      }
+    });
   }
 
-  private emptyForm(hotelId: number | null = null): RequestForm {
+  private buildRequestPayload(
+    item: ServiceRequest,
+    overrides: {
+      status?: RequestStatus | null;
+      assigneeId?: number | null;
+      acceptedAt?: string | null;
+      completedAt?: string | null;
+    }
+  ): RequestWritePayload {
     return {
-      id: null,
-      hotelId,
-      roomId: null,
-      type: null,
-      message: '',
-      status: 'NEW',
-      createdAt: '',
-      acceptedAt: '',
-      completedAt: '',
-      assigneeId: null,
-      rating: null,
-      comments: ''
+      hotelId: item.hotel?.id ?? 0,
+      roomId: item.room?.id ?? 0,
+      type: item.type ?? null,
+      message: item.message ?? null,
+      status: overrides.status ?? item.status ?? null,
+      createdAt: item.createdAt ?? null,
+      acceptedAt: overrides.acceptedAt !== undefined ? overrides.acceptedAt : item.acceptedAt ?? null,
+      completedAt: overrides.completedAt !== undefined ? overrides.completedAt : item.completedAt ?? null,
+      assigneeId:
+        overrides.assigneeId === null
+          ? null
+          : overrides.assigneeId != null
+            ? overrides.assigneeId
+            : item.assignee?.id ?? null,
+      rating: item.rating ?? null,
+      comments: item.comments ?? null
     };
   }
 
-  private toInputDateTime(value: string | null | undefined): string {
-    if (!value) {
-      return '';
-    }
-    return value.length >= 16 ? value.slice(0, 16) : value;
-  }
-
-  private toApiDateTime(value: string): string | null {
-    if (!value) {
-      return null;
-    }
-    return value.length === 16 ? `${value}:00` : value;
+  private sortedRequests(items: ServiceRequest[]): ServiceRequest[] {
+    return [...items].sort((a, b) => {
+      const aTime = Date.parse(a.createdAt ?? '') || 0;
+      const bTime = Date.parse(b.createdAt ?? '') || 0;
+      return bTime - aTime;
+    });
   }
 }

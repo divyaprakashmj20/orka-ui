@@ -38,14 +38,14 @@
             </div>
           </div>
           <div class="form-grid">
-          <label>
-            <span>Name</span>
-            <input [(ngModel)]="form.name" name="name" placeholder="Group name" required />
-          </label>
-          <label>
-            <span>Code</span>
-            <input [(ngModel)]="form.code" name="code" placeholder="Optional code" />
-          </label>
+            <ion-item class="field-item">
+              <ion-label position="stacked">Name</ion-label>
+              <ion-input [(ngModel)]="form.name" name="name" placeholder="Group name" required />
+            </ion-item>
+            <ion-item class="field-item">
+              <ion-label position="stacked">Code</ion-label>
+              <ion-input [(ngModel)]="form.code" name="code" placeholder="Optional code" />
+            </ion-item>
           </div>
 
           <div class="form-actions">
@@ -79,8 +79,12 @@
                     <span class="console-pill">Code: {{ item.code || '-' }}</span>
                   </div>
                   <div class="inline-actions">
-                    <button type="button" (click)="edit(item)">Edit</button>
-                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+                    <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="edit(item)">
+                      Edit
+                    </ion-button>
+                    <ion-button type="button" fill="outline" class="inline-danger" size="small" (click)="remove(item)">
+                      Delete
+                    </ion-button>
                   </div>
               </article>
             } @empty {

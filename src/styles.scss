@@ -18,25 +18,28 @@ body {
 }
 
 :root {
-  --orka-hue: 20;
-  --orka-font: 'Segoe UI', 'Aptos', 'Trebuchet MS', sans-serif;
-  --orka-ink: hsl(193 33% 12%);
-  --orka-muted: hsl(190 12% 42%);
-  --orka-line: hsl(190 18% 16% / 0.12);
-  --orka-accent: hsl(var(--orka-hue) 61% 46%);
-  --orka-accent-deep: hsl(var(--orka-hue) 66% 34%);
-  --orka-accent-soft: hsl(var(--orka-hue) 80% 92%);
-  --orka-secondary: hsl(calc(var(--orka-hue) + 142) 39% 32%);
-  --orka-secondary-soft: hsl(calc(var(--orka-hue) + 142) 42% 93%);
-  --orka-surface: hsl(34 55% 95%);
-  --orka-surface-strong: hsl(35 67% 98%);
-  --orka-console-surface: hsl(37 54% 98% / 0.9);
-  --orka-bg-start: hsl(30 42% 91%);
-  --orka-bg-mid: hsl(38 59% 96%);
-  --orka-bg-end: hsl(42 53% 98%);
-  --orka-glow-left: hsl(var(--orka-hue) 70% 55% / 0.16);
-  --orka-glow-right: hsl(calc(var(--orka-hue) + 142) 52% 42% / 0.12);
-  --orka-card-shadow: 0 16px 36px hsl(190 18% 16% / 0.08);
+  --orka-hue: 225;
+  --orka-font: 'Roboto', 'Segoe UI', 'Aptos', sans-serif;
+  --orka-ink: hsl(240 10% 12%);
+  --orka-muted: hsl(248 7% 38%);
+  --orka-line: hsl(240 7% 30% / 0.12);
+  --orka-line-strong: hsl(240 7% 30% / 0.18);
+  --orka-accent: hsl(var(--orka-hue) 46% 46%);
+  --orka-accent-deep: hsl(var(--orka-hue) 48% 34%);
+  --orka-accent-soft: hsl(var(--orka-hue) 56% 94%);
+  --orka-secondary: hsl(216 12% 44%);
+  --orka-secondary-soft: hsl(216 24% 94%);
+  --orka-surface: hsl(240 20% 96%);
+  --orka-surface-strong: hsl(0 0% 100%);
+  --orka-console-surface: hsl(0 0% 100% / 0.9);
+  --orka-bg-start: hsl(240 26% 97%);
+  --orka-bg-mid: hsl(228 34% 98%);
+  --orka-bg-end: hsl(220 22% 97%);
+  --orka-glow-left: hsl(var(--orka-hue) 70% 55% / 0.08);
+  --orka-glow-right: hsl(280 48% 52% / 0.06);
+  --orka-card-shadow: 0 18px 34px hsl(240 18% 10% / 0.08);
+  --orka-card-shadow-soft: 0 10px 24px hsl(240 18% 10% / 0.05);
+  --orka-page-max: 1180px;
 }
 
 body {
@@ -52,39 +55,48 @@ body {
   --console-line: var(--orka-line);
   --console-surface: var(--orka-console-surface);
   min-height: 100%;
-  padding: 18px 16px 30px;
+  padding: 14px 12px 28px;
   background:
     radial-gradient(circle at top left, var(--orka-glow-left), transparent 26%),
     radial-gradient(circle at top right, var(--orka-glow-right), transparent 24%),
     linear-gradient(180deg, var(--orka-bg-start) 0%, var(--orka-bg-mid) 48%, var(--orka-bg-end) 100%);
   color: var(--console-ink);
+  box-sizing: border-box;
+}
+
+.console-page > * {
+  max-width: var(--orka-page-max);
+  margin-inline: auto;
 }
 
 .console-hero {
   display: grid;
-  gap: 16px;
-  padding: 22px;
-  border-radius: 26px;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
   border: 1px solid var(--console-line);
-  background: linear-gradient(135deg, hsl(0 0% 100% / 0.92), hsl(var(--orka-hue) 75% 97% / 0.96));
+  background:
+    linear-gradient(135deg, hsl(0 0% 100% / 0.98), hsl(var(--orka-hue) 55% 97% / 0.92)),
+    linear-gradient(180deg, transparent, hsl(0 0% 100% / 0.4));
   box-shadow: var(--orka-card-shadow);
+  overflow: hidden;
 }
 
 .console-eyebrow {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--orka-accent-deep);
 }
 
 .console-hero h1,
 .console-hero h2 {
-  margin: 8px 0 10px;
-  font-size: clamp(1.8rem, 4.2vw, 3rem);
-  line-height: 0.98;
-  letter-spacing: -0.05em;
+  margin: 6px 0 10px;
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
 }
 
 .console-hero p,
@@ -96,67 +108,74 @@ body {
 
 .console-grid {
   display: grid;
-  gap: 16px;
-  margin-top: 18px;
+  gap: 14px;
+  margin-top: 16px;
 }
 
 .console-card {
-  border-radius: 24px;
+  border-radius: 22px;
   border: 1px solid var(--console-line);
-  background: var(--console-surface);
-  box-shadow: var(--orka-card-shadow);
+  background: linear-gradient(180deg, hsl(0 0% 100% / 0.96), hsl(0 0% 100% / 0.88));
+  box-shadow: var(--orka-card-shadow-soft);
+  overflow: hidden;
 }
 
 .console-card ion-card-header {
-  padding-bottom: 0;
+  padding: 18px 18px 4px;
 }
 
 .console-card ion-card-title {
-  font-size: 1.2rem;
-  letter-spacing: -0.03em;
+  font-size: 1.12rem;
+  letter-spacing: -0.01em;
 }
 
 .console-card .section-copy {
   margin: 6px 0 0;
   color: var(--console-muted);
+  font-size: 0.94rem;
+}
+
+.console-card ion-card-content {
+  padding: 14px 18px 18px;
 }
 
 .console-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  justify-content: flex-start;
   margin-bottom: 14px;
 }
 
 .console-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 8px 10px;
 }
 
 .console-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 7px 11px;
   border-radius: 999px;
-  background: hsl(190 18% 16% / 0.06);
+  background: hsl(0 0% 100% / 0.82);
+  border: 1px solid hsl(240 7% 30% / 0.08);
   color: var(--console-ink);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
 .console-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .form-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .form-grid label {
@@ -168,24 +187,86 @@ body {
 
 .form-grid label > span {
   font-weight: 600;
+  color: var(--orka-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+.field-item,
+.checkbox-item {
+  --background: hsl(0 0% 100% / 0.96);
+  --border-color: var(--console-line);
+  --border-radius: 14px;
+  --min-height: 56px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 8px;
+  --highlight-color-focused: hsl(var(--orka-hue) 46% 46%);
+  border: 1px solid var(--console-line);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px hsl(190 18% 16% / 0.04);
+}
+
+.field-item ion-label,
+.checkbox-item ion-label {
+  color: var(--orka-muted) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.field-item ion-input,
+.field-item ion-select,
+.field-item ion-textarea {
+  --color: var(--orka-ink);
+  width: 100%;
+  max-width: 100%;
+}
+
+.field-item ion-select::part(text),
+.field-item ion-input::part(native),
+.field-item ion-textarea::part(native) {
+  width: 100%;
 }
 
 .form-grid input,
 .form-grid select,
 .form-grid textarea {
   width: 100%;
+  min-height: 48px;
   padding: 12px 14px;
   border: 1px solid var(--console-line);
   border-radius: 14px;
-  background: hsl(0 0% 100% / 0.88);
+  background: hsl(0 0% 100% / 0.94);
   color: inherit;
   font: inherit;
   box-sizing: border-box;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px hsl(190 18% 16% / 0.04);
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  outline: none;
+  border-color: hsl(var(--orka-hue) 46% 46% / 0.45);
+  box-shadow:
+    0 0 0 4px hsl(var(--orka-hue) 46% 46% / 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.form-grid input[readonly],
+.form-grid textarea[readonly] {
+  background: hsl(40 30% 97%);
 }
 
 .form-grid textarea {
   resize: vertical;
+  min-height: 110px;
 }
 
 .form-grid .span-2 {
@@ -199,21 +280,37 @@ body {
   align-items: center;
 }
 
+.form-actions ion-button {
+  margin: 0;
+}
+
 .console-list {
   display: grid;
   gap: 12px;
 }
 
 .console-record {
-  padding: 16px;
+  position: relative;
+  padding: 14px;
   border-radius: 18px;
   border: 1px solid hsl(190 18% 16% / 0.08);
-  background: hsl(0 0% 100% / 0.76);
+  background: hsl(0 0% 100% / 0.86);
+  box-shadow: 0 8px 18px hsl(240 18% 10% / 0.04);
+}
+
+.console-record::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 18px 0 0 18px;
+  background: linear-gradient(180deg, var(--orka-accent), var(--orka-secondary));
 }
 
 .console-record h3 {
   margin: 0 0 8px;
-  font-size: 1.02rem;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
 }
 
 .console-record p {
@@ -236,18 +333,8 @@ body {
   gap: 8px;
 }
 
-.inline-actions button {
-  border: 1px solid hsl(190 18% 16% / 0.12);
-  background: hsl(0 0% 100% / 0.92);
-  border-radius: 999px;
-  padding: 7px 12px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.inline-actions button.danger {
-  border-color: rgba(185, 28, 28, 0.18);
-  color: #b42318;
+.inline-actions ion-button {
+  margin: 0;
 }
 
 .error-text {
@@ -264,7 +351,7 @@ body {
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 22px 16px;
+  padding: 18px 14px;
   background:
     radial-gradient(circle at top left, var(--orka-glow-left), transparent 28%),
     radial-gradient(circle at bottom right, var(--orka-glow-right), transparent 24%),
@@ -285,7 +372,7 @@ body {
 
 .login-card ion-card-title {
   font-size: clamp(1.45rem, 3vw, 2rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   color: var(--orka-ink);
 }
 
@@ -298,7 +385,9 @@ body {
   --background: hsl(0 0% 100% / 0.72);
   --border-color: var(--orka-line);
   --highlight-color-focused: var(--orka-accent);
-  border-radius: 16px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border-radius: 18px;
 }
 
 .setup-note,
@@ -316,78 +405,6 @@ body {
   color: var(--orka-accent-deep);
 }
 
-.crud-page {
-  padding: 16px;
-  display: grid;
-  gap: 16px;
-}
-
-.form-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.form-grid label {
-  display: grid;
-  gap: 6px;
-  font-size: 0.9rem;
-  color: var(--ion-text-color, #111827);
-}
-
-.form-grid input,
-.form-grid select,
-.form-grid textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #fff;
-  color: inherit;
-  font: inherit;
-  box-sizing: border-box;
-}
-
-.form-grid textarea {
-  resize: vertical;
-}
-
-.form-grid .span-2 {
-  grid-column: 1 / -1;
-}
-
-.form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.inline-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
-
-.inline-actions button {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.inline-actions button.danger {
-  border-color: #fecaca;
-  color: #b91c1c;
-}
-
-.error-text {
-  margin: 10px 0 0;
-  color: #b91c1c;
-}
-
 .checkbox-row {
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -398,9 +415,108 @@ body {
   margin: 0;
 }
 
-@media (min-width: 900px) {
+ion-header ion-toolbar {
+  --background: hsl(0 0% 100% / 0.84);
+  --border-color: transparent;
+  --color: var(--orka-ink);
+  backdrop-filter: blur(14px);
+}
+
+ion-button {
+  --border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+ion-button.inline-neutral {
+  --background: hsl(0 0% 100% / 0.96);
+  --color: var(--orka-ink);
+  --border-color: hsl(190 18% 16% / 0.12);
+}
+
+ion-button.inline-danger {
+  --background: transparent;
+  --color: #b42318;
+  --border-color: rgba(185, 28, 28, 0.24);
+}
+
+ion-button::part(native) {
+  box-shadow: none;
+}
+
+ion-segment {
+  --indicator-color: var(--orka-accent);
+}
+
+ion-segment-button {
+  --color: var(--orka-muted);
+  --color-checked: var(--orka-accent-deep);
+  --indicator-height: 100%;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+ion-chip {
+  font-weight: 600;
+}
+
+.approval-grid,
+.staff-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid hsl(190 18% 16% / 0.08);
+}
+
+.toggle-label {
+  display: grid;
+  gap: 8px;
+}
+
+.toggle-label input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.checkbox-item {
+  align-self: stretch;
+}
+
+@media (min-width: 700px) {
+  .console-page {
+    padding: 20px 18px 34px;
+  }
+
+  .console-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form-grid,
+  .approval-grid,
+  .staff-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .console-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
   .console-grid {
     grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
     align-items: start;
+  }
+
+  .console-page {
+    padding: 24px 24px 44px;
+  }
+
+  .console-hero {
+    padding: 22px;
   }
 }

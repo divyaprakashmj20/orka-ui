@@ -35,39 +35,39 @@
         <ion-card-content>
           <form class="console-form" (ngSubmit)="save()">
             <div class="form-grid">
-              <label>
-                <span>Name</span>
-                <input [(ngModel)]="form.name" name="name" required />
-              </label>
-              <label>
-                <span>Code</span>
-                <input [(ngModel)]="form.code" name="code" />
-              </label>
-              <label>
-                <span>City</span>
-                <input [(ngModel)]="form.city" name="city" />
-              </label>
-              <label>
-                <span>Country</span>
-                <input [(ngModel)]="form.country" name="country" />
-              </label>
+              <ion-item class="field-item">
+                <ion-label position="stacked">Name</ion-label>
+                <ion-input [(ngModel)]="form.name" name="name" required />
+              </ion-item>
+              <ion-item class="field-item">
+                <ion-label position="stacked">Code</ion-label>
+                <ion-input [(ngModel)]="form.code" name="code" />
+              </ion-item>
+              <ion-item class="field-item">
+                <ion-label position="stacked">City</ion-label>
+                <ion-input [(ngModel)]="form.city" name="city" />
+              </ion-item>
+              <ion-item class="field-item">
+                <ion-label position="stacked">Country</ion-label>
+                <ion-input [(ngModel)]="form.country" name="country" />
+              </ion-item>
               @if (showHotelGroupSelector()) {
-                <label class="span-2">
-                  <span>Hotel Group</span>
-                  <select [(ngModel)]="form.hotelGroupId" name="hotelGroupId" required>
-                    <option [ngValue]="null">Select a group</option>
+                <ion-item class="field-item span-2">
+                  <ion-label position="stacked">Hotel Group</ion-label>
+                  <ion-select [(ngModel)]="form.hotelGroupId" name="hotelGroupId" interface="alert" required>
+                    <ion-select-option [value]="null">Select a group</ion-select-option>
                     @for (group of hotelGroups(); track group.id ?? group.name) {
-                      <option [ngValue]="group.id ?? null">
+                      <ion-select-option [value]="group.id ?? null">
                         {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                      </option>
+                      </ion-select-option>
                     }
-                  </select>
-                </label>
+                  </ion-select>
+                </ion-item>
               } @else {
-                <label class="span-2">
-                  <span>Hotel Group</span>
-                  <input [value]="fixedHotelGroupName()" readonly />
-                </label>
+                <ion-item class="field-item span-2">
+                  <ion-label position="stacked">Hotel Group</ion-label>
+                  <ion-input [value]="fixedHotelGroupName()" readonly />
+                </ion-item>
               }
             </div>
 
@@ -106,8 +106,12 @@
                     </span>
                   </div>
                   <div class="inline-actions">
-                    <button type="button" (click)="edit(item)">Edit</button>
-                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+                    <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="edit(item)">
+                      Edit
+                    </ion-button>
+                    <ion-button type="button" fill="outline" class="inline-danger" size="small" (click)="remove(item)">
+                      Delete
+                    </ion-button>
                   </div>
                 </article>
               } @empty {

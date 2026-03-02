@@ -1,0 +1,146 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Room Service</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="guest-page">
+  <div class="guest-shell">
+    @if (success()) {
+      <div class="guest-success-overlay" (click)="resetSuccess()">
+        <section class="guest-success-toast" (click)="$event.stopPropagation()">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <h2>Request submitted</h2>
+          <p>Your hotel team has received the request.</p>
+          <ion-button expand="block" (click)="resetSuccess()">Okay</ion-button>
+        </section>
+      </div>
+    }
+
+    @if (loading()) {
+      <section class="guest-state-card guest-loading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <h1>Loading your room details</h1>
+        <p>Please wait while we prepare the request form.</p>
+      </section>
+    } @else if (error()) {
+      <section class="guest-state-card guest-error">
+        <ion-icon name="location-outline"></ion-icon>
+        <h1>Room link unavailable</h1>
+        <p>{{ error() }}</p>
+      </section>
+    } @else if (context(); as roomContext) {
+      <section class="guest-hero">
+        <p class="guest-kicker">Orka Guest Service</p>
+        <h1>{{ roomContext.hotel?.name || 'Hotel Service' }}</h1>
+        <p class="guest-subtitle">
+          {{ roomContext.hotelGroup?.name || 'Property Support' }}
+        </p>
+
+        <div class="guest-meta">
+          <div class="guest-meta-card">
+            <ion-icon name="location-outline"></ion-icon>
+            <div>
+              <span>Room</span>
+              <strong>{{ roomContext.room?.number || 'Unknown' }}</strong>
+            </div>
+          </div>
+          @if (roomContext.room?.floor != null) {
+            <div class="guest-meta-card">
+              <ion-icon name="location-outline"></ion-icon>
+              <div>
+                <span>Floor</span>
+                <strong>{{ roomContext.room?.floor }}</strong>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <ion-card class="guest-form-card">
+        <ion-card-content>
+          <div class="section-heading">
+            <p class="guest-kicker">Step 1</p>
+            <h2>What do you need?</h2>
+          </div>
+
+          <div class="request-type-grid">
+            @for (type of roomContext.availableRequestTypes; track type) {
+              <button
+                type="button"
+                class="request-type-card"
+                [class.is-selected]="selectedType() === type"
+                (click)="selectType(type)"
+              >
+                <ion-icon [name]="requestTypeIcon(type)"></ion-icon>
+                <span>{{ requestTypeLabel(type) }}</span>
+              </button>
+            }
+          </div>
+
+          <div class="section-heading notes-heading">
+            <p class="guest-kicker">Step 2</p>
+            <h2>Add a note</h2>
+          </div>
+
+          <ion-textarea
+            fill="outline"
+            label="Details for the staff"
+            labelPlacement="stacked"
+            placeholder="Example: Please bring two fresh towels."
+            autoGrow="true"
+            [(ngModel)]="message"
+          ></ion-textarea>
+
+          <p class="guest-note">
+            Short, clear notes help the hotel team respond faster.
+          </p>
+
+          <ion-button expand="block" [disabled]="!canSubmit()" (click)="submit()">
+            @if (saving()) {
+              <ion-spinner slot="start" name="crescent"></ion-spinner>
+            }
+            Submit request
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="guest-history-card">
+        <ion-card-content>
+          <div class="section-heading">
+            <p class="guest-kicker">Your requests</p>
+            <h2>Current session history</h2>
+          </div>
+
+          @if (requests().length) {
+            <div class="guest-history-list">
+              @for (request of requests(); track request.id ?? $index) {
+                <article class="guest-history-item">
+                  <div class="guest-history-header">
+                    <div>
+                      <h3>{{ requestTypeLabel(request.type || 'OTHER') }}</h3>
+                      <p>
+                        <ion-icon name="time-outline"></ion-icon>
+                        {{ request.createdAt ? (request.createdAt | date: 'medium') : 'Just now' }}
+                      </p>
+                    </div>
+                    <ion-badge [color]="requestStatusTone(request.status)">
+                      {{ requestStatusLabel(request.status) }}
+                    </ion-badge>
+                  </div>
+                  @if (request.message) {
+                    <p class="guest-history-message">{{ request.message }}</p>
+                  }
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="guest-note">
+              Requests submitted from this device for this room will appear here.
+            </p>
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+  </div>
+</ion-content>

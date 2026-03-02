@@ -28,9 +28,9 @@
 
 .hero-copy h1 {
   margin: 10px 0 12px;
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.05em;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
 }
 
 .summary {
@@ -58,8 +58,8 @@
 
 .meta-label {
   margin: 10px 0 4px;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -97,7 +97,7 @@
 .section-head h2 {
   margin: 6px 0 0;
   font-size: 1.45rem;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.015em;
 }
 
 .section-count {
@@ -138,7 +138,8 @@
 
 .nav-copy h3 {
   margin: 0 0 4px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
 }
 
 .nav-copy p {
@@ -217,7 +218,7 @@
 .palette-header h2 {
   margin: 6px 0 8px;
   font-size: 1.35rem;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.015em;
 }
 
 .palette-hue-badge {

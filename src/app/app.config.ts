@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([firebaseAuthInterceptor])),
     provideRouter(routes),
-    provideIonicAngular({}),
+    provideIonicAngular({ mode: 'md' }),
     {
       provide: APP_INITIALIZER,
       useFactory: firebaseConfigInitializer,

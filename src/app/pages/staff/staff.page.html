@@ -14,252 +14,199 @@
         <p class="console-eyebrow">Team Operations</p>
         <h1>Staff management</h1>
         <p>
-          Manage active team members after approval. Update role, access scope, operational role,
-          and activation status without mixing this into the approval queue.
+          Manage approved team members through a scoped roster. Filter by location, role, and status,
+          then edit people without navigating an org tree.
         </p>
       </div>
       <div class="console-meta">
         <span class="console-pill">{{ managedUsers().length }} managed user(s)</span>
+        <span class="console-pill">{{ directorySummary() }}</span>
       </div>
     </section>
 
     <ion-card class="console-card">
       <ion-card-header>
-        <ion-card-title>Active Team Directory</ion-card-title>
-        <p class="section-copy">Only users inside your current scope are shown here.</p>
+        <ion-card-title>Directory Filters</ion-card-title>
+        <p class="section-copy">Reduce the roster to the exact scope you want to work on.</p>
       </ion-card-header>
       <ion-card-content>
-        <div class="console-toolbar">
-          <div class="console-meta console-meta-filters">
-            <span class="console-pill">Scoped by current role</span>
-            <div class="filter-group">
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="roleFilter() === 'ALL'"
-                (click)="setRoleFilter('ALL')"
+        <div class="form-grid roster-filters">
+          @if (showGroupFilter()) {
+            <ion-item class="field-item">
+              <ion-label position="stacked">Hotel Group</ion-label>
+              <ion-select
+                [value]="selectedGroupId()"
+                (ionChange)="setGroupFilter($event.detail.value ?? null)"
+                interface="alert"
               >
-                All roles
-              </button>
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="roleFilter() === 'HOTEL_GROUP_ADMIN'"
-                (click)="setRoleFilter('HOTEL_GROUP_ADMIN')"
+                <ion-select-option [value]="null">All groups</ion-select-option>
+                @for (group of visibleGroupOptions(); track group.id ?? group.name) {
+                  <ion-select-option [value]="group.id ?? null">{{ group.name }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          }
+
+          @if (showHotelFilter()) {
+            <ion-item class="field-item">
+              <ion-label position="stacked">Hotel</ion-label>
+              <ion-select
+                [value]="selectedHotelId()"
+                (ionChange)="setHotelFilter($event.detail.value ?? null)"
+                interface="alert"
               >
-                Group admins
-              </button>
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="roleFilter() === 'HOTEL_ADMIN'"
-                (click)="setRoleFilter('HOTEL_ADMIN')"
-              >
-                Hotel admins
-              </button>
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="roleFilter() === 'STAFF'"
-                (click)="setRoleFilter('STAFF')"
-              >
-                Staff
-              </button>
-            </div>
-            <div class="filter-group">
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="statusFilter() === 'ALL'"
-                (click)="setStatusFilter('ALL')"
-              >
-                All status
-              </button>
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="statusFilter() === 'ACTIVE'"
-                (click)="setStatusFilter('ACTIVE')"
-              >
-                Active
-              </button>
-              <button
-                type="button"
-                class="filter-chip"
-                [class.active]="statusFilter() === 'DISABLED'"
-                (click)="setStatusFilter('DISABLED')"
-              >
-                Disabled
-              </button>
-            </div>
-          </div>
-          <div class="form-actions">
-            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
-          </div>
+                <ion-select-option [value]="null">All hotels</ion-select-option>
+                @for (hotel of visibleHotelOptions(); track hotel.id ?? hotel.name) {
+                  <ion-select-option [value]="hotel.id ?? null">{{ hotel.name }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          }
+
+          <ion-item class="field-item">
+            <ion-label position="stacked">Role</ion-label>
+            <ion-select
+              [value]="roleFilter()"
+              (ionChange)="setRoleFilter($event.detail.value)"
+              interface="alert"
+            >
+              <ion-select-option value="ALL">All roles</ion-select-option>
+              @if (showPlatformSection()) {
+                <ion-select-option value="SUPERADMIN">Superadmins</ion-select-option>
+              }
+              <ion-select-option value="HOTEL_GROUP_ADMIN">Group admins</ion-select-option>
+              <ion-select-option value="HOTEL_ADMIN">Hotel admins</ion-select-option>
+              <ion-select-option value="STAFF">Staff</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="field-item">
+            <ion-label position="stacked">Status</ion-label>
+            <ion-select
+              [value]="statusFilter()"
+              (ionChange)="setStatusFilter($event.detail.value)"
+              interface="alert"
+            >
+              <ion-select-option value="ALL">All status</ion-select-option>
+              <ion-select-option value="ACTIVE">Active</ion-select-option>
+              <ion-select-option value="DISABLED">Disabled</ion-select-option>
+            </ion-select>
+          </ion-item>
         </div>
 
-        @if (error()) {
-          <p class="error-text">{{ error() }}</p>
-        }
-
-        @if (loading()) {
-          <p class="empty-text">Loading...</p>
-        } @else {
-          <div class="tree-root">
-            @if (showPlatformSection() && platformUsers().length) {
-              <section class="tree-section">
-                <div class="tree-branch tree-branch-root">
-                  <button type="button" class="tree-toggle tree-node tree-node-root" (click)="togglePlatform()">
-                    <div class="tree-toggle-copy">
-                      <p class="node-eyebrow">Platform</p>
-                      <h3>Superadmins</h3>
-                      <p>{{ platformUsers().length }} account(s) with platform-wide control.</p>
-                    </div>
-                    <span class="tree-toggle-state">
-                      <span class="tree-toggle-arrow">{{ platformExpanded() ? '−' : '+' }}</span>
-                      {{ platformExpanded() ? 'Hide' : 'Show' }}
-                    </span>
-                  </button>
-
-                  @if (platformExpanded()) {
-                    <div class="tree-children">
-                      @for (user of platformUsers(); track user.id ?? user.firebaseUid) {
-                        <ng-container
-                          [ngTemplateOutlet]="personCard"
-                          [ngTemplateOutletContext]="{ $implicit: user }"
-                        />
-                      }
-                    </div>
-                  }
-                </div>
-              </section>
-            }
-
-            @for (groupNode of groupNodes(); track groupNode.group.id ?? groupNode.group.name) {
-              <section class="tree-section">
-                <div class="tree-branch tree-branch-root">
-                  <button
-                    type="button"
-                    class="tree-toggle tree-node tree-node-root"
-                    (click)="toggleGroup(groupNode.group.id)"
-                  >
-                    <div class="tree-toggle-copy">
-                      <p class="node-eyebrow">Hotel Group</p>
-                      <h3>{{ groupNode.group.name }}</h3>
-                      <p>{{ groupSummary(groupNode) }}</p>
-                    </div>
-                    <span class="tree-toggle-state">
-                      <span class="tree-toggle-arrow">{{ isGroupExpanded(groupNode.group.id) ? '−' : '+' }}</span>
-                      {{ isGroupExpanded(groupNode.group.id) ? 'Hide' : 'Show' }}
-                    </span>
-                  </button>
-
-                  @if (isGroupExpanded(groupNode.group.id)) {
-                    <div class="tree-children tree-children-surface">
-                      @if (showGroupLeadershipSection()) {
-                        <div class="tree-branch">
-                          <div class="tree-node tree-node-role">
-                            <p class="node-eyebrow">Group Leadership</p>
-                            <h4>Group Admins</h4>
-                            <p>{{ groupNode.groupAdmins.length }} account(s)</p>
-                          </div>
-
-                          <div class="tree-children tree-people">
-                            @for (user of groupNode.groupAdmins; track user.id ?? user.firebaseUid) {
-                              <ng-container
-                                [ngTemplateOutlet]="personCard"
-                                [ngTemplateOutletContext]="{ $implicit: user }"
-                              />
-                            } @empty {
-                              <p class="empty-text">No group admins assigned.</p>
-                            }
-                          </div>
-                        </div>
-                      }
-
-                      @for (hotelNode of groupNode.hotels; track hotelNode.hotel.id ?? hotelNode.hotel.name) {
-                        <div class="tree-branch">
-                          <button
-                            type="button"
-                            class="tree-toggle tree-node tree-node-hotel"
-                            (click)="toggleHotel(hotelNode.hotel.id)"
-                          >
-                            <div class="tree-toggle-copy">
-                              <p class="node-eyebrow">Hotel</p>
-                              <h4>{{ hotelNode.hotel.name }}</h4>
-                              <p>{{ hotelSummary(hotelNode) }}</p>
-                            </div>
-                            <span class="tree-toggle-state">
-                              <span class="tree-toggle-arrow">{{ isHotelExpanded(hotelNode.hotel.id) ? '−' : '+' }}</span>
-                              {{ isHotelExpanded(hotelNode.hotel.id) ? 'Hide' : 'Show' }}
-                            </span>
-                          </button>
-
-                          @if (isHotelExpanded(hotelNode.hotel.id)) {
-                            <div class="tree-children tree-children-surface">
-                              @if (showHotelAdminSection()) {
-                                <div class="tree-branch">
-                                  <div class="tree-node tree-node-role">
-                                    <p class="node-eyebrow">Leadership</p>
-                                    <h5>Hotel Admins</h5>
-                                    <p>{{ hotelNode.hotelAdmins.length }} account(s)</p>
-                                  </div>
-
-                                  <div class="tree-children tree-people">
-                                    @for (user of hotelNode.hotelAdmins; track user.id ?? user.firebaseUid) {
-                                      <ng-container
-                                        [ngTemplateOutlet]="personCard"
-                                        [ngTemplateOutletContext]="{ $implicit: user }"
-                                      />
-                                    } @empty {
-                                      <p class="empty-text">No hotel admins assigned.</p>
-                                    }
-                                  </div>
-                                </div>
-                              }
-
-                              <div class="tree-branch">
-                                <div class="tree-node tree-node-role">
-                                  <p class="node-eyebrow">Operations</p>
-                                  <h5>Staff</h5>
-                                  <p>{{ hotelNode.staff.length }} account(s)</p>
-                                </div>
-
-                                <div class="tree-children tree-people">
-                                  @for (user of hotelNode.staff; track user.id ?? user.firebaseUid) {
-                                    <ng-container
-                                      [ngTemplateOutlet]="personCard"
-                                      [ngTemplateOutletContext]="{ $implicit: user }"
-                                    />
-                                  } @empty {
-                                    <p class="empty-text">No staff assigned.</p>
-                                  }
-                                </div>
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      } @empty {
-                        <p class="empty-text">No hotels are visible inside this group yet.</p>
-                      }
-                    </div>
-                  }
-                </div>
-              </section>
-            } @empty {
-              @if (!platformUsers().length) {
-                <p class="empty-text">No approved users are available inside your scope.</p>
-              }
-            }
-          </div>
-        }
+        <div class="form-actions">
+          <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+          <ion-button type="button" fill="outline" (click)="clearFilters()">Clear filters</ion-button>
+        </div>
       </ion-card-content>
     </ion-card>
+
+    @if (error()) {
+      <ion-card class="console-card">
+        <ion-card-content>
+          <p class="error-text">{{ error() }}</p>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (loading()) {
+      <ion-card class="console-card">
+        <ion-card-content>
+          <p class="empty-text">Loading...</p>
+        </ion-card-content>
+      </ion-card>
+    } @else {
+      @if (showPlatformSection()) {
+        <section class="roster-section">
+          <div class="section-intro">
+            <div>
+              <p class="console-eyebrow">Platform</p>
+              <h2>Superadmins</h2>
+            </div>
+            <p class="section-count">{{ rosterSummary(platformUsers(), 'Superadmins') }}</p>
+          </div>
+
+          <div class="roster-grid">
+            @for (user of platformUsers(); track user.id ?? user.firebaseUid) {
+              <ng-container
+                [ngTemplateOutlet]="personCard"
+                [ngTemplateOutletContext]="{ $implicit: user }"
+              />
+            } @empty {
+              <p class="empty-text">No superadmins match the current filters.</p>
+            }
+          </div>
+        </section>
+      }
+
+      <section class="roster-section">
+        <div class="section-intro">
+          <div>
+            <p class="console-eyebrow">Leadership</p>
+            <h2>Group Admins</h2>
+          </div>
+          <p class="section-count">{{ rosterSummary(groupAdmins(), 'Group admins') }}</p>
+        </div>
+
+        <div class="roster-grid">
+          @for (user of groupAdmins(); track user.id ?? user.firebaseUid) {
+            <ng-container
+              [ngTemplateOutlet]="personCard"
+              [ngTemplateOutletContext]="{ $implicit: user }"
+            />
+          } @empty {
+            <p class="empty-text">No group admins match the current filters.</p>
+          }
+        </div>
+      </section>
+
+      <section class="roster-section">
+        <div class="section-intro">
+          <div>
+            <p class="console-eyebrow">Leadership</p>
+            <h2>Hotel Admins</h2>
+          </div>
+          <p class="section-count">{{ rosterSummary(hotelAdmins(), 'Hotel admins') }}</p>
+        </div>
+
+        <div class="roster-grid">
+          @for (user of hotelAdmins(); track user.id ?? user.firebaseUid) {
+            <ng-container
+              [ngTemplateOutlet]="personCard"
+              [ngTemplateOutletContext]="{ $implicit: user }"
+            />
+          } @empty {
+            <p class="empty-text">No hotel admins match the current filters.</p>
+          }
+        </div>
+      </section>
+
+      <section class="roster-section">
+        <div class="section-intro">
+          <div>
+            <p class="console-eyebrow">Operations</p>
+            <h2>Staff</h2>
+          </div>
+          <p class="section-count">{{ rosterSummary(staffUsers(), 'Staff') }}</p>
+        </div>
+
+        <div class="roster-grid">
+          @for (user of staffUsers(); track user.id ?? user.firebaseUid) {
+            <ng-container
+              [ngTemplateOutlet]="personCard"
+              [ngTemplateOutletContext]="{ $implicit: user }"
+            />
+          } @empty {
+            <p class="empty-text">No staff match the current filters.</p>
+          }
+        </div>
+      </section>
+    }
   </div>
 </ion-content>
 
 <ng-template #personCard let-user>
-  <article class="console-record tree-person">
+  <article class="console-record roster-card">
     <div class="record-heading">
       <div>
         <h3>{{ user.name }}</h3>
@@ -267,9 +214,7 @@
       </div>
       <div class="record-metadata record-metadata-tight">
         <span class="console-pill">{{ userRoleLabel(user) }}</span>
-        <span class="console-pill">
-          {{ (user.active ?? true) ? 'Active' : 'Disabled' }}
-        </span>
+        <span class="console-pill">{{ (user.active ?? true) ? 'Active' : 'Disabled' }}</span>
       </div>
     </div>
 
@@ -282,99 +227,104 @@
     </div>
 
     <div class="inline-actions inline-actions-compact">
-      <button type="button" (click)="toggleEditor(user.id)">
-        {{ expandedUserId() === user.id ? 'Close editor' : 'Edit staff member' }}
-      </button>
+      <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="toggleEditor(user.id)">
+        {{ expandedUserId() === user.id ? 'Close editor' : 'Edit member' }}
+      </ion-button>
     </div>
 
     @if (user.id != null && expandedUserId() === user.id) {
       <div class="staff-grid">
-        <label>
-          <span>Name</span>
-          <input
+        <ion-item class="field-item">
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input
             [(ngModel)]="drafts[user.id].name"
             [ngModelOptions]="{ standalone: true }"
           />
-        </label>
+        </ion-item>
 
-        <label>
-          <span>Phone</span>
-          <input
+        <ion-item class="field-item">
+          <ion-label position="stacked">Phone</ion-label>
+          <ion-input
             [(ngModel)]="drafts[user.id].phone"
             [ngModelOptions]="{ standalone: true }"
           />
-        </label>
+        </ion-item>
 
-        <label>
-          <span>Access Role</span>
-          <select
+        <ion-item class="field-item">
+          <ion-label position="stacked">Access Role</ion-label>
+          <ion-select
             [(ngModel)]="drafts[user.id].accessRole"
             [ngModelOptions]="{ standalone: true }"
             (ngModelChange)="onRoleChange(user.id)"
+            interface="alert"
           >
             @for (role of roleOptionsForUser(); track role) {
-              <option [ngValue]="role">{{ role.replaceAll('_', ' ') }}</option>
+              <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
             }
-          </select>
-        </label>
+          </ion-select>
+        </ion-item>
 
         @if (needsGroupAssignment(drafts[user.id].accessRole)) {
-          <label>
-            <span>Assigned Hotel Group</span>
-            <select
+          <ion-item class="field-item">
+            <ion-label position="stacked">Assigned Hotel Group</ion-label>
+            <ion-select
               [(ngModel)]="drafts[user.id].assignedHotelGroupId"
               [ngModelOptions]="{ standalone: true }"
+              interface="alert"
             >
-              <option [ngValue]="null">Select group</option>
+              <ion-select-option [value]="null">Select group</ion-select-option>
               @for (group of assignableHotelGroups(); track group.id ?? group.name) {
-                <option [ngValue]="group.id ?? null">
+                <ion-select-option [value]="group.id ?? null">
                   {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                </option>
+                </ion-select-option>
               }
-            </select>
-          </label>
+            </ion-select>
+          </ion-item>
         }
 
         @if (needsHotelAssignment(drafts[user.id].accessRole)) {
-          <label>
-            <span>Assigned Hotel</span>
-            <select
+          <ion-item class="field-item">
+            <ion-label position="stacked">Assigned Hotel</ion-label>
+            <ion-select
               [(ngModel)]="drafts[user.id].assignedHotelId"
               [ngModelOptions]="{ standalone: true }"
+              interface="alert"
             >
-              <option [ngValue]="null">Select hotel</option>
+              <ion-select-option [value]="null">Select hotel</ion-select-option>
               @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
-                <option [ngValue]="hotel.id ?? null">
+                <ion-select-option [value]="hotel.id ?? null">
                   {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                </option>
+                </ion-select-option>
               }
-            </select>
-          </label>
+            </ion-select>
+          </ion-item>
         }
 
         @if (needsEmployeeRole(drafts[user.id].accessRole)) {
-          <label>
-            <span>Operational Role</span>
-            <select
+          <ion-item class="field-item">
+            <ion-label position="stacked">Operational Role</ion-label>
+            <ion-select
               [(ngModel)]="drafts[user.id].employeeRole"
               [ngModelOptions]="{ standalone: true }"
+              interface="alert"
             >
-              <option [ngValue]="null">Select role</option>
+              <ion-select-option [value]="null">Select role</ion-select-option>
               @for (role of employeeRoles; track role) {
-                <option [ngValue]="role">{{ role.replaceAll('_', ' ') }}</option>
+                <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
               }
-            </select>
-          </label>
+            </ion-select>
+          </ion-item>
         }
 
-        <label class="toggle-label">
-          <span>Access Active</span>
-          <input
+        <ion-item class="checkbox-item">
+          <ion-checkbox
+            slot="start"
             type="checkbox"
             [(ngModel)]="drafts[user.id].active"
             [ngModelOptions]="{ standalone: true }"
           />
-        </label>
+          <ion-label>Access Active</ion-label>
+        </ion-item>
 
         <div class="form-actions span-2">
           <ion-button type="button" [disabled]="isBusy(user.id)" (click)="save(user)">

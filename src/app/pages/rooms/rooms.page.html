@@ -27,48 +27,48 @@
     <div class="console-grid">
       <ion-card class="console-card">
         <ion-card-header>
-          <ion-card-title>{{ form.id ? 'Edit Room' : 'Create Room' }}</ion-card-title>
+          <ion-card-title>Create Room</ion-card-title>
           <p class="section-copy">Attach each room to the correct hotel and floor for service dispatch.</p>
         </ion-card-header>
         <ion-card-content>
           <form class="console-form" (ngSubmit)="save()">
             <div class="form-grid">
-              <label>
-                <span>Room Number</span>
-                <input [(ngModel)]="form.number" name="number" required />
-              </label>
-              <label>
-                <span>Floor</span>
-                <input
+              <ion-item class="field-item">
+                <ion-label position="stacked">Room Number</ion-label>
+                <ion-input [(ngModel)]="form.number" name="number" required />
+              </ion-item>
+              <ion-item class="field-item">
+                <ion-label position="stacked">Floor</ion-label>
+                <ion-input
                   [(ngModel)]="form.floor"
                   name="floor"
                   type="number"
                   [ngModelOptions]="{ standalone: false }"
                 />
-              </label>
+              </ion-item>
               @if (showHotelSelector()) {
-                <label class="span-2">
-                  <span>Hotel</span>
-                  <select [(ngModel)]="form.hotelId" name="hotelId" required>
-                    <option [ngValue]="null">Select hotel</option>
+                <ion-item class="field-item span-2">
+                  <ion-label position="stacked">Hotel</ion-label>
+                  <ion-select [(ngModel)]="form.hotelId" name="hotelId" interface="alert" required>
+                    <ion-select-option [value]="null">Select hotel</ion-select-option>
                     @for (hotel of hotels(); track hotel.id ?? hotel.name) {
-                      <option [ngValue]="hotel.id ?? null">
+                      <ion-select-option [value]="hotel.id ?? null">
                         {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                      </option>
+                      </ion-select-option>
                     }
-                  </select>
-                </label>
+                  </ion-select>
+                </ion-item>
               } @else {
-                <label class="span-2">
-                  <span>Hotel</span>
-                  <input [value]="fixedHotelName()" readonly />
-                </label>
+                <ion-item class="field-item span-2">
+                  <ion-label position="stacked">Hotel</ion-label>
+                  <ion-input [value]="fixedHotelName()" readonly />
+                </ion-item>
               }
             </div>
 
             <div class="form-actions">
               <ion-button type="submit" [disabled]="saving()">
-                {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
+                {{ saving() ? 'Saving...' : 'Create' }}
               </ion-button>
               <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
               <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
@@ -83,34 +83,182 @@
       <ion-card class="console-card">
         <ion-card-header>
           <ion-card-title>Records</ion-card-title>
-          <p class="section-copy">Live room inventory visible to staff and guest-side request flows.</p>
+          <p class="section-copy">Tap a room to inspect guest tools and edit details without flooding the page.</p>
         </ion-card-header>
         <ion-card-content>
           @if (loading()) {
             <p class="empty-text">Loading...</p>
           } @else {
-            <div class="console-list">
-              @for (item of items(); track item.id ?? item.number) {
-                <article class="console-record">
-                  <h3>Room {{ item.number }}</h3>
-                  <div class="record-metadata">
-                    <span class="console-pill">Floor: {{ item.floor ?? '-' }}</span>
-                    <span class="console-pill">
-                      Hotel: {{ item.hotel?.name || ('#' + (item.hotel?.id ?? '?')) }}
-                    </span>
-                  </div>
-                  <div class="inline-actions">
-                    <button type="button" (click)="edit(item)">Edit</button>
-                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
-                  </div>
-                </article>
-              } @empty {
-                <p class="empty-text">No rooms found.</p>
-              }
+            <div class="room-workspace">
+              <div class="room-roster">
+                @for (hotelGroup of groupedRooms(); track hotelGroup.key) {
+                  <section class="room-hotel-group">
+                    <div class="room-hotel-head">
+                      <h3>{{ hotelGroup.hotelName }}</h3>
+                      <span class="console-pill">{{ hotelGroup.floors.length }} floor(s)</span>
+                    </div>
+
+                    <div class="room-floor-list">
+                      @for (floorGroup of hotelGroup.floors; track floorGroup.floor ?? $index) {
+                        <div class="room-floor-block">
+                          <div class="room-floor-head">
+                            <span>{{ floorLabel(floorGroup.floor) }}</span>
+                            <small>{{ floorGroup.rooms.length }} room(s)</small>
+                          </div>
+
+                          <div class="room-chip-grid">
+                            @for (item of floorGroup.rooms; track item.id ?? item.number) {
+                              <button
+                                type="button"
+                                class="room-chip"
+                                [class.is-selected]="selectedRoom()?.id === item.id"
+                                (click)="selectRoom(item)"
+                              >
+                                {{ item.number }}
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </section>
+                } @empty {
+                  <p class="empty-text">No rooms found.</p>
+                }
+              </div>
             </div>
           }
         </ion-card-content>
       </ion-card>
     </div>
+
+    @if (roomModalOpen() && selectedRoom(); as room) {
+      <div class="room-popup-overlay" (click)="closeRoomModal()">
+        <section class="room-popup-card" (click)="$event.stopPropagation()">
+          <div class="room-popup-head">
+            <div>
+              <p class="console-eyebrow">
+                @if (roomModalMode() === 'edit') {
+                  Edit Room
+                } @else {
+                  Room Detail
+                }
+              </p>
+              <h3>Room {{ room.number }}</h3>
+            </div>
+            <ion-button fill="clear" size="small" (click)="closeRoomModal()">Close</ion-button>
+          </div>
+
+          @if (roomModalMode() === 'edit') {
+            <form class="console-form" (ngSubmit)="saveEdit()">
+              <div class="form-grid">
+                <ion-item class="field-item">
+                  <ion-label position="stacked">Room Number</ion-label>
+                  <ion-input [(ngModel)]="editForm.number" name="editNumber" required />
+                </ion-item>
+                <ion-item class="field-item">
+                  <ion-label position="stacked">Floor</ion-label>
+                  <ion-input
+                    [(ngModel)]="editForm.floor"
+                    name="editFloor"
+                    type="number"
+                    [ngModelOptions]="{ standalone: false }"
+                  />
+                </ion-item>
+                @if (showHotelSelector()) {
+                  <ion-item class="field-item span-2">
+                    <ion-label position="stacked">Hotel</ion-label>
+                    <ion-select [(ngModel)]="editForm.hotelId" name="editHotelId" interface="alert" required>
+                      <ion-select-option [value]="null">Select hotel</ion-select-option>
+                      @for (hotel of hotels(); track hotel.id ?? hotel.name) {
+                        <ion-select-option [value]="hotel.id ?? null">
+                          {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
+                        </ion-select-option>
+                      }
+                    </ion-select>
+                  </ion-item>
+                } @else {
+                  <ion-item class="field-item span-2">
+                    <ion-label position="stacked">Hotel</ion-label>
+                    <ion-input [value]="fixedHotelName()" readonly />
+                  </ion-item>
+                }
+              </div>
+
+              <div class="form-actions">
+                <ion-button type="submit" [disabled]="modalSaving()">
+                  {{ modalSaving() ? 'Updating...' : 'Update' }}
+                </ion-button>
+                <ion-button type="button" fill="outline" (click)="closeEdit()">Cancel</ion-button>
+              </div>
+            </form>
+          } @else {
+            <div class="room-detail room-modal-detail">
+              <div class="room-detail-head">
+                <span class="console-pill">{{ room.hotel?.name || 'Unassigned hotel' }}</span>
+              </div>
+
+              <div class="record-metadata">
+                <span class="console-pill">Floor: {{ room.floor ?? '-' }}</span>
+                @if (room.guestAccessToken) {
+                  <span class="console-pill">Guest access active</span>
+                }
+              </div>
+
+              @if (room.guestAccessToken) {
+                <div class="room-link-box">
+                  <span>Guest request link</span>
+                  <p>{{ selectedGuestUrl() }}</p>
+                </div>
+
+                <div class="room-qr-panel">
+                  <div class="room-qr-copy">
+                    <span class="room-qr-label">Room QR</span>
+                    <p>Print or download this QR so guests can open the request page directly.</p>
+                  </div>
+
+                  @if (qrLoading()) {
+                    <div class="room-qr-loading">Generating QR...</div>
+                  } @else if (qrCodeDataUrl()) {
+                    <div class="room-qr-preview">
+                      <img [src]="qrCodeDataUrl()" [alt]="'QR code for room ' + room.number" />
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="inline-actions">
+                <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="startEditFromSelected()">
+                  Edit
+                </ion-button>
+                <ion-button
+                  type="button"
+                  fill="outline"
+                  class="inline-neutral"
+                  size="small"
+                  [disabled]="!room.guestAccessToken"
+                  (click)="copyGuestUrl(room)"
+                >
+                  Copy Guest Link
+                </ion-button>
+                <ion-button
+                  type="button"
+                  fill="outline"
+                  class="inline-neutral"
+                  size="small"
+                  [disabled]="!room.guestAccessToken || qrLoading()"
+                  (click)="downloadGuestQr(room)"
+                >
+                  Download QR
+                </ion-button>
+                <ion-button type="button" fill="outline" class="inline-danger" size="small" (click)="remove(room)">
+                  Delete
+                </ion-button>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    }
   </div>
 </ion-content>

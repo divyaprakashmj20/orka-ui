@@ -45,6 +45,7 @@ export interface Room {
   id?: number;
   number: string;
   floor?: number | null;
+  guestAccessToken?: string | null;
   hotel?: HotelRef | null;
 }
 
@@ -61,6 +62,24 @@ export interface ServiceRequest {
   assignee?: AppUserRef | null;
   rating?: number | null;
   comments?: string | null;
+}
+
+export interface RequestWritePayload {
+  hotelId: number;
+  roomId: number;
+  type: RequestType | null;
+  message?: string | null;
+  status?: RequestStatus | null;
+  createdAt?: string | null;
+  acceptedAt?: string | null;
+  completedAt?: string | null;
+  assigneeId?: number | null;
+  rating?: number | null;
+  comments?: string | null;
+}
+
+export interface GuestSessionBootstrapPayload {
+  sessionToken?: string | null;
 }
 
 export interface AppUser {
@@ -136,4 +155,24 @@ export interface AppUserRef {
   employeeRole?: EmployeeRole | null;
   accessRole?: AccessRole | null;
   active?: boolean;
+}
+
+export interface GuestRoomContext {
+  guestAccessToken: string;
+  hotelGroup?: HotelGroupRef | null;
+  hotel?: HotelRef | null;
+  room?: RoomRef | null;
+  availableRequestTypes: RequestType[];
+}
+
+export interface GuestSessionBootstrapResult {
+  sessionToken: string;
+  context: GuestRoomContext;
+  requests: ServiceRequest[];
+}
+
+export interface GuestRequestCreatePayload {
+  sessionToken: string;
+  type: RequestType;
+  message?: string | null;
 }

@@ -60,76 +60,81 @@
 
                 @if (user.id != null) {
                   <div class="approval-grid">
-                    <label>
-                      <span>Role</span>
-                      <select
+                    <ion-item class="field-item">
+                      <ion-label position="stacked">Role</ion-label>
+                      <ion-select
                         [(ngModel)]="drafts[user.id].accessRole"
                         [ngModelOptions]="{ standalone: true }"
                         (ngModelChange)="onRoleChange(user.id)"
+                        interface="alert"
                       >
                         @for (role of roleOptionsForUser(user); track role) {
-                          <option [ngValue]="role">{{ role }}</option>
+                          <ion-select-option [value]="role">{{ role }}</ion-select-option>
                         }
-                      </select>
-                    </label>
+                      </ion-select>
+                    </ion-item>
 
                     @if (needsGroupAssignment(drafts[user.id].accessRole)) {
-                      <label>
-                        <span>Assign Hotel Group</span>
-                        <select
+                      <ion-item class="field-item">
+                        <ion-label position="stacked">Assign Hotel Group</ion-label>
+                        <ion-select
                           [(ngModel)]="drafts[user.id].assignedHotelGroupId"
                           [ngModelOptions]="{ standalone: true }"
+                          interface="alert"
                         >
-                          <option [ngValue]="null">Select group</option>
+                          <ion-select-option [value]="null">Select group</ion-select-option>
                           @for (group of assignableHotelGroups(); track group.id ?? group.name) {
-                            <option [ngValue]="group.id ?? null">
+                            <ion-select-option [value]="group.id ?? null">
                               {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                            </option>
+                            </ion-select-option>
                           }
-                        </select>
-                      </label>
+                        </ion-select>
+                      </ion-item>
                     }
 
                     @if (needsHotelAssignment(drafts[user.id].accessRole)) {
-                      <label>
-                        <span>Assign Hotel</span>
-                        <select
+                      <ion-item class="field-item">
+                        <ion-label position="stacked">Assign Hotel</ion-label>
+                        <ion-select
                           [(ngModel)]="drafts[user.id].assignedHotelId"
                           [ngModelOptions]="{ standalone: true }"
+                          interface="alert"
                         >
-                          <option [ngValue]="null">Select hotel</option>
+                          <ion-select-option [value]="null">Select hotel</ion-select-option>
                           @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
-                            <option [ngValue]="hotel.id ?? null">
+                            <ion-select-option [value]="hotel.id ?? null">
                               {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                            </option>
+                            </ion-select-option>
                           }
-                        </select>
-                      </label>
+                        </ion-select>
+                      </ion-item>
                     }
 
                     @if (needsEmployeeRole(drafts[user.id].accessRole)) {
-                      <label>
-                        <span>Operational Role</span>
-                        <select
+                      <ion-item class="field-item">
+                        <ion-label position="stacked">Operational Role</ion-label>
+                        <ion-select
                           [(ngModel)]="drafts[user.id].employeeRole"
                           [ngModelOptions]="{ standalone: true }"
+                          interface="alert"
                         >
-                          <option [ngValue]="null">Select role</option>
+                          <ion-select-option [value]="null">Select role</ion-select-option>
                           @for (role of employeeRoles; track role) {
-                            <option [ngValue]="role">{{ role.replaceAll('_', ' ') }}</option>
+                            <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
                           }
-                        </select>
-                      </label>
+                        </ion-select>
+                      </ion-item>
                     }
 
-                    <label class="toggle-label">
-                      <span>Active after approval</span>
-                      <input
+                    <ion-item class="checkbox-item">
+                      <ion-checkbox
+                        slot="start"
                         type="checkbox"
                         [(ngModel)]="drafts[user.id].active"
                         [ngModelOptions]="{ standalone: true }"
                       />
-                    </label>
+                      <ion-label>Active after approval</ion-label>
+                    </ion-item>
 
                     <div class="form-actions span-2">
                       <ion-button type="button" [disabled]="isBusy(user.id)" (click)="approve(user)">

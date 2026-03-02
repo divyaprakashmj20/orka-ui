@@ -8,132 +8,197 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <div class="crud-page">
-    <ion-card>
+  <div class="console-page">
+    <section class="console-hero">
+      <div>
+        <p class="console-eyebrow">Operations Board</p>
+        <h1>Requests</h1>
+        <p>
+          Work through active guest needs without the old CRUD form. Filter the queue, open a request,
+          and move it forward with one tap.
+        </p>
+      </div>
+      <div class="console-meta">
+        <span class="console-pill">{{ requestCounts().ALL }} total</span>
+        <span class="console-pill">{{ requestCounts().NEW }} new</span>
+        <span class="console-pill">{{ requestCounts().ACCEPTED }} active</span>
+      </div>
+    </section>
+
+    <ion-card class="console-card">
       <ion-card-header>
-        <ion-card-title>{{ form.id ? 'Edit Request' : 'Create Request' }}</ion-card-title>
+        <ion-card-title>Queue</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <form class="form-grid" (ngSubmit)="save()">
-          @if (showHotelSelector()) {
-            <label>
-              <span>Hotel</span>
-              <select [(ngModel)]="form.hotelId" name="hotelId" required>
-                <option [ngValue]="null">Select hotel</option>
-                @for (hotel of hotels(); track hotel.id ?? hotel.name) {
-                  <option [ngValue]="hotel.id ?? null">{{ hotel.name }}</option>
-                }
-              </select>
-            </label>
-          } @else {
-            <label>
-              <span>Hotel</span>
-              <input [value]="fixedHotelName()" readonly />
-            </label>
+        <div class="request-filter-grid" role="tablist" aria-label="Request filters">
+          @for (filter of boardFilters; track filter) {
+            <button
+              type="button"
+              class="request-filter-tile"
+              [class.is-active]="activeFilter() === filter"
+              (click)="setFilter(filter)"
+            >
+              <span>{{ filterLabel(filter) }}</span>
+              <strong>{{ requestCounts()[filter] }}</strong>
+            </button>
           }
-          <label>
-            <span>Room</span>
-            <select [(ngModel)]="form.roomId" name="roomId" required>
-              <option [ngValue]="null">Select room</option>
-              @for (room of visibleRooms(); track room.id ?? room.number) {
-                <option [ngValue]="room.id ?? null">{{ roomLabel(room) }}</option>
-              }
-            </select>
-          </label>
-          <label>
-            <span>Type</span>
-            <select [(ngModel)]="form.type" name="type" required>
-              <option [ngValue]="null">Select type</option>
-              @for (type of requestTypes; track type) {
-                <option [ngValue]="type">{{ type }}</option>
-              }
-            </select>
-          </label>
-          <label>
-            <span>Status</span>
-            <select [(ngModel)]="form.status" name="status">
-              <option [ngValue]="null">Unset</option>
-              @for (status of requestStatuses; track status) {
-                <option [ngValue]="status">{{ status }}</option>
-              }
-            </select>
-          </label>
-          <label class="span-2">
-            <span>Message</span>
-            <textarea [(ngModel)]="form.message" name="message" rows="3"></textarea>
-          </label>
-          <label>
-            <span>Assignee (optional)</span>
-            <select [(ngModel)]="form.assigneeId" name="assigneeId">
-              <option [ngValue]="null">Unassigned</option>
-              @for (assignee of visibleAssignees(); track assignee.id ?? assignee.name) {
-                <option [ngValue]="assignee.id ?? null">{{ assigneeLabel(assignee) }}</option>
-              }
-            </select>
-          </label>
-          <label>
-            <span>Rating</span>
-            <input [(ngModel)]="form.rating" name="rating" type="number" min="1" max="5" />
-          </label>
-          <label>
-            <span>Created At</span>
-            <input [(ngModel)]="form.createdAt" name="createdAt" type="datetime-local" />
-          </label>
-          <label>
-            <span>Accepted At</span>
-            <input [(ngModel)]="form.acceptedAt" name="acceptedAt" type="datetime-local" />
-          </label>
-          <label>
-            <span>Completed At</span>
-            <input [(ngModel)]="form.completedAt" name="completedAt" type="datetime-local" />
-          </label>
-          <label class="span-2">
-            <span>Comments</span>
-            <textarea [(ngModel)]="form.comments" name="comments" rows="2"></textarea>
-          </label>
+        </div>
 
-          <div class="form-actions span-2">
-            <ion-button type="submit" [disabled]="saving()">
-              {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
-            </ion-button>
-            <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
-            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
-          </div>
-        </form>
         @if (error()) {
           <p class="error-text">{{ error() }}</p>
         }
-      </ion-card-content>
-    </ion-card>
 
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Records</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
         @if (loading()) {
-          <p>Loading...</p>
+          <p class="empty-text">Loading requests...</p>
         } @else {
-          <ion-list inset="true">
-            @for (item of items(); track item.id ?? $index) {
-              <ion-item>
-                <ion-label>
-                  <h2>Request #{{ item.id ?? '?' }} • {{ item.type || 'UNKNOWN' }}</h2>
-                  <p>Status: {{ item.status || '-' }} • Hotel: {{ item.hotel?.name || '-' }}</p>
-                  <p>Room: {{ item.room?.number || '-' }} • Assignee: {{ item.assignee?.name || 'Unassigned' }}</p>
-                  <p>{{ item.message || 'No message' }}</p>
-                  <div class="inline-actions">
-                    <button type="button" (click)="edit(item)">Edit</button>
-                    <button type="button" class="danger" (click)="remove(item)">Delete</button>
+          <div class="request-board">
+            @for (item of filteredItems(); track item.id ?? $index) {
+              <button
+                type="button"
+                class="request-card"
+                [class.is-selected]="selectedRequest()?.id === item.id"
+                [class.status-new]="item.status === 'NEW'"
+                [class.status-accepted]="item.status === 'ACCEPTED'"
+                [class.status-completed]="item.status === 'COMPLETED'"
+                [class.status-cancelled]="item.status === 'CANCELLED'"
+                (click)="openRequest(item)"
+              >
+                <div class="request-card-head">
+                  <div class="request-primary">
+                    <div class="request-room-badge">
+                      <strong class="request-room">{{ item.room?.number || '?' }}</strong>
+                      @if (item.room?.floor != null) {
+                        <span class="request-floor">F{{ item.room?.floor }}</span>
+                      }
+                    </div>
+                    <div class="request-title-block">
+                      <span class="request-location">{{ item.hotel?.name || 'Hotel' }}</span>
+                      <span class="request-type">{{ typeLabel(item) }}</span>
+                    </div>
                   </div>
-                </ion-label>
-              </ion-item>
+                  <div class="request-chip-row">
+                    <span class="request-chip request-status-chip">{{ statusLabel(item) }}</span>
+                  </div>
+                </div>
+
+                <div class="request-card-details">
+                  <span><strong>Assignee:</strong> {{ assigneeName(item) }}</span>
+                  <span><strong>Assignee Role:</strong> {{ assigneeRole(item) }}</span>
+                  <span class="request-type-meta"><strong>Type:</strong> {{ typeLabel(item) }}</span>
+                  <p class="request-comment-line"><strong>Comment:</strong> {{ item.message || 'No guest note provided.' }}</p>
+                  <span><strong>Created:</strong> {{ dateTimeLabel(item.createdAt) }}</span>
+                  <span><strong>Accepted:</strong> {{ dateTimeLabel(item.acceptedAt) }}</span>
+                  <span><strong>Completed:</strong> {{ dateTimeLabel(item.completedAt) }}</span>
+                </div>
+
+                <div class="request-card-actions">
+                  @if (canAccept(item)) {
+                    <ion-button size="small" (click)="$event.stopPropagation(); accept(item)" [disabled]="acting()">
+                      Accept
+                    </ion-button>
+                  }
+                  @if (canComplete(item)) {
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      (click)="$event.stopPropagation(); complete(item)"
+                      [disabled]="acting()"
+                    >
+                      Complete
+                    </ion-button>
+                  }
+                  @if (canReopen(item)) {
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      color="medium"
+                      (click)="$event.stopPropagation(); reopen(item)"
+                      [disabled]="acting()"
+                    >
+                      Reopen
+                    </ion-button>
+                  }
+                  <ion-button size="small" fill="clear" (click)="$event.stopPropagation(); openRequest(item)">
+                    View
+                  </ion-button>
+                </div>
+              </button>
             } @empty {
-              <ion-item><ion-label>No requests found.</ion-label></ion-item>
+              <div class="request-empty-state">
+                <p>No requests in this view.</p>
+                <ion-button fill="outline" (click)="refreshAll()">Refresh</ion-button>
+              </div>
             }
-          </ion-list>
+          </div>
         }
       </ion-card-content>
     </ion-card>
+
+    @if (selectedRequest(); as item) {
+      <div class="request-popup-overlay" (click)="closeRequest()">
+        <section class="request-popup-card" (click)="$event.stopPropagation()">
+          <div class="request-popup-head">
+            <div>
+              <p class="console-eyebrow">Request Detail</p>
+              <h3>{{ item.hotel?.name || 'Hotel' }} • Room {{ item.room?.number || '?' }}</h3>
+            </div>
+            <ion-button fill="clear" size="small" (click)="closeRequest()">Close</ion-button>
+          </div>
+
+          <div class="request-popup-status">
+            <span class="request-chip request-status-chip">{{ statusLabel(item) }}</span>
+            <span class="request-chip">{{ typeLabel(item) }}</span>
+          </div>
+
+          <div class="request-detail-grid">
+            <div class="request-detail-block">
+              <span>Assignee</span>
+              <strong class="request-assignee-name">{{ assigneeName(item) }}</strong>
+              <small class="request-assignee-role">{{ assigneeRole(item) }}</small>
+            </div>
+            <div class="request-detail-block">
+              <span>Request Type</span>
+              <strong>{{ typeLabel(item) }}</strong>
+            </div>
+            <div class="request-detail-block span-2">
+              <span>Guest Note</span>
+              <p>{{ item.message || 'No guest note provided.' }}</p>
+            </div>
+            <div class="request-detail-block">
+              <span>Created At</span>
+              <strong>{{ dateTimeLabel(item.createdAt) }}</strong>
+            </div>
+            <div class="request-detail-block">
+              <span>Accepted At</span>
+              <strong>{{ dateTimeLabel(item.acceptedAt) }}</strong>
+            </div>
+            <div class="request-detail-block">
+              <span>Completed At</span>
+              <strong>{{ dateTimeLabel(item.completedAt) }}</strong>
+            </div>
+            @if (item.comments) {
+              <div class="request-detail-block span-2">
+                <span>Internal Comments</span>
+                <p>{{ item.comments }}</p>
+              </div>
+            }
+          </div>
+
+          <div class="request-popup-actions">
+            @if (canAccept(item)) {
+              <ion-button (click)="accept(item)" [disabled]="acting()">Accept Request</ion-button>
+            }
+            @if (canComplete(item)) {
+              <ion-button fill="outline" (click)="complete(item)" [disabled]="acting()">Mark Complete</ion-button>
+            }
+            @if (canReopen(item)) {
+              <ion-button fill="outline" color="medium" (click)="reopen(item)" [disabled]="acting()">
+                Reopen
+              </ion-button>
+            }
+          </div>
+        </section>
+      </div>
+    }
   </div>
 </ion-content>

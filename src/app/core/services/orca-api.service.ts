@@ -8,8 +8,13 @@ import {
   AppUserRegistrationPayload,
   DeviceTokenRegisterPayload,
   DeviceTokenUnregisterPayload,
+  GuestRequestCreatePayload,
+  GuestRoomContext,
+  GuestSessionBootstrapPayload,
+  GuestSessionBootstrapResult,
   Hotel,
   HotelGroup,
+  RequestWritePayload,
   Room,
   ServiceRequest
 } from '../models/orca.models';
@@ -94,14 +99,29 @@ export class OrcaApiService {
     return this.http.delete<void>(`${this.apiBase}/rooms/${id}`);
   }
 
+  getGuestRoomContext(token: string): Observable<GuestRoomContext> {
+    return this.http.get<GuestRoomContext>(`${this.apiBase}/requests/guest/${token}`);
+  }
+
+  bootstrapGuestSession(
+    token: string,
+    input: GuestSessionBootstrapPayload
+  ): Observable<GuestSessionBootstrapResult> {
+    return this.http.post<GuestSessionBootstrapResult>(`${this.apiBase}/requests/guest/${token}/session`, input);
+  }
+
+  createGuestRequest(token: string, input: GuestRequestCreatePayload): Observable<ServiceRequest> {
+    return this.http.post<ServiceRequest>(`${this.apiBase}/requests/guest/${token}`, input);
+  }
+
   listRequests(): Observable<ServiceRequest[]> {
     return this.http.get<ServiceRequest[]>(`${this.apiBase}/requests`);
   }
 
-  saveRequest(input: ServiceRequest): Observable<ServiceRequest> {
-    return input.id == null
+  saveRequest(input: RequestWritePayload, id?: number | null): Observable<ServiceRequest> {
+    return id == null
       ? this.http.post<ServiceRequest>(`${this.apiBase}/requests`, input)
-      : this.http.put<ServiceRequest>(`${this.apiBase}/requests/${input.id}`, input);
+      : this.http.put<ServiceRequest>(`${this.apiBase}/requests/${id}`, input);
   }
 
   deleteRequest(id: number): Observable<void> {
