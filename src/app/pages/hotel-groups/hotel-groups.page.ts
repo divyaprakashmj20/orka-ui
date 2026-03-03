@@ -1,24 +1,13 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonTitle,
-  IonToolbar
+  IonInput
 } from '@ionic/angular/standalone';
 import { HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { ShellComponent } from '../../core/shell/shell.component';
 
 type HotelGroupForm = {
   id: number | null;
@@ -32,19 +21,8 @@ type HotelGroupForm = {
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonTitle,
-    IonContent,
-    IonItem,
-    IonLabel,
+    ShellComponent,
     IonInput,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonButton
   ],
   templateUrl: './hotel-groups.page.html',

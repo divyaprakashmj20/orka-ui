@@ -1,56 +1,41 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
   IonInput,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonTitle,
-  IonToolbar
+  IonSpinner,
+  NavController
 } from '@ionic/angular/standalone';
 import { FirebaseError } from 'firebase/app';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 
 @Component({
   selector: 'app-forgot-password-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonItem,
-    IonLabel,
     IonInput,
     IonButton,
-    IonNote
+    IonSpinner
   ],
   templateUrl: './forgot-password.page.html',
   styleUrl: './forgot-password.page.scss'
 })
 export class ForgotPasswordPage {
-  private readonly auth = inject(FirebaseAuthService);
+  private readonly auth   = inject(FirebaseAuthService);
+  private readonly nav    = inject(NavController);
 
   protected form = { email: '' };
   protected readonly loading = signal(false);
-  protected readonly error = signal('');
+  protected readonly error   = signal('');
   protected readonly success = signal('');
+
+  protected go(path: string): void {
+    void this.nav.navigateRoot(path);
+  }
 
   protected async sendReset(): Promise<void> {
     const email = this.form.email.trim();

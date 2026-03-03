@@ -1,0 +1,124 @@
+<ion-content>
+  <!-- Mobile scrim -->
+  @if (sidebarOpen()) {
+    <div class="o-scrim is-active" (click)="closeSidebar()"></div>
+  }
+
+  <div class="o-shell">
+    <!-- ── Sidebar ─────────────────────────────── -->
+    <nav class="o-sidebar" [class.is-open]="sidebarOpen()">
+      <div class="o-sidebar-brand">
+        <div class="o-brand-mark">O</div>
+        <span class="o-brand-name">Orka</span>
+      </div>
+
+      <div class="o-sidebar-nav">
+        <div class="o-nav-section">
+          @for (item of visibleNav(); track item.path) {
+            <a
+              class="o-nav-item"
+              [class.is-active]="isActive(item.path)"
+              (click)="navigate(item.path)"
+            >
+              <ion-icon [name]="item.icon"></ion-icon>
+              {{ item.label }}
+              @if (item.path === '/requests' && requestsUnreadCount() > 0) {
+                <span class="o-nav-unread">{{ requestsUnreadCount() > 99 ? '99+' : requestsUnreadCount() }}</span>
+              }
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="o-sidebar-footer">
+        @if (logoutError()) {
+          <p class="o-sidebar-error">{{ logoutError() }}</p>
+        }
+        <div class="o-user-card">
+          <div class="o-user-avatar">{{ userInitials() }}</div>
+          <div class="o-user-info">
+            <strong>{{ displayName() }}</strong>
+            <span>{{ roleDisplay() }}</span>
+          </div>
+          <button class="o-logout-btn" [disabled]="loggingOut()" (click)="logout()" title="Sign out">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Main ──────────────────────────────────── -->
+    <div class="o-main">
+      <header class="o-topbar">
+        <div class="o-topbar-left">
+          <button class="o-burger" (click)="toggleSidebar()">
+            <ion-icon name="menu-outline"></ion-icon>
+          </button>
+          <div class="o-topbar-titles">
+            <div class="o-page-title">{{ pageTitle }}</div>
+            @if (pageSubtitle) {
+              <div class="o-page-subtitle">{{ pageSubtitle }}</div>
+            }
+          </div>
+        </div>
+        <div class="o-topbar-right">
+          <!-- Theme toggle pill -->
+          <button
+            class="o-theme-toggle"
+            [class.is-dark]="isDark()"
+            (click)="toggleTheme()"
+            [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+          >
+            <span class="o-tt-track">
+              <!-- stars (dark side) -->
+              <span class="o-tt-star s1"></span>
+              <span class="o-tt-star s2"></span>
+              <span class="o-tt-star s3"></span>
+              <span class="o-tt-star s4"></span>
+              <!-- fixed-position icons in track -->
+              <ion-icon name="sunny" class="o-tt-sun"></ion-icon>
+              <ion-icon name="moon" class="o-tt-moon"></ion-icon>
+              <!-- sliding thumb -->
+              <span class="o-tt-thumb">
+                <ion-icon name="sunny" class="o-tt-icon-sun"></ion-icon>
+                <ion-icon name="moon" class="o-tt-icon-moon"></ion-icon>
+              </span>
+            </span>
+          </button>
+          <span class="o-scope-chip">{{ userScopeLine() }}</span>
+        </div>
+      </header>
+
+      <div class="o-body">
+        <ng-content></ng-content>
+      </div>
+
+      <!-- ── New-request toast ──────────────────────── -->
+      @if (toastRequest(); as req) {
+        <div class="o-toast" role="alert" aria-live="polite">
+          <button type="button" class="o-toast-body" (click)="goToRequests()">
+            <span class="o-toast-icon">
+              <ion-icon name="notifications-outline"></ion-icon>
+            </span>
+            <div class="o-toast-content">
+              <span class="o-toast-title">New request</span>
+              <span class="o-toast-detail">
+                Room {{ req.room?.number ?? '?' }}
+                @if (req.room?.floor != null) { · Floor {{ req.room?.floor }} }
+                @if (req.hotel?.name) { · {{ req.hotel?.name }} }
+              </span>
+              <span class="o-toast-type">{{ toastTypeLabel(req) }}</span>
+            </div>
+            @if (requestsUnreadCount() > 1) {
+              <span class="o-toast-count">+{{ requestsUnreadCount() }}</span>
+            }
+          </button>
+          <button type="button" class="o-toast-close" (click)="dismissToast()" aria-label="Dismiss">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+</ion-content>

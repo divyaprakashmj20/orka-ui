@@ -2,21 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
   IonInput,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonTitle,
-  IonToolbar
+  IonSpinner,
+  NavController
 } from '@ionic/angular/standalone';
 import { FirebaseError } from 'firebase/app';
 import { firstValueFrom } from 'rxjs';
@@ -25,33 +16,23 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
 
 @Component({
   selector: 'app-login-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonItem,
-    IonLabel,
     IonInput,
     IonButton,
-    IonNote
+    IonSpinner
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss'
 })
 export class LoginPage {
-  private readonly auth = inject(FirebaseAuthService);
-  private readonly api = inject(OrcaApiService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly auth   = inject(FirebaseAuthService);
+  private readonly api    = inject(OrcaApiService);
+  private readonly nav    = inject(NavController);
+  private readonly route  = inject(ActivatedRoute);
 
   protected form = {
     email: '',
@@ -60,6 +41,10 @@ export class LoginPage {
 
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+
+  protected go(path: string): void {
+    void this.nav.navigateRoot(path);
+  }
 
   constructor() {
     const reason = this.route.snapshot.queryParamMap.get('reason');
@@ -87,14 +72,16 @@ export class LoginPage {
       if (appUser.status !== 'ACTIVE') {
         await this.auth.signOutAndWaitForState();
         this.error.set(this.messageForStatus(appUser.status));
+        this.loading.set(false);
         return;
       }
 
       const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
-      await this.router.navigateByUrl(redirectTo);
+      void this.nav.navigateRoot(redirectTo);
+      // Do NOT reset loading here — the page is navigating away. Resetting
+      // briefly re-renders the form over the incoming page during transition.
     } catch (error) {
       this.error.set(this.toMessage(error));
-    } finally {
       this.loading.set(false);
     }
   }

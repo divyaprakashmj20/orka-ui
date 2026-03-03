@@ -1,29 +1,18 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
-  IonCard,
   IonCheckbox,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
   IonInput,
-  IonItem,
-  IonLabel,
   IonSelect,
-  IonSelectOption,
-  IonTitle,
-  IonToolbar
+  IonSelectOption
 } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { ACCESS_ROLES, AccessRole, AppUser, EMPLOYEE_ROLES, EmployeeRole, Hotel, HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { ShellComponent } from '../../core/shell/shell.component';
 
 type Draft = {
   name: string;
@@ -41,22 +30,11 @@ type Draft = {
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonTitle,
-    IonContent,
-    IonItem,
-    IonLabel,
+    ShellComponent,
     IonInput,
     IonSelect,
     IonSelectOption,
     IonCheckbox,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonButton
   ],
   templateUrl: './staff.page.html',

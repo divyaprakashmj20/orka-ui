@@ -1,0 +1,377 @@
+/* Shell host fills the full app viewport regardless of the routed page host's height.
+   position:absolute + inset:0 anchors to ion-app (position:relative by Ionic default)
+   so we never rely on the page host element having any size. */
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+ion-content { --background: var(--o-bg); }
+
+/* ── Theme toggle pill ────────────────────────────── */
+.o-theme-toggle {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.o-tt-track {
+  position: relative;
+  display: block;
+  width: 72px;
+  height: 34px;
+  border-radius: 999px;
+  overflow: hidden;
+  transition: background 0.45s ease;
+
+  /* Light mode — warm golden sky */
+  background: linear-gradient(120deg, #fbbf24 0%, #f97316 100%);
+  box-shadow: 0 0 0 2px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+
+  .is-dark & {
+    /* Dark mode — deep indigo night */
+    background: linear-gradient(120deg, #312e81 0%, #0f0a2a 100%);
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+}
+
+/* Star dots (hidden in light, visible in dark) */
+.o-tt-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 0;
+
+  .is-dark & { opacity: 1; }
+}
+.s1 { width: 3px; height: 3px; top:  6px; right: 18px; transition-delay: 0.05s; }
+.s2 { width: 2px; height: 2px; top: 14px; right: 24px; transition-delay: 0.12s; }
+.s3 { width: 2px; height: 2px; top:  9px; right: 30px; transition-delay: 0.18s; }
+.s4 { width: 3px; height: 3px; top: 20px; right: 14px; transition-delay: 0.08s; }
+
+/* Fixed sun icon (left side of track) */
+.o-tt-sun {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  transition: opacity 0.3s ease;
+  opacity: 0;              /* hidden: thumb covers it */
+
+  .is-dark & { opacity: 0.45; }
+}
+
+/* Fixed moon icon (right side of track) */
+.o-tt-moon {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  transition: opacity 0.3s ease;
+  opacity: 0.45;           /* faint in light mode */
+
+  .is-dark & { opacity: 0; }
+}
+
+/* Sliding thumb */
+.o-tt-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.38s ease,
+              box-shadow 0.38s ease;
+
+  /* Light: warm white thumb, glow */
+  background: #fffbeb;
+  box-shadow: 0 2px 8px rgba(251,191,36,0.6), 0 1px 3px rgba(0,0,0,0.2);
+
+  .is-dark & {
+    transform: translateX(38px);
+    background: #c7d2fe;
+    box-shadow: 0 2px 10px rgba(99,102,241,0.7), 0 1px 3px rgba(0,0,0,0.4);
+  }
+}
+
+/* Thumb icons */
+.o-tt-icon-sun,
+.o-tt-icon-moon {
+  position: absolute;
+  font-size: 15px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.o-tt-icon-sun {
+  color: #f59e0b;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+
+  .is-dark & {
+    opacity: 0;
+    transform: scale(0.5) rotate(-90deg);
+  }
+}
+
+.o-tt-icon-moon {
+  color: #6366f1;
+  opacity: 0;
+  transform: scale(0.5) rotate(90deg);
+
+  .is-dark & {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Hover: subtle lift + scale */
+.o-theme-toggle:hover .o-tt-track {
+  filter: brightness(1.08);
+}
+.o-theme-toggle:hover .o-tt-thumb {
+  filter: brightness(1.1);
+}
+.o-theme-toggle:active .o-tt-track {
+  filter: brightness(0.95);
+}
+.o-theme-toggle:active .o-tt-thumb {
+  transform: translateX(0) scale(0.92);
+  .is-dark & { transform: translateX(38px) scale(0.92); }
+}
+
+/* Sidebar error */
+.o-sidebar-error {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  background: var(--o-danger-dim);
+  color: var(--o-danger);
+  font-size: 0.75rem;
+}
+
+/* Logout button inside user card */
+.o-logout-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--o-border);
+  background: transparent;
+  color: var(--o-text-3);
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover {
+    background: var(--o-danger-dim);
+    color: var(--o-danger);
+    border-color: rgba(239,68,68,0.25);
+  }
+}
+
+/* Scope chip in topbar */
+.o-scope-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--o-surface);
+  border: 1px solid var(--o-border);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--o-text-2);
+}
+
+/* Unread count badge on nav items */
+.o-nav-unread {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--o-danger);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── New-request toast ───────────────────────────── */
+@keyframes toast-in {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.o-toast {
+  position: fixed;
+  /* mobile: full width, sits above safe area */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  display: flex;
+  align-items: stretch;
+  background: var(--o-surface);
+  border-top: 1px solid var(--o-border-md);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+  animation: toast-in 0.28s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  /* safe-area padding so it clears the home indicator on iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* desktop: card-style, bottom-right */
+  @media (min-width: 640px) {
+    left: auto;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    border-radius: var(--r-xl);
+    border: 1px solid var(--o-border-md);
+    padding-bottom: 0;
+  }
+}
+
+.o-toast-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 14px 16px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  /* tap feedback */
+  -webkit-tap-highlight-color: transparent;
+
+  &:active { background: rgba(255,255,255,0.04); }
+
+  @media (min-width: 640px) {
+    padding: 14px 12px 14px 16px;
+  }
+}
+
+.o-toast-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background: var(--o-accent-dim);
+  border: 1.5px solid var(--o-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--o-accent-lt);
+  flex-shrink: 0;
+
+  /* pulse ring */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--o-accent);
+    animation: toast-pulse 1.6s ease-out infinite;
+    opacity: 0;
+  }
+}
+
+@keyframes toast-pulse {
+  0%   { transform: scale(1);    opacity: 0.6; }
+  100% { transform: scale(1.7);  opacity: 0;   }
+}
+
+.o-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.o-toast-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--o-text);
+  letter-spacing: -0.01em;
+}
+
+.o-toast-detail {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--o-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.o-toast-type {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--o-accent-lt);
+}
+
+.o-toast-count {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--o-danger);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.o-toast-close {
+  flex-shrink: 0;
+  width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--o-border);
+  color: var(--o-text-3);
+  font-size: 1.1rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s, background 0.12s;
+
+  &:hover { color: var(--o-text); background: rgba(255,255,255,0.05); }
+  &:active { background: rgba(255,255,255,0.09); }
+
+  @media (min-width: 640px) {
+    border-left: none;
+    border-radius: 0 var(--r-xl) var(--r-xl) 0;
+  }
+}
+
+/* User card — keep it accessible */
+.o-user-card { cursor: default; }

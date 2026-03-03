@@ -2,21 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
   IonInput,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonTitle,
-  IonToolbar
+  IonSpinner,
+  NavController
 } from '@ionic/angular/standalone';
 import { FirebaseError } from 'firebase/app';
 import { firstValueFrom } from 'rxjs';
@@ -25,33 +16,23 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
 
 @Component({
   selector: 'app-register-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonItem,
-    IonLabel,
     IonInput,
     IonButton,
-    IonNote
+    IonSpinner
   ],
   templateUrl: './register.page.html',
   styleUrl: './register.page.scss'
 })
 export class RegisterPage {
-  private readonly auth = inject(FirebaseAuthService);
-  private readonly api = inject(OrcaApiService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly auth   = inject(FirebaseAuthService);
+  private readonly api    = inject(OrcaApiService);
+  private readonly nav    = inject(NavController);
+  private readonly route  = inject(ActivatedRoute);
 
   protected form = {
     name: '',
@@ -65,6 +46,10 @@ export class RegisterPage {
 
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+
+  protected go(path: string): void {
+    void this.nav.navigateRoot(path);
+  }
 
   protected async register(): Promise<void> {
     const name = this.form.name.trim();
@@ -107,10 +92,10 @@ export class RegisterPage {
         })
       );
       const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
-      await this.router.navigateByUrl(redirectTo);
+      void this.nav.navigateRoot(redirectTo);
+      // Do NOT reset loading — page is navigating away
     } catch (error) {
       // If Firebase auth succeeds but backend profile creation fails, delete the Firebase user
-      // so we do not leave behind an orphaned auth account.
       if (this.auth.currentUser()) {
         try {
           await this.auth.deleteCurrentUserAndWaitForState();
@@ -119,7 +104,6 @@ export class RegisterPage {
         }
       }
       this.error.set(this.toMessage(error));
-    } finally {
       this.loading.set(false);
     }
   }

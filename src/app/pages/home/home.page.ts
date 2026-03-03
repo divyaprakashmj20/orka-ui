@@ -1,23 +1,25 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { IonIcon, IonButton } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
 import {
-  IonButton,
-  IonButtons,
-  IonChip,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonTitle,
-  IonSegment,
-  IonSegmentButton,
-  IonToolbar
-} from '@ionic/angular/standalone';
+  bedOutline,
+  businessOutline,
+  chevronForwardOutline,
+  homeOutline,
+  peopleOutline,
+  personAddOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { ShellComponent } from '../../core/shell/shell.component';
 import { AppUser, AccessRole } from '../../core/models/orca.models';
 import { PushNotificationsService } from '../../core/notifications/push-notifications.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { OrkaSseService } from '../../core/services/orka-sse.service';
 
 type DashboardTab = 'overview' | 'operations' | 'admin';
 
@@ -35,17 +37,9 @@ type DashboardSection = {
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonChip,
     IonIcon,
-    IonTitle,
-    IonContent,
-    IonSegment,
-    IonSegmentButton
+    IonButton,
+    ShellComponent
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss'
@@ -63,7 +57,21 @@ export class HomePage implements OnInit {
   protected readonly userEmail = computed(() => this.auth.user()?.email ?? 'Signed in user');
   protected readonly appUser = signal<AppUser | null>(null);
   protected readonly activeTab = signal<DashboardTab>('overview');
-  protected readonly paletteHue = signal(20);
+  protected readonly requestsUnreadCount = toSignal(inject(OrkaSseService).unreadCount$, { initialValue: 0 });
+  protected readonly paletteHue  = signal(239);
+  protected readonly successHue  = signal(142);
+  protected readonly warningHue  = signal(38);
+  protected readonly dangerHue   = signal(0);
+  // Surface knobs
+  protected readonly neutralHue    = signal(235);
+  protected readonly darkBgL       = signal(4);
+  protected readonly darkSurfL     = signal(9);
+  protected readonly darkTextL     = signal(95);
+  protected readonly darkBorderA   = signal(7);
+  protected readonly lightBgL      = signal(97);
+  protected readonly lightSurfL    = signal(100);
+  protected readonly lightTextL    = signal(5);
+  protected readonly lightBorderA  = signal(7);
 
   protected readonly sections: DashboardSection[] = [
     {
@@ -186,45 +194,70 @@ export class HomePage implements OnInit {
     () => this.appUser()?.accessRole === 'SUPERADMIN'
   );
 
+  protected timeGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 5)  return 'Good night.';
+    if (hour < 12) return 'Good morning.';
+    if (hour < 17) return 'Good afternoon.';
+    if (hour < 21) return 'Good evening.';
+    return 'Good night.';
+  }
+
   protected readonly paletteReadout = computed(() => {
-    const hue = this.paletteHue();
+    const a = this.paletteHue();
+    const s = this.successHue();
+    const w = this.warningHue();
+    const d = this.dangerHue();
     return [
-      { label: '--orka-hue', value: `${hue}`, swatch: `hsl(${hue} 61% 46%)` },
-      {
-        label: '--orka-accent',
-        value: this.hslToHex(hue, 61, 46),
-        swatch: `hsl(${hue} 61% 46%)`
-      },
-      {
-        label: '--orka-accent-deep',
-        value: this.hslToHex(hue, 66, 34),
-        swatch: `hsl(${hue} 66% 34%)`
-      },
-      {
-        label: '--orka-secondary',
-        value: this.hslToHex((hue + 142) % 360, 39, 32),
-        swatch: `hsl(${(hue + 142) % 360} 39% 32%)`
-      },
-      {
-        label: '--orka-bg-start',
-        value: this.hslToHex(30, 42, 91),
-        swatch: 'hsl(30 42% 91%)'
-      },
-      {
-        label: '--orka-bg-end',
-        value: this.hslToHex(42, 53, 98),
-        swatch: 'hsl(42 53% 98%)'
-      }
+      { label: '--o-accent',       swatch: `hsl(${a} 84% 67%)`,        value: `hsl(${a} 84% 67%)` },
+      { label: '--o-accent-lt',    swatch: `hsl(${a} 87% 75%)`,        value: `hsl(${a} 87% 75%)` },
+      { label: '--o-success',      swatch: `hsl(${s} 69% 45%)`,        value: `hsl(${s} 69% 45%)` },
+      { label: '--o-success-dim',  swatch: `hsl(${s} 69% 45% / 0.5)`, value: `hsl(${s} 69% 45%/.12)` },
+      { label: '--o-warning',      swatch: `hsl(${w} 93% 50%)`,        value: `hsl(${w} 93% 50%)` },
+      { label: '--o-warning-dim',  swatch: `hsl(${w} 93% 50% / 0.5)`, value: `hsl(${w} 93% 50%/.12)` },
+      { label: '--o-danger',       swatch: `hsl(${d} 84% 60%)`,        value: `hsl(${d} 84% 60%)` },
+      { label: '--o-danger-dim',   swatch: `hsl(${d} 84% 60% / 0.5)`, value: `hsl(${d} 84% 60%/.12)` },
     ];
   });
 
   constructor() {
+    addIcons({ homeOutline, sparklesOutline, bedOutline, peopleOutline, personAddOutline, businessOutline, chevronForwardOutline });
     effect(() => {
-      this.document.documentElement.style.setProperty('--orka-hue', String(this.paletteHue()));
+      const el = this.document.documentElement;
+      el.style.setProperty('--orka-hue',          String(this.paletteHue()));
+      el.style.setProperty('--orka-success-hue',   String(this.successHue()));
+      el.style.setProperty('--orka-warning-hue',   String(this.warningHue()));
+      el.style.setProperty('--orka-danger-hue',    String(this.dangerHue()));
+      el.style.setProperty('--orka-neutral-hue',   String(this.neutralHue()));
+      el.style.setProperty('--orka-d-bg-l',        String(this.darkBgL()));
+      el.style.setProperty('--orka-d-surf-l',      String(this.darkSurfL()));
+      el.style.setProperty('--orka-d-text-l',      String(this.darkTextL()));
+      el.style.setProperty('--orka-d-border-a',    String(this.darkBorderA()));
+      el.style.setProperty('--orka-l-bg-l',        String(this.lightBgL()));
+      el.style.setProperty('--orka-l-surf-l',      String(this.lightSurfL()));
+      el.style.setProperty('--orka-l-text-l',      String(this.lightTextL()));
+      el.style.setProperty('--orka-l-border-a',    String(this.lightBorderA()));
     });
   }
 
   ngOnInit(): void {
+    const load = (key: string, fallback: number): number => {
+      const v = localStorage.getItem(key);
+      return v !== null && Number.isFinite(+v) ? +v : fallback;
+    };
+    this.paletteHue.set(load('orka-hue-accent',    239));
+    this.successHue.set(load('orka-hue-success',   142));
+    this.warningHue.set(load('orka-hue-warning',    38));
+    this.dangerHue.set( load('orka-hue-danger',      0));
+    this.neutralHue.set(  load('orka-neutral-hue',  235));
+    this.darkBgL.set(     load('orka-d-bg-l',         4));
+    this.darkSurfL.set(   load('orka-d-surf-l',       9));
+    this.darkTextL.set(   load('orka-d-text-l',      95));
+    this.darkBorderA.set( load('orka-d-border-a',     7));
+    this.lightBgL.set(    load('orka-l-bg-l',        97));
+    this.lightSurfL.set(  load('orka-l-surf-l',     100));
+    this.lightTextL.set(  load('orka-l-text-l',       5));
+    this.lightBorderA.set(load('orka-l-border-a',     7));
     void this.loadAppUser();
   }
 
@@ -234,12 +267,52 @@ export class HomePage implements OnInit {
     }
   }
 
-  protected updatePaletteHue(value: string | number | null | undefined): void {
-    const numeric = Number(value);
-    if (!Number.isFinite(numeric)) {
-      return;
-    }
-    this.paletteHue.set(Math.max(0, Math.min(360, Math.round(numeric))));
+  protected updateHue(color: 'accent' | 'success' | 'warning' | 'danger', raw: string | number | null | undefined): void {
+    const n = Math.max(0, Math.min(360, Math.round(Number(raw))));
+    if (!Number.isFinite(n)) return;
+    const keys: Record<string, [() => void, string]> = {
+      accent:  [() => this.paletteHue.set(n), 'orka-hue-accent'],
+      success: [() => this.successHue.set(n), 'orka-hue-success'],
+      warning: [() => this.warningHue.set(n), 'orka-hue-warning'],
+      danger:  [() => this.dangerHue.set(n),  'orka-hue-danger'],
+    };
+    const [setter, lsKey] = keys[color];
+    setter();
+    localStorage.setItem(lsKey, String(n));
+  }
+
+  protected updateSurface(key: string, raw: string | number | null | undefined, min: number, max: number): void {
+    const n = Math.max(min, Math.min(max, Math.round(Number(raw))));
+    if (!Number.isFinite(n)) return;
+    const map: Record<string, WritableSignal<number>> = {
+      'orka-neutral-hue': this.neutralHue,
+      'orka-d-bg-l':      this.darkBgL,
+      'orka-d-surf-l':    this.darkSurfL,
+      'orka-d-text-l':    this.darkTextL,
+      'orka-d-border-a':  this.darkBorderA,
+      'orka-l-bg-l':      this.lightBgL,
+      'orka-l-surf-l':    this.lightSurfL,
+      'orka-l-text-l':    this.lightTextL,
+      'orka-l-border-a':  this.lightBorderA,
+    };
+    map[key]?.set(n);
+    localStorage.setItem(key, String(n));
+  }
+
+  protected resetPalette(): void {
+    this.paletteHue.set(239);  this.successHue.set(142);
+    this.warningHue.set(38);   this.dangerHue.set(0);
+    this.neutralHue.set(235);
+    this.darkBgL.set(4);    this.darkSurfL.set(9);
+    this.darkTextL.set(95); this.darkBorderA.set(7);
+    this.lightBgL.set(97);  this.lightSurfL.set(100);
+    this.lightTextL.set(5); this.lightBorderA.set(7);
+    [
+      'orka-hue-accent','orka-hue-success','orka-hue-warning','orka-hue-danger',
+      'orka-neutral-hue',
+      'orka-d-bg-l','orka-d-surf-l','orka-d-text-l','orka-d-border-a',
+      'orka-l-bg-l','orka-l-surf-l','orka-l-text-l','orka-l-border-a',
+    ].forEach(k => localStorage.removeItem(k));
   }
 
   protected async logout(): Promise<void> {
@@ -321,5 +394,9 @@ export class HomePage implements OnInit {
         .toUpperCase();
 
     return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
+  }
+
+  protected navigate(path: string): void {
+    void this.router.navigateByUrl(path, { replaceUrl: true });
   }
 }

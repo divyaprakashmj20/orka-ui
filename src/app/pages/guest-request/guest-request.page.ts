@@ -1,19 +1,14 @@
+import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
-  IonBadge,
   IonButton,
-  IonCard,
-  IonCardContent,
   IonContent,
-  IonHeader,
   IonIcon,
   IonSpinner,
-  IonTextarea,
-  IonTitle,
-  IonToolbar
+  IonTextarea
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -23,6 +18,8 @@ import {
   checkmarkCircleOutline,
   helpCircleOutline,
   locationOutline,
+  moonOutline,
+  sunnyOutline,
   timeOutline
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
@@ -31,30 +28,27 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
 
 @Component({
   selector: 'app-guest-request-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonBadge,
-    IonCard,
-    IonCardContent,
     IonButton,
-    IonTextarea,
+    IonContent,
+    IonIcon,
     IonSpinner,
-    IonIcon
+    IonTextarea
   ],
   templateUrl: './guest-request.page.html',
   styleUrl: './guest-request.page.scss'
 })
 export class GuestRequestPage implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly api = inject(OrcaApiService);
+  private readonly route    = inject(ActivatedRoute);
+  private readonly api      = inject(OrcaApiService);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly loading = signal(true);
+  protected readonly isDark  = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly success = signal(false);
@@ -69,14 +63,24 @@ export class GuestRequestPage implements OnInit {
 
   constructor() {
     addIcons({
-      bedOutline,
-      buildOutline,
-      cafeOutline,
-      helpCircleOutline,
-      checkmarkCircleOutline,
-      locationOutline,
-      timeOutline
+      bedOutline, buildOutline, cafeOutline, helpCircleOutline,
+      checkmarkCircleOutline, locationOutline, timeOutline,
+      moonOutline, sunnyOutline
     });
+    const saved = localStorage.getItem('orka-theme');
+    const dark = saved !== 'light';
+    this.isDark.set(dark);
+    // Sync with whatever the shell already set
+    this.document.documentElement.getAttribute('data-theme') === 'light'
+      ? this.isDark.set(false)
+      : this.isDark.set(true);
+  }
+
+  protected toggleTheme(): void {
+    const next = !this.isDark();
+    this.isDark.set(next);
+    this.document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light');
+    localStorage.setItem('orka-theme', next ? 'dark' : 'light');
   }
 
   async ngOnInit(): Promise<void> {

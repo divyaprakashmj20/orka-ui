@@ -1,39 +1,29 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
-    </ion-buttons>
-    <ion-title>Staff Management</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <div class="console-page">
-    <section class="console-hero">
+﻿<app-shell pageTitle="Staff">
+    <div class="o-page-head">
       <div>
-        <p class="console-eyebrow">Team Operations</p>
+        <p class="o-page-eyebrow">Team Operations</p>
         <h1>Staff management</h1>
         <p>
           Manage approved team members through a scoped roster. Filter by location, role, and status,
           then edit people without navigating an org tree.
         </p>
       </div>
-      <div class="console-meta">
-        <span class="console-pill">{{ managedUsers().length }} managed user(s)</span>
-        <span class="console-pill">{{ directorySummary() }}</span>
+      <div class="o-page-head-meta">
+        <span class="o-badge">{{ managedUsers().length }} managed user(s)</span>
+        <span class="o-badge">{{ directorySummary() }}</span>
       </div>
-    </section>
+    </div>
 
-    <ion-card class="console-card">
-      <ion-card-header>
-        <ion-card-title>Directory Filters</ion-card-title>
-        <p class="section-copy">Reduce the roster to the exact scope you want to work on.</p>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="form-grid roster-filters">
+    <div class="o-card">
+      <div class="o-card-head">
+        <h3>Directory Filters</h3>
+        <p class="o-card-copy">Reduce the roster to the exact scope you want to work on.</p>
+      </div>
+      <div class="o-card-body">
+        <div class="o-form-grid roster-filters">
           @if (showGroupFilter()) {
-            <ion-item class="field-item">
-              <ion-label position="stacked">Hotel Group</ion-label>
+            <div class="o-field">
+              <label>Hotel Group</label>
               <ion-select
                 [value]="selectedGroupId()"
                 (ionChange)="setGroupFilter($event.detail.value ?? null)"
@@ -44,12 +34,12 @@
                   <ion-select-option [value]="group.id ?? null">{{ group.name }}</ion-select-option>
                 }
               </ion-select>
-            </ion-item>
+            </div>
           }
 
           @if (showHotelFilter()) {
-            <ion-item class="field-item">
-              <ion-label position="stacked">Hotel</ion-label>
+            <div class="o-field">
+              <label>Hotel</label>
               <ion-select
                 [value]="selectedHotelId()"
                 (ionChange)="setHotelFilter($event.detail.value ?? null)"
@@ -60,11 +50,11 @@
                   <ion-select-option [value]="hotel.id ?? null">{{ hotel.name }}</ion-select-option>
                 }
               </ion-select>
-            </ion-item>
+            </div>
           }
 
-          <ion-item class="field-item">
-            <ion-label position="stacked">Role</ion-label>
+          <div class="o-field">
+            <label>Role</label>
             <ion-select
               [value]="roleFilter()"
               (ionChange)="setRoleFilter($event.detail.value)"
@@ -78,10 +68,10 @@
               <ion-select-option value="HOTEL_ADMIN">Hotel admins</ion-select-option>
               <ion-select-option value="STAFF">Staff</ion-select-option>
             </ion-select>
-          </ion-item>
+          </div>
 
-          <ion-item class="field-item">
-            <ion-label position="stacked">Status</ion-label>
+          <div class="o-field">
+            <label>Status</label>
             <ion-select
               [value]="statusFilter()"
               (ionChange)="setStatusFilter($event.detail.value)"
@@ -91,36 +81,36 @@
               <ion-select-option value="ACTIVE">Active</ion-select-option>
               <ion-select-option value="DISABLED">Disabled</ion-select-option>
             </ion-select>
-          </ion-item>
+          </div>
         </div>
 
-        <div class="form-actions">
+        <div class="o-form-actions">
           <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
           <ion-button type="button" fill="outline" (click)="clearFilters()">Clear filters</ion-button>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+    </div>
 
     @if (error()) {
-      <ion-card class="console-card">
-        <ion-card-content>
-          <p class="error-text">{{ error() }}</p>
-        </ion-card-content>
-      </ion-card>
+      <div class="o-card">
+        <div class="o-card-body">
+          <p class="o-error">{{ error() }}</p>
+        </div>
+      </div>
     }
 
     @if (loading()) {
-      <ion-card class="console-card">
-        <ion-card-content>
-          <p class="empty-text">Loading...</p>
-        </ion-card-content>
-      </ion-card>
+      <div class="o-card">
+        <div class="o-card-body">
+          <p class="o-empty">Loading...</p>
+        </div>
+      </div>
     } @else {
       @if (showPlatformSection()) {
         <section class="roster-section">
           <div class="section-intro">
             <div>
-              <p class="console-eyebrow">Platform</p>
+              <p class="o-page-eyebrow">Platform</p>
               <h2>Superadmins</h2>
             </div>
             <p class="section-count">{{ rosterSummary(platformUsers(), 'Superadmins') }}</p>
@@ -133,7 +123,7 @@
                 [ngTemplateOutletContext]="{ $implicit: user }"
               />
             } @empty {
-              <p class="empty-text">No superadmins match the current filters.</p>
+              <p class="o-empty">No superadmins match the current filters.</p>
             }
           </div>
         </section>
@@ -142,7 +132,7 @@
       <section class="roster-section">
         <div class="section-intro">
           <div>
-            <p class="console-eyebrow">Leadership</p>
+            <p class="o-page-eyebrow">Leadership</p>
             <h2>Group Admins</h2>
           </div>
           <p class="section-count">{{ rosterSummary(groupAdmins(), 'Group admins') }}</p>
@@ -155,7 +145,7 @@
               [ngTemplateOutletContext]="{ $implicit: user }"
             />
           } @empty {
-            <p class="empty-text">No group admins match the current filters.</p>
+            <p class="o-empty">No group admins match the current filters.</p>
           }
         </div>
       </section>
@@ -163,7 +153,7 @@
       <section class="roster-section">
         <div class="section-intro">
           <div>
-            <p class="console-eyebrow">Leadership</p>
+            <p class="o-page-eyebrow">Leadership</p>
             <h2>Hotel Admins</h2>
           </div>
           <p class="section-count">{{ rosterSummary(hotelAdmins(), 'Hotel admins') }}</p>
@@ -176,7 +166,7 @@
               [ngTemplateOutletContext]="{ $implicit: user }"
             />
           } @empty {
-            <p class="empty-text">No hotel admins match the current filters.</p>
+            <p class="o-empty">No hotel admins match the current filters.</p>
           }
         </div>
       </section>
@@ -184,7 +174,7 @@
       <section class="roster-section">
         <div class="section-intro">
           <div>
-            <p class="console-eyebrow">Operations</p>
+            <p class="o-page-eyebrow">Operations</p>
             <h2>Staff</h2>
           </div>
           <p class="section-count">{{ rosterSummary(staffUsers(), 'Staff') }}</p>
@@ -197,61 +187,63 @@
               [ngTemplateOutletContext]="{ $implicit: user }"
             />
           } @empty {
-            <p class="empty-text">No staff match the current filters.</p>
+            <p class="o-empty">No staff match the current filters.</p>
           }
         </div>
       </section>
     }
-  </div>
-</ion-content>
+</app-shell>
 
 <ng-template #personCard let-user>
-  <article class="console-record roster-card">
+  <article class="o-record roster-card">
     <div class="record-heading">
-      <div>
-        <h3>{{ user.name }}</h3>
-        <p>{{ user.email }}</p>
+      <div class="o-record-head">
+        <div class="o-record-tag" aria-hidden="true">{{ user.name?.charAt(0)?.toUpperCase() }}</div>
+        <div>
+          <h3>{{ user.name }}</h3>
+          <p>{{ user.email }}</p>
+        </div>
       </div>
       <div class="record-metadata record-metadata-tight">
-        <span class="console-pill">{{ userRoleLabel(user) }}</span>
-        <span class="console-pill">{{ (user.active ?? true) ? 'Active' : 'Disabled' }}</span>
+        <span class="o-badge">{{ userRoleLabel(user) }}</span>
+        <span class="o-badge">{{ (user.active ?? true) ? 'Active' : 'Disabled' }}</span>
       </div>
     </div>
 
     <div class="record-metadata record-metadata-compact">
       @if (user.phone) {
-        <span class="console-pill">Phone: {{ user.phone }}</span>
+        <span class="o-badge">Phone: {{ user.phone }}</span>
       }
-      <span class="console-pill">Group: {{ user.assignedHotelGroup?.name || '-' }}</span>
-      <span class="console-pill">Hotel: {{ user.assignedHotel?.name || '-' }}</span>
+      <span class="o-badge">Group: {{ user.assignedHotelGroup?.name || '-' }}</span>
+      <span class="o-badge">Hotel: {{ user.assignedHotel?.name || '-' }}</span>
     </div>
 
     <div class="inline-actions inline-actions-compact">
-      <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="toggleEditor(user.id)">
+      <ion-button type="button" fill="outline"  size="small" (click)="toggleEditor(user.id)">
         {{ expandedUserId() === user.id ? 'Close editor' : 'Edit member' }}
       </ion-button>
     </div>
 
     @if (user.id != null && expandedUserId() === user.id) {
       <div class="staff-grid">
-        <ion-item class="field-item">
-          <ion-label position="stacked">Name</ion-label>
+        <div class="o-field">
+          <label>Name</label>
           <ion-input
             [(ngModel)]="drafts[user.id].name"
             [ngModelOptions]="{ standalone: true }"
           />
-        </ion-item>
+        </div>
 
-        <ion-item class="field-item">
-          <ion-label position="stacked">Phone</ion-label>
+        <div class="o-field">
+          <label>Phone</label>
           <ion-input
             [(ngModel)]="drafts[user.id].phone"
             [ngModelOptions]="{ standalone: true }"
           />
-        </ion-item>
+        </div>
 
-        <ion-item class="field-item">
-          <ion-label position="stacked">Access Role</ion-label>
+        <div class="o-field">
+          <label>Access Role</label>
           <ion-select
             [(ngModel)]="drafts[user.id].accessRole"
             [ngModelOptions]="{ standalone: true }"
@@ -259,14 +251,14 @@
             interface="alert"
           >
             @for (role of roleOptionsForUser(); track role) {
-              <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
+              <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
             }
           </ion-select>
-        </ion-item>
+        </div>
 
         @if (needsGroupAssignment(drafts[user.id].accessRole)) {
-          <ion-item class="field-item">
-            <ion-label position="stacked">Assigned Hotel Group</ion-label>
+          <div class="o-field">
+            <label>Assigned Hotel Group</label>
             <ion-select
               [(ngModel)]="drafts[user.id].assignedHotelGroupId"
               [ngModelOptions]="{ standalone: true }"
@@ -279,12 +271,12 @@
                 </ion-select-option>
               }
             </ion-select>
-          </ion-item>
+          </div>
         }
 
         @if (needsHotelAssignment(drafts[user.id].accessRole)) {
-          <ion-item class="field-item">
-            <ion-label position="stacked">Assigned Hotel</ion-label>
+          <div class="o-field">
+            <label>Assigned Hotel</label>
             <ion-select
               [(ngModel)]="drafts[user.id].assignedHotelId"
               [ngModelOptions]="{ standalone: true }"
@@ -297,12 +289,12 @@
                 </ion-select-option>
               }
             </ion-select>
-          </ion-item>
+          </div>
         }
 
         @if (needsEmployeeRole(drafts[user.id].accessRole)) {
-          <ion-item class="field-item">
-            <ion-label position="stacked">Operational Role</ion-label>
+          <div class="o-field">
+            <label>Operational Role</label>
             <ion-select
               [(ngModel)]="drafts[user.id].employeeRole"
               [ngModelOptions]="{ standalone: true }"
@@ -310,23 +302,23 @@
             >
               <ion-select-option [value]="null">Select role</ion-select-option>
               @for (role of employeeRoles; track role) {
-                <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
+                <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
               }
             </ion-select>
-          </ion-item>
+          </div>
         }
 
-        <ion-item class="checkbox-item">
+        <div class="o-field">
           <ion-checkbox
             slot="start"
             type="checkbox"
             [(ngModel)]="drafts[user.id].active"
             [ngModelOptions]="{ standalone: true }"
           />
-          <ion-label>Access Active</ion-label>
-        </ion-item>
+          <label>Access Active</label>
+        </div>
 
-        <div class="form-actions span-2">
+        <div class="o-form-actions">
           <ion-button type="button" [disabled]="isBusy(user.id)" (click)="save(user)">
             Save Changes
           </ion-button>

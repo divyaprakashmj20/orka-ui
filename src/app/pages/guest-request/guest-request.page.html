@@ -1,10 +1,15 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Room Service</ion-title>
-  </ion-toolbar>
-</ion-header>
+﻿<ion-content [scrollY]="true">
+  <div class="guest-page">
 
-<ion-content [fullscreen]="true" class="guest-page">
+  <div class="guest-topbar">
+    <div class="guest-topbar-left">
+      <span class="guest-brand">Orka</span>
+      <span class="guest-brand-sub">Guest Service</span>
+    </div>
+    <button class="guest-theme-btn" (click)="toggleTheme()" [title]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+      <ion-icon [name]="isDark() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+    </button>
+  </div>
   <div class="guest-shell">
     @if (success()) {
       <div class="guest-success-overlay" (click)="resetSuccess()">
@@ -36,7 +41,6 @@
         <p class="guest-subtitle">
           {{ roomContext.hotelGroup?.name || 'Property Support' }}
         </p>
-
         <div class="guest-meta">
           <div class="guest-meta-card">
             <ion-icon name="location-outline"></ion-icon>
@@ -57,13 +61,12 @@
         </div>
       </section>
 
-      <ion-card class="guest-form-card">
-        <ion-card-content>
+      <div class="guest-form-card">
+        <div class="guest-card-body">
           <div class="section-heading">
             <p class="guest-kicker">Step 1</p>
             <h2>What do you need?</h2>
           </div>
-
           <div class="request-type-grid">
             @for (type of roomContext.availableRequestTypes; track type) {
               <button
@@ -77,12 +80,10 @@
               </button>
             }
           </div>
-
           <div class="section-heading notes-heading">
             <p class="guest-kicker">Step 2</p>
             <h2>Add a note</h2>
           </div>
-
           <ion-textarea
             fill="outline"
             label="Details for the staff"
@@ -91,27 +92,22 @@
             autoGrow="true"
             [(ngModel)]="message"
           ></ion-textarea>
-
-          <p class="guest-note">
-            Short, clear notes help the hotel team respond faster.
-          </p>
-
+          <p class="guest-note">Short, clear notes help the hotel team respond faster.</p>
           <ion-button expand="block" [disabled]="!canSubmit()" (click)="submit()">
             @if (saving()) {
               <ion-spinner slot="start" name="crescent"></ion-spinner>
             }
             Submit request
           </ion-button>
-        </ion-card-content>
-      </ion-card>
+        </div>
+      </div>
 
-      <ion-card class="guest-history-card">
-        <ion-card-content>
+      <div class="guest-history-card">
+        <div class="guest-card-body">
           <div class="section-heading">
             <p class="guest-kicker">Your requests</p>
             <h2>Current session history</h2>
           </div>
-
           @if (requests().length) {
             <div class="guest-history-list">
               @for (request of requests(); track request.id ?? $index) {
@@ -124,9 +120,12 @@
                         {{ request.createdAt ? (request.createdAt | date: 'medium') : 'Just now' }}
                       </p>
                     </div>
-                    <ion-badge [color]="requestStatusTone(request.status)">
-                      {{ requestStatusLabel(request.status) }}
-                    </ion-badge>
+                    <span class="o-badge"
+                      [class.new]="request.status === 'NEW'"
+                      [class.accepted]="request.status === 'ACCEPTED'"
+                      [class.completed]="request.status === 'COMPLETED'"
+                      [class.cancelled]="request.status === 'CANCELLED'"
+                    >{{ requestStatusLabel(request.status) }}</span>
                   </div>
                   @if (request.message) {
                     <p class="guest-history-message">{{ request.message }}</p>
@@ -135,12 +134,12 @@
               }
             </div>
           } @else {
-            <p class="guest-note">
-              Requests submitted from this device for this room will appear here.
-            </p>
+            <p class="guest-note">Requests submitted from this device for this room will appear here.</p>
           }
-        </ion-card-content>
-      </ion-card>
+        </div>
+      </div>
     }
+  </div>
+
   </div>
 </ion-content>
