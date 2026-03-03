@@ -1,20 +1,20 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
 import {
-  IonButton,
-  IonButtons,
-  IonChip,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonTitle,
-  IonSegment,
-  IonSegmentButton,
-  IonToolbar
-} from '@ionic/angular/standalone';
+  bedOutline,
+  businessOutline,
+  chevronForwardOutline,
+  homeOutline,
+  peopleOutline,
+  personAddOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
+import { ShellComponent } from '../../core/shell/shell.component';
 import { AppUser, AccessRole } from '../../core/models/orca.models';
 import { PushNotificationsService } from '../../core/notifications/push-notifications.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
@@ -35,17 +35,8 @@ type DashboardSection = {
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonChip,
     IonIcon,
-    IonTitle,
-    IonContent,
-    IonSegment,
-    IonSegmentButton
+    ShellComponent
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss'
@@ -219,6 +210,7 @@ export class HomePage implements OnInit {
   });
 
   constructor() {
+    addIcons({ homeOutline, sparklesOutline, bedOutline, peopleOutline, personAddOutline, businessOutline, chevronForwardOutline });
     effect(() => {
       this.document.documentElement.style.setProperty('--orka-hue', String(this.paletteHue()));
     });
@@ -321,5 +313,9 @@ export class HomePage implements OnInit {
         .toUpperCase();
 
     return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
+  }
+
+  protected navigate(path: string): void {
+    void this.router.navigateByUrl(path, { replaceUrl: true });
   }
 }

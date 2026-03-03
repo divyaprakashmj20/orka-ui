@@ -1,201 +1,258 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
-    </ion-buttons>
-    <ion-title>Requests</ion-title>
-  </ion-toolbar>
-</ion-header>
+﻿<app-shell pageTitle="Requests">
 
-<ion-content [fullscreen]="true">
-  <div class="console-page">
-    <section class="console-hero">
-      <div>
-        <p class="console-eyebrow">Operations Board</p>
-        <h1>Requests</h1>
-        <p>
-          Work through active guest needs without the old CRUD form. Filter the queue, open a request,
-          and move it forward with one tap.
-        </p>
+  <!-- Sticky header -->
+  <div class="rq-header">
+    <div class="rq-header-counts">
+      <div class="rq-count-chip rq-count-new">
+        <span class="rq-count-dot"></span>
+        <strong>{{ requestCounts().NEW }}</strong>
+        <span>new</span>
       </div>
-      <div class="console-meta">
-        <span class="console-pill">{{ requestCounts().ALL }} total</span>
-        <span class="console-pill">{{ requestCounts().NEW }} new</span>
-        <span class="console-pill">{{ requestCounts().ACCEPTED }} active</span>
+      <div class="rq-count-chip rq-count-active">
+        <strong>{{ requestCounts().ACCEPTED }}</strong>
+        <span>active</span>
       </div>
-    </section>
+      <div class="rq-count-chip rq-count-total">
+        <strong>{{ requestCounts().ALL }}</strong>
+        <span>total</span>
+      </div>
+    </div>
+    <ion-button fill="clear" size="small" class="rq-refresh-btn" (click)="refreshAll()">
+      <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+    </ion-button>
+  </div>
 
-    <ion-card class="console-card">
-      <ion-card-header>
-        <ion-card-title>Queue</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="request-filter-grid" role="tablist" aria-label="Request filters">
-          @for (filter of boardFilters; track filter) {
-            <button
-              type="button"
-              class="request-filter-tile"
-              [class.is-active]="activeFilter() === filter"
-              (click)="setFilter(filter)"
-            >
-              <span>{{ filterLabel(filter) }}</span>
-              <strong>{{ requestCounts()[filter] }}</strong>
+  <!-- Tab bar -->
+  <div class="rq-tabs" role="tablist">
+    @for (filter of boardFilters; track filter) {
+      <button
+        type="button"
+        class="rq-tab"
+        [class.is-active]="activeFilter() === filter"
+        (click)="setFilter(filter)"
+        role="tab"
+      >
+        {{ filterLabel(filter) }}
+        @if (requestCounts()[filter] > 0) {
+          <span class="rq-tab-badge">{{ requestCounts()[filter] }}</span>
+        }
+      </button>
+    }
+    <div class="rq-tab-indicator"></div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="rq-error-bar">
+      <ion-icon name="warning-outline"></ion-icon>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Card list -->
+  <div class="rq-list">
+
+    @if (loading()) {
+      @for (n of [1, 2, 3, 4]; track n) {
+        <div class="rq-skeleton"></div>
+      }
+    } @else {
+
+      @for (item of filteredItems(); track item.id ?? $index) {
+        <div
+          class="rq-card"
+          [class.rq-card-new]="item.status === 'NEW'"
+          [class.rq-card-accepted]="item.status === 'ACCEPTED'"
+          [class.rq-card-completed]="item.status === 'COMPLETED'"
+          [class.rq-card-cancelled]="item.status === 'CANCELLED'"
+        >
+          <!-- Card body — tap to open detail -->
+          <button type="button" class="rq-card-body" (click)="openRequest(item)">
+
+            <!-- Left: room number hero -->
+            <div class="rq-room-hero">
+              <div class="rq-room-ring">
+                <div class="rq-room-num">{{ item.room?.number || '?' }}</div>
+                @if (item.room?.floor != null) {
+                  <div class="rq-room-floor">Floor {{ item.room?.floor }}</div>
+                }
+              </div>
+            </div>
+
+            <!-- Middle: info -->
+            <div class="rq-card-info">
+              <div class="rq-card-info-top">
+                <span class="rq-type-chip">{{ typeLabel(item) }}</span>
+                <span class="rq-hotel-name">{{ item.hotel?.name || 'Hotel' }}</span>
+              </div>
+              @if (item.message) {
+                <p class="rq-guest-note">"{{ item.message }}"</p>
+              }
+              <div class="rq-card-meta">
+                <span class="rq-assignee-tag">
+                  <ion-icon name="person-outline"></ion-icon>
+                  {{ assigneeName(item) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: time + status -->
+            <div class="rq-card-right">
+              <span class="rq-time" [class.rq-time-urgent]="isUrgent(item)">
+                {{ elapsedMetricValue(item) }}
+              </span>
+              <div class="rq-status-dot" [class]="'dot-' + (item.status ?? 'NEW').toLowerCase()"></div>
+            </div>
+
+          </button>
+
+          <!-- Card action strip — primary action always visible -->
+          @if (canAccept(item) || canComplete(item)) {
+            <div class="rq-card-action-strip">
+              @if (canAccept(item)) {
+                <button
+                  type="button"
+                  class="rq-action-btn rq-action-accept"
+                  (click)="accept(item)"
+                  [disabled]="acting()"
+                >
+                  <ion-icon name="checkmark-outline"></ion-icon>
+                  Accept — Take this request
+                </button>
+              }
+              @if (canComplete(item)) {
+                <button
+                  type="button"
+                  class="rq-action-btn rq-action-complete"
+                  (click)="complete(item)"
+                  [disabled]="acting()"
+                >
+                  <ion-icon name="checkmark-done-outline"></ion-icon>
+                  Mark Complete
+                </button>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      @if (filteredItems().length === 0) {
+        <div class="rq-empty">
+          <div class="rq-empty-icon">
+            @if (activeFilter() === 'NEW') { ✓ }
+            @else { — }
+          </div>
+          <p class="rq-empty-title">
+            @if (activeFilter() === 'NEW') { All clear — no new requests }
+            @else if (activeFilter() === 'ACCEPTED') { Nothing in progress }
+            @else if (activeFilter() === 'COMPLETED') { No completed requests yet }
+            @else if (activeFilter() === 'CANCELLED') { No cancelled requests }
+            @else { No requests found }
+          </p>
+          <button type="button" class="rq-empty-refresh" (click)="refreshAll()">
+            Refresh
+          </button>
+        </div>
+      }
+
+    }
+  </div>
+
+  <!-- Detail bottom sheet -->
+  @if (selectedRequest(); as item) {
+    <div class="rq-sheet-backdrop" (click)="closeRequest()">
+      <div class="rq-sheet" (click)="$event.stopPropagation()">
+
+        <div class="rq-sheet-bar"></div>
+
+        <!-- Sheet header -->
+        <div class="rq-sheet-hero">
+          <div class="rq-sheet-room">
+            <div class="rq-sheet-room-num">{{ item.room?.number || '?' }}</div>
+            @if (item.room?.floor != null) {
+              <div class="rq-sheet-room-floor">Floor {{ item.room?.floor }}</div>
+            }
+          </div>
+          <div class="rq-sheet-title">
+            <h3>{{ typeLabel(item) }}</h3>
+            <p>{{ item.hotel?.name || 'Hotel' }}</p>
+            <div class="rq-sheet-chips">
+              <span class="rq-status-pill" [ngClass]="statusClass(item)">{{ statusLabel(item) }}</span>
+            </div>
+          </div>
+          <button type="button" class="rq-sheet-close" (click)="closeRequest()">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Guest note -->
+        @if (item.message) {
+          <div class="rq-sheet-note">
+            <span>Guest note</span>
+            <p>"{{ item.message }}"</p>
+          </div>
+        }
+
+        <!-- Info grid -->
+        <div class="rq-info-grid">
+          <div class="rq-info-cell">
+            <span>Assignee</span>
+            <strong>{{ assigneeName(item) }}</strong>
+            <small>{{ assigneeRole(item) }}</small>
+          </div>
+          <div class="rq-info-cell">
+            <span>Elapsed</span>
+            <strong [class.rq-time-urgent]="isUrgent(item)">{{ elapsedMetricValue(item) }}</strong>
+          </div>
+          <div class="rq-info-cell">
+            <span>Created</span>
+            <strong>{{ dateTimeLabel(item.createdAt) }}</strong>
+          </div>
+          <div class="rq-info-cell">
+            <span>Accepted</span>
+            <strong>{{ dateTimeLabel(item.acceptedAt) }}</strong>
+          </div>
+          <div class="rq-info-cell">
+            <span>Completed</span>
+            <strong>{{ dateTimeLabel(item.completedAt) }}</strong>
+          </div>
+          @if (item.comments) {
+            <div class="rq-info-cell rq-info-cell-wide">
+              <span>Internal Comments</span>
+              <p>{{ item.comments }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Sheet actions -->
+        <div class="rq-sheet-actions">
+          @if (canAccept(item)) {
+            <button type="button" class="rq-saction rq-saction-primary" (click)="accept(item)" [disabled]="acting()">
+              <ion-icon name="checkmark-outline"></ion-icon>
+              Accept Request
+            </button>
+          }
+          @if (canComplete(item)) {
+            <button type="button" class="rq-saction rq-saction-outline" (click)="complete(item)" [disabled]="acting()">
+              <ion-icon name="checkmark-done-outline"></ion-icon>
+              Mark Complete
+            </button>
+          }
+          @if (canReopen(item)) {
+            <button type="button" class="rq-saction rq-saction-ghost" (click)="reopen(item)" [disabled]="acting()">
+              Reopen
+            </button>
+          }
+          @if (canCancel(item)) {
+            <button type="button" class="rq-saction rq-saction-danger" (click)="cancel(item)" [disabled]="acting()">
+              Cancel Request
             </button>
           }
         </div>
 
-        @if (error()) {
-          <p class="error-text">{{ error() }}</p>
-        }
-
-        @if (loading()) {
-          <p class="empty-text">Loading requests...</p>
-        } @else {
-          <div class="request-board">
-            @for (item of filteredItems(); track item.id ?? $index) {
-              <button
-                type="button"
-                class="request-card"
-                [class.is-selected]="selectedRequest()?.id === item.id"
-                [class.status-new]="item.status === 'NEW'"
-                [class.status-accepted]="item.status === 'ACCEPTED'"
-                [class.status-completed]="item.status === 'COMPLETED'"
-                [class.status-cancelled]="item.status === 'CANCELLED'"
-                (click)="openRequest(item)"
-              >
-                <div class="request-card-head">
-                  <div class="request-primary">
-                    <div class="request-room-badge">
-                      <strong class="request-room">{{ item.room?.number || '?' }}</strong>
-                      @if (item.room?.floor != null) {
-                        <span class="request-floor">F{{ item.room?.floor }}</span>
-                      }
-                    </div>
-                    <div class="request-title-block">
-                      <span class="request-location">{{ item.hotel?.name || 'Hotel' }}</span>
-                      <span class="request-type">{{ typeLabel(item) }}</span>
-                    </div>
-                  </div>
-                  <div class="request-chip-row">
-                    <span class="request-chip request-status-chip">{{ statusLabel(item) }}</span>
-                  </div>
-                </div>
-
-                <div class="request-card-details">
-                  <span><strong>Assignee:</strong> {{ assigneeName(item) }}</span>
-                  <p class="request-comment-line"><strong>Comment:</strong> {{ item.message || 'No guest note provided.' }}</p>
-                  <span><strong>{{ elapsedMetricLabel(item) }}:</strong> {{ elapsedMetricValue(item) }}</span>
-                  <span class="request-primary-time"><strong>{{ primaryTimeHeading(item) }}:</strong> {{ primaryTimeLabel(item) }}</span>
-                </div>
-
-                <div class="request-card-actions">
-                  @if (canAccept(item)) {
-                    <ion-button size="small" (click)="$event.stopPropagation(); accept(item)" [disabled]="acting()">
-                      Accept
-                    </ion-button>
-                  }
-                  @if (canComplete(item)) {
-                    <ion-button
-                      size="small"
-                      fill="outline"
-                      (click)="$event.stopPropagation(); complete(item)"
-                      [disabled]="acting()"
-                    >
-                      Complete
-                    </ion-button>
-                  }
-                  @if (canReopen(item)) {
-                    <ion-button
-                      size="small"
-                      fill="outline"
-                      color="medium"
-                      (click)="$event.stopPropagation(); reopen(item)"
-                      [disabled]="acting()"
-                    >
-                      Reopen
-                    </ion-button>
-                  }
-                  <ion-button size="small" fill="clear" (click)="$event.stopPropagation(); openRequest(item)">
-                    View
-                  </ion-button>
-                </div>
-              </button>
-            } @empty {
-              <div class="request-empty-state">
-                <p>No requests in this view.</p>
-                <ion-button fill="outline" (click)="refreshAll()">Refresh</ion-button>
-              </div>
-            }
-          </div>
-        }
-      </ion-card-content>
-    </ion-card>
-
-    @if (selectedRequest(); as item) {
-      <div class="request-popup-overlay" (click)="closeRequest()">
-        <section class="request-popup-card" (click)="$event.stopPropagation()">
-          <div class="request-popup-head">
-            <div>
-              <p class="console-eyebrow">Request Detail</p>
-              <h3>{{ item.hotel?.name || 'Hotel' }} • Room {{ item.room?.number || '?' }}</h3>
-            </div>
-            <ion-button fill="clear" size="small" (click)="closeRequest()">Close</ion-button>
-          </div>
-
-          <div class="request-popup-status">
-            <span class="request-chip request-status-chip">{{ statusLabel(item) }}</span>
-            <span class="request-chip">{{ typeLabel(item) }}</span>
-          </div>
-
-          <div class="request-detail-grid">
-            <div class="request-detail-block">
-              <span>Assignee</span>
-              <strong class="request-assignee-name">{{ assigneeName(item) }}</strong>
-              <small class="request-assignee-role">{{ assigneeRole(item) }}</small>
-            </div>
-            <div class="request-detail-block">
-              <span>Request Type</span>
-              <strong>{{ typeLabel(item) }}</strong>
-            </div>
-            <div class="request-detail-block span-2">
-              <span>Guest Note</span>
-              <p>{{ item.message || 'No guest note provided.' }}</p>
-            </div>
-            <div class="request-detail-block">
-              <span>Created At</span>
-              <strong>{{ dateTimeLabel(item.createdAt) }}</strong>
-            </div>
-            <div class="request-detail-block">
-              <span>Accepted At</span>
-              <strong>{{ dateTimeLabel(item.acceptedAt) }}</strong>
-            </div>
-            <div class="request-detail-block">
-              <span>Completed At</span>
-              <strong>{{ dateTimeLabel(item.completedAt) }}</strong>
-            </div>
-            @if (item.comments) {
-              <div class="request-detail-block span-2">
-                <span>Internal Comments</span>
-                <p>{{ item.comments }}</p>
-              </div>
-            }
-          </div>
-
-          <div class="request-popup-actions">
-            @if (canAccept(item)) {
-              <ion-button (click)="accept(item)" [disabled]="acting()">Accept Request</ion-button>
-            }
-            @if (canComplete(item)) {
-              <ion-button fill="outline" (click)="complete(item)" [disabled]="acting()">Mark Complete</ion-button>
-            }
-            @if (canReopen(item)) {
-              <ion-button fill="outline" color="medium" (click)="reopen(item)" [disabled]="acting()">
-                Reopen
-              </ion-button>
-            }
-          </div>
-        </section>
       </div>
-    }
-  </div>
-</ion-content>
+    </div>
+  }
+
+</app-shell>

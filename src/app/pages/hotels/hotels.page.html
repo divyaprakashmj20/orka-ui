@@ -1,59 +1,49 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
-    </ion-buttons>
-    <ion-title>Hotels</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <div class="console-page">
-    <section class="console-hero">
+﻿<app-shell pageTitle="Hotels">
+    <div class="o-page-head">
       <div>
-        <p class="console-eyebrow">Portfolio Management</p>
+        <p class="o-page-eyebrow">Portfolio Management</p>
         <h1>Hotels</h1>
         <p>
           Organize hotels under the right group, define property codes, and keep location data clean
           for staff and guest-facing flows.
         </p>
       </div>
-      <div class="console-meta">
-        <span class="console-pill">{{ items().length }} hotel(s)</span>
-        <span class="console-pill">{{ hotelGroups().length }} group option(s)</span>
+      <div class="o-page-head-meta">
+        <span class="o-badge">{{ items().length }} hotel(s)</span>
+        <span class="o-badge">{{ hotelGroups().length }} group option(s)</span>
       </div>
-    </section>
+    </div>
 
-    <div class="console-grid">
-      <ion-card class="console-card">
-        <ion-card-header>
-          <ion-card-title>{{ form.id ? 'Edit Hotel' : 'Create Hotel' }}</ion-card-title>
-          <p class="section-copy">
+    <div class="o-cols">
+      <div class="o-card">
+        <div class="o-card-head">
+          <h3>{{ form.id ? 'Edit Hotel' : 'Create Hotel' }}</h3>
+          <p class="o-card-copy">
             Each hotel inherits its broader admin scope from a hotel group.
           </p>
-        </ion-card-header>
-        <ion-card-content>
-          <form class="console-form" (ngSubmit)="save()">
-            <div class="form-grid">
-              <ion-item class="field-item">
-                <ion-label position="stacked">Name</ion-label>
+        </div>
+        <div class="o-card-body">
+          <form class="o-form" (ngSubmit)="save()">
+            <div class="o-form-grid">
+              <div class="o-field">
+                <label>Name</label>
                 <ion-input [(ngModel)]="form.name" name="name" required />
-              </ion-item>
-              <ion-item class="field-item">
-                <ion-label position="stacked">Code</ion-label>
+              </div>
+              <div class="o-field">
+                <label>Code</label>
                 <ion-input [(ngModel)]="form.code" name="code" />
-              </ion-item>
-              <ion-item class="field-item">
-                <ion-label position="stacked">City</ion-label>
+              </div>
+              <div class="o-field">
+                <label>City</label>
                 <ion-input [(ngModel)]="form.city" name="city" />
-              </ion-item>
-              <ion-item class="field-item">
-                <ion-label position="stacked">Country</ion-label>
+              </div>
+              <div class="o-field">
+                <label>Country</label>
                 <ion-input [(ngModel)]="form.country" name="country" />
-              </ion-item>
+              </div>
               @if (showHotelGroupSelector()) {
-                <ion-item class="field-item span-2">
-                  <ion-label position="stacked">Hotel Group</ion-label>
+                <div class="o-field o-field--wide">
+                  <label>Hotel Group</label>
                   <ion-select [(ngModel)]="form.hotelGroupId" name="hotelGroupId" interface="alert" required>
                     <ion-select-option [value]="null">Select a group</ion-select-option>
                     @for (group of hotelGroups(); track group.id ?? group.name) {
@@ -62,16 +52,16 @@
                       </ion-select-option>
                     }
                   </ion-select>
-                </ion-item>
+                </div>
               } @else {
-                <ion-item class="field-item span-2">
-                  <ion-label position="stacked">Hotel Group</ion-label>
+                <div class="o-field o-field--wide">
+                  <label>Hotel Group</label>
                   <ion-input [value]="fixedHotelGroupName()" readonly />
-                </ion-item>
+                </div>
               }
             </div>
 
-            <div class="form-actions">
+            <div class="o-form-actions">
               <ion-button type="submit" [disabled]="saving()">
                 {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
               </ion-button>
@@ -80,47 +70,46 @@
             </div>
           </form>
           @if (error()) {
-            <p class="error-text">{{ error() }}</p>
+            <p class="o-error">{{ error() }}</p>
           }
-        </ion-card-content>
-      </ion-card>
+        </div>
+      </div>
 
-      <ion-card class="console-card">
-        <ion-card-header>
-          <ion-card-title>Records</ion-card-title>
-          <p class="section-copy">Hotels currently available for staff, rooms, and request routing.</p>
-        </ion-card-header>
-        <ion-card-content>
+      <div class="o-card">
+        <div class="o-card-head">
+          <h3>Records</h3>
+          <p class="o-card-copy">Hotels currently available for staff, rooms, and request routing.</p>
+        </div>
+        <div class="o-card-body">
           @if (loading()) {
-            <p class="empty-text">Loading...</p>
+            <p class="o-empty">Loading...</p>
           } @else {
-            <div class="console-list">
+            <div class="o-list">
               @for (item of items(); track item.id ?? item.name) {
-                <article class="console-record">
+                <article class="o-record">
                   <h3>{{ item.name }}</h3>
                   <p>{{ item.city || '-' }}, {{ item.country || '-' }}</p>
-                  <div class="record-metadata">
-                    <span class="console-pill">Code: {{ item.code || '-' }}</span>
-                    <span class="console-pill">
+                  <div class="o-record-meta">
+                    <span class="o-badge">Code: {{ item.code || '-' }}</span>
+                    <span class="o-badge">
                       Group: {{ item.hotelGroup?.name || ('#' + (item.hotelGroup?.id ?? '?')) }}
                     </span>
                   </div>
-                  <div class="inline-actions">
-                    <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="edit(item)">
+                  <div class="o-row-actions">
+                    <ion-button type="button" fill="outline"  size="small" (click)="edit(item)">
                       Edit
                     </ion-button>
-                    <ion-button type="button" fill="outline" class="inline-danger" size="small" (click)="remove(item)">
+                    <ion-button type="button" fill="outline"  size="small" (click)="remove(item)">
                       Delete
                     </ion-button>
                   </div>
                 </article>
               } @empty {
-                <p class="empty-text">No hotels found.</p>
+                <p class="o-empty">No hotels found.</p>
               }
             </div>
           }
-        </ion-card-content>
-      </ion-card>
+        </div>
+      </div>
     </div>
-  </div>
-</ion-content>
+</app-shell>

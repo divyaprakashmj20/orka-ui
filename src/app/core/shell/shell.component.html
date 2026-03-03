@@ -1,0 +1,94 @@
+<ion-content>
+  <!-- Mobile scrim -->
+  @if (sidebarOpen()) {
+    <div class="o-scrim is-active" (click)="closeSidebar()"></div>
+  }
+
+  <div class="o-shell">
+    <!-- ── Sidebar ─────────────────────────────── -->
+    <nav class="o-sidebar" [class.is-open]="sidebarOpen()">
+      <div class="o-sidebar-brand">
+        <div class="o-brand-mark">O</div>
+        <span class="o-brand-name">Orka</span>
+      </div>
+
+      <div class="o-sidebar-nav">
+        <div class="o-nav-section">
+          @for (item of visibleNav(); track item.path) {
+            <a
+              class="o-nav-item"
+              [class.is-active]="isActive(item.path)"
+              (click)="navigate(item.path)"
+            >
+              <ion-icon [name]="item.icon"></ion-icon>
+              {{ item.label }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="o-sidebar-footer">
+        @if (logoutError()) {
+          <p class="o-sidebar-error">{{ logoutError() }}</p>
+        }
+        <div class="o-user-card">
+          <div class="o-user-avatar">{{ userInitials() }}</div>
+          <div class="o-user-info">
+            <strong>{{ displayName() }}</strong>
+            <span>{{ roleDisplay() }}</span>
+          </div>
+          <button class="o-logout-btn" [disabled]="loggingOut()" (click)="logout()" title="Sign out">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Main ──────────────────────────────────── -->
+    <div class="o-main">
+      <header class="o-topbar">
+        <div class="o-topbar-left">
+          <button class="o-burger" (click)="toggleSidebar()">
+            <ion-icon name="menu-outline"></ion-icon>
+          </button>
+          <div>
+            <div class="o-page-title">{{ pageTitle }}</div>
+            @if (pageSubtitle) {
+              <div class="o-page-subtitle">{{ pageSubtitle }}</div>
+            }
+          </div>
+        </div>
+        <div class="o-topbar-right">
+          <!-- Theme toggle pill -->
+          <button
+            class="o-theme-toggle"
+            [class.is-dark]="isDark()"
+            (click)="toggleTheme()"
+            [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+          >
+            <span class="o-tt-track">
+              <!-- stars (dark side) -->
+              <span class="o-tt-star s1"></span>
+              <span class="o-tt-star s2"></span>
+              <span class="o-tt-star s3"></span>
+              <span class="o-tt-star s4"></span>
+              <!-- fixed-position icons in track -->
+              <ion-icon name="sunny" class="o-tt-sun"></ion-icon>
+              <ion-icon name="moon" class="o-tt-moon"></ion-icon>
+              <!-- sliding thumb -->
+              <span class="o-tt-thumb">
+                <ion-icon name="sunny" class="o-tt-icon-sun"></ion-icon>
+                <ion-icon name="moon" class="o-tt-icon-moon"></ion-icon>
+              </span>
+            </span>
+          </button>
+          <span class="o-scope-chip">{{ userScopeLine() }}</span>
+        </div>
+      </header>
+
+      <div class="o-body">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+</ion-content>

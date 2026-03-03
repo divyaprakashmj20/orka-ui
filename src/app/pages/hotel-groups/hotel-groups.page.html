@@ -1,54 +1,44 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
-    </ion-buttons>
-    <ion-title>Hotel Groups</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <div class="console-page">
-    <section class="console-hero">
+﻿<app-shell pageTitle="Hotel Groups">
+    <div class="o-page-head">
       <div>
-        <p class="console-eyebrow">Platform Structure</p>
+        <p class="o-page-eyebrow">Platform Structure</p>
         <h1>Hotel groups</h1>
         <p>
           Define the top-level operating groups that own the hotels, approvals, and admin scope
           beneath them.
         </p>
       </div>
-      <div class="console-meta">
-        <span class="console-pill">{{ items().length }} group(s)</span>
-        <span class="console-pill">{{ form.id ? 'Editing existing group' : 'Creating new group' }}</span>
+      <div class="o-page-head-meta">
+        <span class="o-badge">{{ items().length }} group(s)</span>
+        <span class="o-badge">{{ form.id ? 'Editing existing group' : 'Creating new group' }}</span>
       </div>
-    </section>
+    </div>
 
-    <div class="console-grid">
-    <ion-card class="console-card">
-      <ion-card-header>
-        <ion-card-title>{{ form.id ? 'Edit Hotel Group' : 'Create Hotel Group' }}</ion-card-title>
-        <p class="section-copy">Use stable names and optional short codes for invitations and routing.</p>
-      </ion-card-header>
-      <ion-card-content>
-        <form class="console-form" (ngSubmit)="save()">
-          <div class="console-toolbar">
-            <div class="console-meta">
-              <span class="console-pill">Code can be auto-generated later</span>
+    <div class="o-cols">
+    <div class="o-card">
+      <div class="o-card-head">
+        <h3>{{ form.id ? 'Edit Hotel Group' : 'Create Hotel Group' }}</h3>
+        <p class="o-card-copy">Use stable names and optional short codes for invitations and routing.</p>
+      </div>
+      <div class="o-card-body">
+        <form class="o-form" (ngSubmit)="save()">
+          <div class="o-page-head-row">
+            <div class="o-page-head-meta">
+              <span class="o-badge">Code can be auto-generated later</span>
             </div>
           </div>
-          <div class="form-grid">
-            <ion-item class="field-item">
-              <ion-label position="stacked">Name</ion-label>
+          <div class="o-form-grid">
+            <div class="o-field">
+              <label>Name</label>
               <ion-input [(ngModel)]="form.name" name="name" placeholder="Group name" required />
-            </ion-item>
-            <ion-item class="field-item">
-              <ion-label position="stacked">Code</ion-label>
+            </div>
+            <div class="o-field">
+              <label>Code</label>
               <ion-input [(ngModel)]="form.code" name="code" placeholder="Optional code" />
-            </ion-item>
+            </div>
           </div>
 
-          <div class="form-actions">
+          <div class="o-form-actions">
             <ion-button type="submit" [disabled]="saving()">
               {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
             </ion-button>
@@ -57,43 +47,42 @@
           </div>
         </form>
         @if (error()) {
-          <p class="error-text">{{ error() }}</p>
+          <p class="o-error">{{ error() }}</p>
         }
-      </ion-card-content>
-    </ion-card>
+      </div>
+    </div>
 
-    <ion-card class="console-card">
-      <ion-card-header>
-        <ion-card-title>Records</ion-card-title>
-        <p class="section-copy">Existing groups that can own hotels and scoped admin permissions.</p>
-      </ion-card-header>
-      <ion-card-content>
+    <div class="o-card">
+      <div class="o-card-head">
+        <h3>Records</h3>
+        <p class="o-card-copy">Existing groups that can own hotels and scoped admin permissions.</p>
+      </div>
+      <div class="o-card-body">
         @if (loading()) {
-          <p class="empty-text">Loading...</p>
+          <p class="o-empty">Loading...</p>
         } @else {
-          <div class="console-list">
+          <div class="o-list">
             @for (item of items(); track item.id ?? item.name) {
-              <article class="console-record">
+              <article class="o-record">
                   <h3>{{ item.name }}</h3>
-                  <div class="record-metadata">
-                    <span class="console-pill">Code: {{ item.code || '-' }}</span>
+                  <div class="o-record-meta">
+                    <span class="o-badge">Code: {{ item.code || '-' }}</span>
                   </div>
-                  <div class="inline-actions">
-                    <ion-button type="button" fill="outline" class="inline-neutral" size="small" (click)="edit(item)">
+                  <div class="o-row-actions">
+                    <ion-button type="button" fill="outline"  size="small" (click)="edit(item)">
                       Edit
                     </ion-button>
-                    <ion-button type="button" fill="outline" class="inline-danger" size="small" (click)="remove(item)">
+                    <ion-button type="button" fill="outline"  size="small" (click)="remove(item)">
                       Delete
                     </ion-button>
                   </div>
               </article>
             } @empty {
-              <p class="empty-text">No hotel groups found.</p>
+              <p class="o-empty">No hotel groups found.</p>
             }
           </div>
         }
-      </ion-card-content>
-    </ion-card>
+      </div>
     </div>
-  </div>
-</ion-content>
+    </div>
+</app-shell>

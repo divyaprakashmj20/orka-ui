@@ -1,70 +1,63 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
-  </ion-toolbar>
-</ion-header>
+﻿<div class="o-auth-scroll">
+<div class="o-auth-page">
+  <div class="o-auth-box">
+    <div class="o-auth-brand">
+      <div class="o-auth-mark">O</div>
+      <span class="o-auth-wordmark">Orka</span>
+    </div>
 
-<ion-content [fullscreen]="true">
-  <div class="login-page">
-    <ion-card class="login-card">
-      <ion-card-header>
-        <ion-card-title>Sign in to Orka</ion-card-title>
-      </ion-card-header>
+    <div class="o-auth-card">
+      <h1 class="o-auth-heading">Welcome back</h1>
 
-      <ion-card-content>
-        <form class="login-form" (ngSubmit)="login()">
-          <ion-item>
-            <ion-label position="stacked">Email</ion-label>
-            <ion-input
-              type="email"
-              autocomplete="email"
-              inputmode="email"
-              [(ngModel)]="form.email"
-              name="email"
-              placeholder="you@example.com"
-              required
-            />
-          </ion-item>
+      @if (error()) {
+        <div class="o-error">{{ error() }}</div>
+      }
 
-          <ion-item>
-            <ion-label position="stacked">Password</ion-label>
-            <ion-input
-              type="password"
-              autocomplete="current-password"
-              [(ngModel)]="form.password"
-              name="password"
-              placeholder="Enter your password"
-              required
-            />
-          </ion-item>
+      <form (ngSubmit)="login()" #f="ngForm" class="o-form">
+        <div class="o-field">
+          <label>Email</label>
+          <ion-input
+            type="email"
+            placeholder="you@company.com"
+            [(ngModel)]="form.email"
+            name="email"
+            autocomplete="email"
+            inputmode="email"
+          />
+        </div>
 
-          @if (error()) {
-            <p class="error-text">{{ error() }}</p>
+        <div class="o-field">
+          <label>Password</label>
+          <ion-input
+            type="password"
+            placeholder="••••••••"
+            [(ngModel)]="form.password"
+            name="password"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="loading()"
+          class="o-btn-submit"
+        >
+          @if (loading()) {
+            <ion-spinner name="crescent" slot="start" />
+            Signing in…
+          } @else {
+            Sign in
           }
+        </ion-button>
+      </form>
 
-          <ion-button expand="block" type="submit" [disabled]="loading()">
-            {{ loading() ? 'Signing in...' : 'Sign In' }}
-          </ion-button>
-        </form>
-
-        <div class="setup-note">
-          <ion-note>
-            Paste your Firebase Web App config into
-            <code>src/app/core/firebase/firebase.config.ts</code>
-          </ion-note>
-        </div>
-
-        <div class="auth-links">
-          <ion-note>
-            New here?
-            <a routerLink="/register">Create an account</a>
-          </ion-note>
-          <ion-note>
-            Forgot your password?
-            <a routerLink="/forgot-password">Reset it</a>
-          </ion-note>
-        </div>
-      </ion-card-content>
-    </ion-card>
+      <div class="o-auth-footer">
+        <a (click)="go('/forgot-password')">Forgot password?</a>
+        <span>·</span>
+        <span>Need access? Contact your admin.</span>
+      </div>
+    </div>
   </div>
-</ion-content>
+</div>
+</div>

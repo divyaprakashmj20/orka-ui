@@ -1,67 +1,57 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
-    </ion-buttons>
-    <ion-title>Pending User Approvals</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <div class="console-page">
-    <section class="console-hero">
+﻿<app-shell pageTitle="Users">
+    <div class="o-page-head">
       <div>
-        <p class="console-eyebrow">Access Control</p>
+        <p class="o-page-eyebrow">Access Control</p>
         <h1>User approvals</h1>
         <p>
           Review incoming users, assign the right hotel or hotel-group scope, and keep access
           limited to the right level of the hierarchy.
         </p>
       </div>
-      <div class="console-meta">
-        <span class="console-pill">{{ pendingUsers().length }} pending user(s)</span>
+      <div class="o-page-head-meta">
+        <span class="o-badge">{{ pendingUsers().length }} pending user(s)</span>
       </div>
-    </section>
+    </div>
 
-    <ion-card class="console-card">
-      <ion-card-header>
-        <ion-card-title>Pending App Users</ion-card-title>
-        <p class="section-copy">Only approvals inside your role scope are shown here.</p>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="console-toolbar">
-          <div class="console-meta">
-            <span class="console-pill">Role-aware approval queue</span>
+    <div class="o-card">
+      <div class="o-card-head">
+        <h3>Pending App Users</h3>
+        <p class="o-card-copy">Only approvals inside your role scope are shown here.</p>
+      </div>
+      <div class="o-card-body">
+        <div class="o-page-head-row">
+          <div class="o-page-head-meta">
+            <span class="o-badge">Role-aware approval queue</span>
           </div>
-          <div class="form-actions">
+          <div class="o-form-actions">
             <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
           </div>
         </div>
 
         @if (error()) {
-          <p class="error-text">{{ error() }}</p>
+          <p class="o-error">{{ error() }}</p>
         }
         @if (loading()) {
-          <p class="empty-text">Loading...</p>
+          <p class="o-empty">Loading...</p>
         } @else {
-          <div class="console-list">
+          <div class="o-list">
             @for (user of pendingUsers(); track user.id ?? user.firebaseUid) {
-              <article class="console-record">
+              <article class="o-record">
                 <h3>{{ user.name }}</h3>
                 <p>{{ user.email }}</p>
-                <div class="record-metadata">
-                  <span class="console-pill">
+                <div class="o-record-meta">
+                  <span class="o-badge">
                     Requested Group: {{ user.requestedHotelGroup?.name || '-' }}
                   </span>
-                  <span class="console-pill">
+                  <span class="o-badge">
                     Requested Hotel: {{ user.requestedHotel?.name || '-' }}
                   </span>
                 </div>
 
                 @if (user.id != null) {
                   <div class="approval-grid">
-                    <ion-item class="field-item">
-                      <ion-label position="stacked">Role</ion-label>
+                    <div class="o-field">
+                      <label>Role</label>
                       <ion-select
                         [(ngModel)]="drafts[user.id].accessRole"
                         [ngModelOptions]="{ standalone: true }"
@@ -72,11 +62,11 @@
                           <ion-select-option [value]="role">{{ role }}</ion-select-option>
                         }
                       </ion-select>
-                    </ion-item>
+                    </div>
 
                     @if (needsGroupAssignment(drafts[user.id].accessRole)) {
-                      <ion-item class="field-item">
-                        <ion-label position="stacked">Assign Hotel Group</ion-label>
+                      <div class="o-field">
+                        <label>Assign Hotel Group</label>
                         <ion-select
                           [(ngModel)]="drafts[user.id].assignedHotelGroupId"
                           [ngModelOptions]="{ standalone: true }"
@@ -89,12 +79,12 @@
                             </ion-select-option>
                           }
                         </ion-select>
-                      </ion-item>
+                      </div>
                     }
 
                     @if (needsHotelAssignment(drafts[user.id].accessRole)) {
-                      <ion-item class="field-item">
-                        <ion-label position="stacked">Assign Hotel</ion-label>
+                      <div class="o-field">
+                        <label>Assign Hotel</label>
                         <ion-select
                           [(ngModel)]="drafts[user.id].assignedHotelId"
                           [ngModelOptions]="{ standalone: true }"
@@ -107,12 +97,12 @@
                             </ion-select-option>
                           }
                         </ion-select>
-                      </ion-item>
+                      </div>
                     }
 
                     @if (needsEmployeeRole(drafts[user.id].accessRole)) {
-                      <ion-item class="field-item">
-                        <ion-label position="stacked">Operational Role</ion-label>
+                      <div class="o-field">
+                        <label>Operational Role</label>
                         <ion-select
                           [(ngModel)]="drafts[user.id].employeeRole"
                           [ngModelOptions]="{ standalone: true }"
@@ -120,23 +110,23 @@
                         >
                           <ion-select-option [value]="null">Select role</ion-select-option>
                           @for (role of employeeRoles; track role) {
-                            <ion-select-option [value]="role">{{ role.replaceAll('_', ' ') }}</ion-select-option>
+                            <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
                           }
                         </ion-select>
-                      </ion-item>
+                      </div>
                     }
 
-                    <ion-item class="checkbox-item">
+                    <div class="o-field">
                       <ion-checkbox
                         slot="start"
                         type="checkbox"
                         [(ngModel)]="drafts[user.id].active"
                         [ngModelOptions]="{ standalone: true }"
                       />
-                      <ion-label>Active after approval</ion-label>
-                    </ion-item>
+                      <label>Active after approval</label>
+                    </div>
 
-                    <div class="form-actions span-2">
+                    <div class="o-form-actions">
                       <ion-button type="button" [disabled]="isBusy(user.id)" (click)="approve(user)">
                         Approve
                       </ion-button>
@@ -154,11 +144,10 @@
                 }
               </article>
             } @empty {
-              <p class="empty-text">No pending users.</p>
+              <p class="o-empty">No pending users.</p>
             }
           </div>
         }
-      </ion-card-content>
-    </ion-card>
-  </div>
-</ion-content>
+      </div>
+    </div>
+</app-shell>

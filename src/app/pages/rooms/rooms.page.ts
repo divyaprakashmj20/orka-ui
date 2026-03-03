@@ -1,23 +1,11 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonBackButton,
   IonButton,
-  IonButtons,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
   IonInput,
-  IonItem,
-  IonLabel,
   IonSelect,
-  IonSelectOption,
-  IonTitle,
-  IonToolbar
+  IonSelectOption
 } from '@ionic/angular/standalone';
 import QRCode from 'qrcode';
 import { firstValueFrom } from 'rxjs';
@@ -25,6 +13,7 @@ import { environment } from '../../../environments/environment';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser, Hotel, Room } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { ShellComponent } from '../../core/shell/shell.component';
 
 type RoomForm = {
   id: number | null;
@@ -39,21 +28,10 @@ type RoomForm = {
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonTitle,
-    IonContent,
-    IonItem,
-    IonLabel,
+    ShellComponent,
     IonInput,
     IonSelect,
     IonSelectOption,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonButton
   ],
   templateUrl: './rooms.page.html',
