@@ -9,7 +9,7 @@
     <!-- Welcome row -->
     <div class="home-welcome">
       <div>
-        <h1 class="home-greeting">Good to have you back.</h1>
+        <h1 class="home-greeting">{{ timeGreeting() }}</h1>
         <p>{{ summaryText() }}</p>
       </div>
       <div class="home-identity">
@@ -29,6 +29,9 @@
            (keyup.enter)="navigate(section.path)">
           <div class="home-module-icon">
             <ion-icon [name]="section.icon"></ion-icon>
+            @if (section.path === '/requests' && requestsUnreadCount() > 0) {
+              <span class="home-module-badge">{{ requestsUnreadCount() > 99 ? '99+' : requestsUnreadCount() }}</span>
+            }
           </div>
           <div class="home-module-body">
             <strong>{{ section.title }}</strong>
@@ -47,18 +50,149 @@
     @if (isSuperAdmin()) {
       <div class="home-section-label" style="margin-top: 36px;">Theme lab <span class="home-section-tag">Superadmin</span></div>
       <div class="o-card home-palette">
-        <div class="home-palette-control">
-          <label>Accent hue
-            <span class="home-hue-badge">{{ paletteHue() }}°</span>
-          </label>
-          <input
-            type="range" min="0" max="360"
-            [value]="paletteHue()"
-            (input)="updatePaletteHue(($any($event.target).value))"
-            class="home-hue-range"
-          />
+        <p class="home-palette-desc">Live colour overrides — drag to preview across the full UI. Persists between reloads.</p>
+
+        <div class="home-slider-group">
+
+          <div class="home-slider-row">
+            <span class="home-slider-dot" [style.background]="'hsl(' + paletteHue() + ' 84% 67%)'"></span>
+            <span class="home-slider-label">Accent</span>
+            <span class="home-hue-badge"
+              [style.background]="'hsl(' + paletteHue() + ' 84% 67% / 0.15)'"
+              [style.color]="'hsl(' + paletteHue() + ' 84% 67%)'">{{ paletteHue() }}°</span>
+            <input type="range" min="0" max="360" [value]="paletteHue()"
+              (input)="updateHue('accent', $any($event.target).value)"
+              class="home-hue-range" />
+          </div>
+
+          <div class="home-slider-row">
+            <span class="home-slider-dot" [style.background]="'hsl(' + successHue() + ' 69% 45%)'"></span>
+            <span class="home-slider-label">Success</span>
+            <span class="home-hue-badge"
+              [style.background]="'hsl(' + successHue() + ' 69% 45% / 0.15)'"
+              [style.color]="'hsl(' + successHue() + ' 69% 45%)'">{{ successHue() }}°</span>
+            <input type="range" min="0" max="360" [value]="successHue()"
+              (input)="updateHue('success', $any($event.target).value)"
+              class="home-hue-range" />
+          </div>
+
+          <div class="home-slider-row">
+            <span class="home-slider-dot" [style.background]="'hsl(' + warningHue() + ' 93% 50%)'"></span>
+            <span class="home-slider-label">Warning</span>
+            <span class="home-hue-badge"
+              [style.background]="'hsl(' + warningHue() + ' 93% 50% / 0.15)'"
+              [style.color]="'hsl(' + warningHue() + ' 93% 50%)'">{{ warningHue() }}°</span>
+            <input type="range" min="0" max="360" [value]="warningHue()"
+              (input)="updateHue('warning', $any($event.target).value)"
+              class="home-hue-range" />
+          </div>
+
+          <div class="home-slider-row">
+            <span class="home-slider-dot" [style.background]="'hsl(' + dangerHue() + ' 84% 60%)'"></span>
+            <span class="home-slider-label">Danger</span>
+            <span class="home-hue-badge"
+              [style.background]="'hsl(' + dangerHue() + ' 84% 60% / 0.15)'"
+              [style.color]="'hsl(' + dangerHue() + ' 84% 60%)'">{{ dangerHue() }}°</span>
+            <input type="range" min="0" max="360" [value]="dangerHue()"
+              (input)="updateHue('danger', $any($event.target).value)"
+              class="home-hue-range" />
+          </div>
+
         </div>
-        <div class="home-swatches">
+
+        <!-- Surface & Tone -->
+        <p class="home-palette-subhead">Surface &amp; Tone</p>
+        <div class="home-slider-group">
+
+          <div class="home-slider-row">
+            <span class="home-slider-dot" [style.background]="'hsl(' + neutralHue() + ' 30% 55%)'"></span>
+            <span class="home-slider-label">Neutral hue</span>
+            <span class="home-hue-badge"
+              [style.background]="'hsl(' + neutralHue() + ' 30% 55% / 0.15)'"
+              [style.color]="'hsl(' + neutralHue() + ' 30% 55%)'">{{ neutralHue() }}°</span>
+            <input type="range" min="0" max="360" [value]="neutralHue()"
+              (input)="updateSurface('orka-neutral-hue', $any($event.target).value, 0, 360)"
+              class="home-hue-range" />
+          </div>
+
+          <div class="home-surface-cols">
+            <div>
+              <p class="home-surface-mode-label">Dark mode</p>
+              <div class="home-slider-group">
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">BG</span>
+                  <span class="home-hue-badge">{{ darkBgL() }}%</span>
+                  <input type="range" min="0" max="20" [value]="darkBgL()"
+                    (input)="updateSurface('orka-d-bg-l', $any($event.target).value, 0, 20)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Surface</span>
+                  <span class="home-hue-badge">{{ darkSurfL() }}%</span>
+                  <input type="range" min="0" max="25" [value]="darkSurfL()"
+                    (input)="updateSurface('orka-d-surf-l', $any($event.target).value, 0, 25)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Text</span>
+                  <span class="home-hue-badge">{{ darkTextL() }}%</span>
+                  <input type="range" min="75" max="100" [value]="darkTextL()"
+                    (input)="updateSurface('orka-d-text-l', $any($event.target).value, 75, 100)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Border α</span>
+                  <span class="home-hue-badge">{{ darkBorderA() }}%</span>
+                  <input type="range" min="0" max="30" [value]="darkBorderA()"
+                    (input)="updateSurface('orka-d-border-a', $any($event.target).value, 0, 30)"
+                    class="home-hue-range" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <p class="home-surface-mode-label">Light mode</p>
+              <div class="home-slider-group">
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">BG</span>
+                  <span class="home-hue-badge">{{ lightBgL() }}%</span>
+                  <input type="range" min="85" max="100" [value]="lightBgL()"
+                    (input)="updateSurface('orka-l-bg-l', $any($event.target).value, 85, 100)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Surface</span>
+                  <span class="home-hue-badge">{{ lightSurfL() }}%</span>
+                  <input type="range" min="85" max="100" [value]="lightSurfL()"
+                    (input)="updateSurface('orka-l-surf-l', $any($event.target).value, 85, 100)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Text</span>
+                  <span class="home-hue-badge">{{ lightTextL() }}%</span>
+                  <input type="range" min="0" max="20" [value]="lightTextL()"
+                    (input)="updateSurface('orka-l-text-l', $any($event.target).value, 0, 20)"
+                    class="home-hue-range" />
+                </div>
+                <div class="home-slider-row">
+                  <span class="home-slider-label home-slider-label--sm">Border α</span>
+                  <span class="home-hue-badge">{{ lightBorderA() }}%</span>
+                  <input type="range" min="0" max="25" [value]="lightBorderA()"
+                    (input)="updateSurface('orka-l-border-a', $any($event.target).value, 0, 25)"
+                    class="home-hue-range" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 14px;">
+          <ion-button type="button" fill="outline" size="small" (click)="resetPalette()">
+            Reset to defaults
+          </ion-button>
+        </div>
+
+        <div class="home-swatches" style="margin-top: 16px;">
           @for (token of paletteReadout(); track token.label) {
             <div class="home-swatch">
               <span class="home-swatch-dot" [style.background]="token.swatch"></span>

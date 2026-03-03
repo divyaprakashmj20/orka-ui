@@ -1,5 +1,11 @@
-/* Shell fills the ion-content area */
-:host { display: contents; }
+/* Shell host fills the full app viewport regardless of the routed page host's height.
+   position:absolute + inset:0 anchors to ion-app (position:relative by Ionic default)
+   so we never rely on the page host element having any size. */
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
 
 ion-content { --background: var(--o-bg); }
 
@@ -187,6 +193,184 @@ ion-content { --background: var(--o-bg); }
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--o-text-2);
+}
+
+/* Unread count badge on nav items */
+.o-nav-unread {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--o-danger);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── New-request toast ───────────────────────────── */
+@keyframes toast-in {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.o-toast {
+  position: fixed;
+  /* mobile: full width, sits above safe area */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  display: flex;
+  align-items: stretch;
+  background: var(--o-surface);
+  border-top: 1px solid var(--o-border-md);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+  animation: toast-in 0.28s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  /* safe-area padding so it clears the home indicator on iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* desktop: card-style, bottom-right */
+  @media (min-width: 640px) {
+    left: auto;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    border-radius: var(--r-xl);
+    border: 1px solid var(--o-border-md);
+    padding-bottom: 0;
+  }
+}
+
+.o-toast-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 14px 16px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  /* tap feedback */
+  -webkit-tap-highlight-color: transparent;
+
+  &:active { background: rgba(255,255,255,0.04); }
+
+  @media (min-width: 640px) {
+    padding: 14px 12px 14px 16px;
+  }
+}
+
+.o-toast-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background: var(--o-accent-dim);
+  border: 1.5px solid var(--o-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--o-accent-lt);
+  flex-shrink: 0;
+
+  /* pulse ring */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--o-accent);
+    animation: toast-pulse 1.6s ease-out infinite;
+    opacity: 0;
+  }
+}
+
+@keyframes toast-pulse {
+  0%   { transform: scale(1);    opacity: 0.6; }
+  100% { transform: scale(1.7);  opacity: 0;   }
+}
+
+.o-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.o-toast-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--o-text);
+  letter-spacing: -0.01em;
+}
+
+.o-toast-detail {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--o-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.o-toast-type {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--o-accent-lt);
+}
+
+.o-toast-count {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--o-danger);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.o-toast-close {
+  flex-shrink: 0;
+  width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--o-border);
+  color: var(--o-text-3);
+  font-size: 1.1rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s, background 0.12s;
+
+  &:hover { color: var(--o-text); background: rgba(255,255,255,0.05); }
+  &:active { background: rgba(255,255,255,0.09); }
+
+  @media (min-width: 640px) {
+    border-left: none;
+    border-radius: 0 var(--r-xl) var(--r-xl) 0;
+  }
 }
 
 /* User card — keep it accessible */

@@ -56,7 +56,76 @@
   50%       { opacity: 0.5; transform: scale(1.4); }
 }
 
+.rq-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 .rq-refresh-btn { margin: 0; }
+
+/* --- SSE live indicator ---------------------------------- */
+.rq-sse-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px 4px 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+
+  &.is-connected {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+
+    .rq-sse-dot {
+      background: #22c55e;
+      animation: rq-sse-pulse 2s ease-in-out infinite;
+    }
+
+    .rq-sse-label { color: #22c55e; }
+  }
+
+  &.is-error {
+    background: rgba(251, 191, 36, 0.10);
+    border-color: rgba(251, 191, 36, 0.25);
+
+    .rq-sse-dot {
+      background: var(--o-warning);
+      animation: rq-sse-blink 1s steps(1) infinite;
+    }
+
+    .rq-sse-label { color: var(--o-warning); }
+  }
+}
+
+.rq-sse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--o-muted);
+  flex-shrink: 0;
+}
+
+.rq-sse-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--o-muted);
+}
+
+@keyframes rq-sse-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.55; transform: scale(1.5); }
+}
+
+@keyframes rq-sse-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
 
 /* --- Tab bar --------------------------------------------- */
 .rq-tabs {
@@ -345,6 +414,8 @@
 /* --- Card action strip ----------------------------------- */
 .rq-card-action-strip {
   padding: 0 16px 14px;
+  display: flex;
+  gap: 8px;
 }
 
 .rq-action-btn {
@@ -352,16 +423,16 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: 100%;
-  padding: 11px 16px;
+  flex: 1;
+  padding: 10px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
   transition: opacity 0.15s ease, transform 0.1s ease;
 
-  ion-icon { font-size: 1rem; }
+  ion-icon { font-size: 0.95rem; }
 
   &:active { transform: scale(0.98); }
   &:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -377,6 +448,18 @@
   background: rgba(74,222,128,0.12);
   color: var(--o-success);
   border: 1px solid rgba(74,222,128,0.3);
+}
+
+.rq-action-reopen {
+  background: rgba(148,163,184,0.12);
+  color: var(--o-text-2);
+  border: 1px solid rgba(148,163,184,0.25);
+}
+
+.rq-action-cancel {
+  background: rgba(239,68,68,0.10);
+  color: var(--o-danger);
+  border: 1px solid rgba(239,68,68,0.25);
 }
 
 /* --- Empty state ----------------------------------------- */
@@ -797,6 +880,16 @@
     background: #dcfce7;
     border-color: #86efac;
     color: #15803d;
+  }
+  .rq-action-reopen {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+  .rq-action-cancel {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
   }
 
   /* Skeleton */

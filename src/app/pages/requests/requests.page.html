@@ -17,9 +17,22 @@
         <span>total</span>
       </div>
     </div>
-    <ion-button fill="clear" size="small" class="rq-refresh-btn" (click)="refreshAll()">
-      <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-    </ion-button>
+    <div class="rq-header-right">
+      <div
+        class="rq-sse-pill"
+        [class.is-connected]="sseStatus() === 'connected'"
+        [class.is-error]="sseStatus() === 'error'"
+        [title]="sseStatus() === 'connected' ? 'Live updates active' : sseStatus() === 'connecting' ? 'Connecting…' : 'Reconnecting…'"
+      >
+        <span class="rq-sse-dot"></span>
+        <span class="rq-sse-label">
+          {{ sseStatus() === 'connected' ? 'live' : sseStatus() === 'connecting' ? 'connecting' : 'reconnecting' }}
+        </span>
+      </div>
+      <ion-button fill="clear" size="small" class="rq-refresh-btn" (click)="refreshAll()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 
   <!-- Tab bar -->
@@ -106,29 +119,51 @@
 
           </button>
 
-          <!-- Card action strip — primary action always visible -->
-          @if (canAccept(item) || canComplete(item)) {
+          <!-- Card action strip — all actions always visible -->
+          @if (canAccept(item) || canComplete(item) || canReopen(item) || canCancel(item)) {
             <div class="rq-card-action-strip">
               @if (canAccept(item)) {
                 <button
                   type="button"
                   class="rq-action-btn rq-action-accept"
-                  (click)="accept(item)"
+                  (click)="accept(item); $event.stopPropagation()"
                   [disabled]="acting()"
                 >
                   <ion-icon name="checkmark-outline"></ion-icon>
-                  Accept — Take this request
+                  Accept
                 </button>
               }
               @if (canComplete(item)) {
                 <button
                   type="button"
                   class="rq-action-btn rq-action-complete"
-                  (click)="complete(item)"
+                  (click)="complete(item); $event.stopPropagation()"
                   [disabled]="acting()"
                 >
                   <ion-icon name="checkmark-done-outline"></ion-icon>
-                  Mark Complete
+                  Complete
+                </button>
+              }
+              @if (canReopen(item)) {
+                <button
+                  type="button"
+                  class="rq-action-btn rq-action-reopen"
+                  (click)="reopen(item); $event.stopPropagation()"
+                  [disabled]="acting()"
+                >
+                  <ion-icon name="refresh-outline"></ion-icon>
+                  Reopen
+                </button>
+              }
+              @if (canCancel(item)) {
+                <button
+                  type="button"
+                  class="rq-action-btn rq-action-cancel"
+                  (click)="cancel(item); $event.stopPropagation()"
+                  [disabled]="acting()"
+                >
+                  <ion-icon name="close-circle-outline"></ion-icon>
+                  Cancel
                 </button>
               }
             </div>

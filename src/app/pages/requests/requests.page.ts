@@ -1,12 +1,12 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   IonButton,
   IonIcon
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkDoneOutline, checkmarkOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline } from 'ionicons/icons';
+import { checkmarkDoneOutline, checkmarkOutline, closeCircleOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import {
@@ -19,6 +19,7 @@ import {
 import { ShellComponent } from '../../core/shell/shell.component';
 import { PushEventsService } from '../../core/notifications/push-events.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { OrkaSseService, SseConnectionStatus } from '../../core/services/orka-sse.service';
 
 type RequestBoardFilter = 'ALL' | RequestStatus;
 type RequestActionPatch = {
@@ -40,12 +41,14 @@ type RequestActionPatch = {
   templateUrl: './requests.page.html',
   styleUrl: './requests.page.scss'
 })
-export class RequestsPage implements OnInit {
+export class RequestsPage implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly pushEvents = inject(PushEventsService);
   private readonly auth = inject(FirebaseAuthService);
+  private readonly sseService = inject(OrkaSseService);
 
   protected readonly items = signal<ServiceRequest[]>([]);
+  protected readonly sseStatus = signal<SseConnectionStatus>('connecting');
   protected readonly currentAppUser = signal<AppUser | null>(null);
   protected readonly loading = signal(false);
   protected readonly acting = signal(false);
@@ -79,19 +82,45 @@ export class RequestsPage implements OnInit {
   });
 
   constructor(private readonly api: OrcaApiService) {
-    addIcons({ checkmarkOutline, checkmarkDoneOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline });
+    addIcons({ checkmarkOutline, checkmarkDoneOutline, closeCircleOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline });
   }
 
   ngOnInit(): void {
+    this.sseService.setRequestsPageActive(true);
+
+    // Mirror the service's persistent items into the local signal.
+    this.sseService.items$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((incoming) => {
+        this.items.set(this.sortedRequests(incoming));
+        // Keep the detail sheet in sync if it's open.
+        const selectedId = this.selectedRequest()?.id;
+        if (selectedId != null) {
+          this.selectedRequest.set(incoming.find((i) => i.id === selectedId) ?? null);
+        }
+      });
+
+    // Mirror SSE connection status into a signal for template binding.
+    this.sseService.status$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((status) => this.sseStatus.set(status));
+
+    // Push notification fallback — only REST-refresh when SSE is not live.
     this.pushEvents.events$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (event.kind === 'NEW_REQUEST' || event.kind === 'APP_RESUMED') {
-          this.loadRequests();
+          if (this.sseStatus() !== 'connected') {
+            this.loadRequests();
+          }
         }
       });
 
     void this.loadCurrentAppUserAndRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.sseService.setRequestsPageActive(false);
   }
 
   protected refreshAll(): void {
@@ -103,11 +132,8 @@ export class RequestsPage implements OnInit {
     this.error.set('');
     this.api.listRequests().subscribe({
       next: (items) => {
-        this.items.set(this.sortedRequests(items));
-        const currentSelectedId = this.selectedRequest()?.id;
-        if (currentSelectedId != null) {
-          this.selectedRequest.set(items.find((item) => item.id === currentSelectedId) ?? null);
-        }
+        // Push into service so it stays in sync as the single source of truth.
+        this.sseService.items$.next(items);
         this.loading.set(false);
       },
       error: () => {
@@ -337,9 +363,10 @@ export class RequestsPage implements OnInit {
       }
     } catch {
       this.currentAppUser.set(null);
-    } finally {
-      this.refreshAll();
     }
+    // Do NOT call refreshAll() here — SSE sends the initial snapshot immediately
+    // on connect, so a parallel REST call would cause a double-update race.
+    // refreshAll() is only used for the manual refresh button (SSE fallback).
   }
 
   private saveAction(payload: RequestWritePayload, requestId: number): void {
@@ -348,8 +375,10 @@ export class RequestsPage implements OnInit {
     this.api.saveRequest(payload, requestId).subscribe({
       next: (saved) => {
         this.acting.set(false);
-        const updated = this.items().map((item) => (item.id === requestId ? saved : item));
-        this.items.set(this.sortedRequests(updated));
+        // Update the detail sheet immediately from the REST response so the user
+        // sees the change without waiting for the SSE broadcast roundtrip.
+        // Do NOT patch items here — SSE broadcast is the authoritative source
+        // and will arrive momentarily, preventing a double-update flicker.
         this.selectedRequest.set(saved);
       },
       error: () => {

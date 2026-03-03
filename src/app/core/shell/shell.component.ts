@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -9,22 +10,25 @@ import {
   bedOutline,
   businessOutline,
   chevronForwardOutline,
+  closeOutline,
   homeOutline,
   logOutOutline,
   menuOutline,
   moon,
   moonOutline,
+  notificationsOutline,
   peopleOutline,
   personAddOutline,
   sparklesOutline,
   sunny,
   sunnyOutline,
 } from 'ionicons/icons';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../auth/firebase-auth.service';
-import { AppUser, AccessRole } from '../models/orca.models';
+import { AppUser, AccessRole, ServiceRequest } from '../models/orca.models';
 import { PushNotificationsService } from '../notifications/push-notifications.service';
 import { OrcaApiService } from '../services/orca-api.service';
+import { OrkaSseService } from '../services/orka-sse.service';
 
 type NavItem = {
   label: string;
@@ -50,7 +54,7 @@ const NAV_ITEMS: NavItem[] = [
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
-export class ShellComponent implements OnInit {
+export class ShellComponent implements OnInit, OnDestroy {
   @Input() pageTitle = '';
   @Input() pageSubtitle = '';
 
@@ -60,11 +64,17 @@ export class ShellComponent implements OnInit {
   private readonly router    = inject(Router);
   private readonly push      = inject(PushNotificationsService);
 
+  private readonly sseService = inject(OrkaSseService);
+  private toastSub?: Subscription;
+
   protected readonly appUser     = signal<AppUser | null>(null);
   protected readonly sidebarOpen = signal(false);
   protected readonly loggingOut  = signal(false);
   protected readonly logoutError = signal('');
   protected readonly isDark      = signal(true);
+  protected readonly requestsUnreadCount = toSignal(this.sseService.unreadCount$, { initialValue: 0 });
+  /** The request shown in the toast. Null = toast hidden. */
+  protected readonly toastRequest = signal<ServiceRequest | null>(null);
 
   protected readonly visibleNav = computed(() => {
     const role = this.appUser()?.accessRole;
@@ -96,7 +106,7 @@ export class ShellComponent implements OnInit {
       homeOutline, sparklesOutline, bedOutline, peopleOutline,
       personAddOutline, businessOutline, logOutOutline, menuOutline,
       chevronForwardOutline, alertCircleOutline, moonOutline, sunnyOutline,
-      moon, sunny
+      moon, sunny, notificationsOutline, closeOutline
     });
     // Restore persisted theme
     const saved = localStorage.getItem('orka-theme');
@@ -107,6 +117,29 @@ export class ShellComponent implements OnInit {
 
   ngOnInit(): void {
     void this.loadUser();
+    // Drive toast from SSE service — a new request sets latestNewRequest$,
+    // navigating to requests clears it.
+    this.toastSub = this.sseService.latestNewRequest$.subscribe((req) => {
+      this.toastRequest.set(req);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.toastSub?.unsubscribe();
+  }
+
+  protected dismissToast(): void {
+    // Hide the toast locally without clearing the unread count.
+    this.toastRequest.set(null);
+  }
+
+  protected goToRequests(): void {
+    this.dismissToast();
+    void this.router.navigateByUrl('/requests', { replaceUrl: true });
+  }
+
+  protected toastTypeLabel(req: ServiceRequest): string {
+    return req.type?.replace(/_/g, ' ') ?? 'Request';
   }
 
   protected toggleTheme(): void {
