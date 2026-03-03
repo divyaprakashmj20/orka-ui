@@ -115,6 +115,17 @@
                       Reopen
                     </ion-button>
                   }
+                  @if (canCancel(item)) {
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      color="danger"
+                      (click)="$event.stopPropagation(); cancel(item)"
+                      [disabled]="acting()"
+                    >
+                      Cancel
+                    </ion-button>
+                  }
                   <ion-button size="small" fill="clear" (click)="$event.stopPropagation(); openRequest(item)">
                     View
                   </ion-button>
@@ -191,6 +202,11 @@
             @if (canReopen(item)) {
               <ion-button fill="outline" color="medium" (click)="reopen(item)" [disabled]="acting()">
                 Reopen
+              </ion-button>
+            }
+            @if (canCancel(item)) {
+              <ion-button fill="outline" color="danger" (click)="cancel(item)" [disabled]="acting()">
+                Cancel
               </ion-button>
             }
           </div>

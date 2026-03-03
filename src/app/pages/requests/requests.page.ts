@@ -11,8 +11,6 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
-  IonSegment,
-  IonSegmentButton,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
@@ -29,6 +27,12 @@ import { PushEventsService } from '../../core/notifications/push-events.service'
 import { OrcaApiService } from '../../core/services/orca-api.service';
 
 type RequestBoardFilter = 'ALL' | RequestStatus;
+type RequestActionPatch = {
+  status?: RequestStatus | null;
+  assigneeId?: number | null;
+  acceptedAt?: string | null;
+  completedAt?: string | null;
+};
 
 @Component({
   selector: 'app-requests-page',
@@ -45,9 +49,7 @@ type RequestBoardFilter = 'ALL' | RequestStatus;
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonSegment,
-    IonSegmentButton
+    IonButton
   ],
   templateUrl: './requests.page.html',
   styleUrl: './requests.page.scss'
@@ -151,7 +153,7 @@ export class RequestsPage implements OnInit {
     if (!currentUser?.id) {
       return false;
     }
-    return item.assignee?.id === currentUser.id || currentUser.accessRole === 'HOTEL_ADMIN' || currentUser.accessRole === 'ADMIN';
+    return item.assignee?.id === currentUser.id || this.canManageRequestState(currentUser);
   }
 
   protected canReopen(item: ServiceRequest): boolean {
@@ -159,10 +161,18 @@ export class RequestsPage implements OnInit {
       return false;
     }
     const currentUser = this.currentAppUser();
-    return (
-      (item.status === 'COMPLETED' || item.status === 'CANCELLED') &&
-      (currentUser?.accessRole === 'HOTEL_ADMIN' || currentUser?.accessRole === 'ADMIN')
-    );
+    return (item.status === 'COMPLETED' || item.status === 'CANCELLED') && this.canManageRequestState(currentUser);
+  }
+
+  protected canCancel(item: ServiceRequest): boolean {
+    if (item.id == null) {
+      return false;
+    }
+    const currentUser = this.currentAppUser();
+    if (!currentUser) {
+      return false;
+    }
+    return (item.status === 'NEW' || item.status === 'ACCEPTED') && this.canManageRequestState(currentUser);
   }
 
   protected accept(item: ServiceRequest): void {
@@ -174,7 +184,7 @@ export class RequestsPage implements OnInit {
     const payload = this.buildRequestPayload(item, {
       status: 'ACCEPTED',
       assigneeId: currentUser.id,
-      acceptedAt: item.acceptedAt ?? new Date().toISOString(),
+      acceptedAt: item.acceptedAt ?? this.nowIso(),
       completedAt: null
     });
     this.saveAction(payload, item.id!);
@@ -187,7 +197,7 @@ export class RequestsPage implements OnInit {
 
     const payload = this.buildRequestPayload(item, {
       status: 'COMPLETED',
-      completedAt: new Date().toISOString()
+      completedAt: this.nowIso()
     });
     this.saveAction(payload, item.id!);
   }
@@ -206,26 +216,24 @@ export class RequestsPage implements OnInit {
     this.saveAction(payload, item.id!);
   }
 
+  protected cancel(item: ServiceRequest): void {
+    if (!this.canCancel(item)) {
+      return;
+    }
+
+    const payload = this.buildRequestPayload(item, {
+      status: 'CANCELLED',
+      completedAt: null
+    });
+    this.saveAction(payload, item.id!);
+  }
+
   protected statusLabel(item: ServiceRequest): string {
     return item.status ?? 'NEW';
   }
 
   protected typeLabel(item: ServiceRequest): string {
     return item.type?.replaceAll('_', ' ') ?? 'Unspecified';
-  }
-
-  protected roomLabel(item: ServiceRequest): string {
-    const room = item.room?.number ? `Room ${item.room.number}` : 'Room unknown';
-    const hotel = item.hotel?.name;
-    return hotel ? `${hotel} • ${room}` : room;
-  }
-
-  protected assigneeLabel(item: ServiceRequest): string {
-    if (!item.assignee?.name) {
-      return 'Unassigned';
-    }
-    const role = item.assignee.employeeRole ?? item.assignee.accessRole;
-    return role ? `${item.assignee.name} • ${role.replaceAll('_', ' ')}` : item.assignee.name;
   }
 
   protected assigneeName(item: ServiceRequest): string {
@@ -235,18 +243,6 @@ export class RequestsPage implements OnInit {
   protected assigneeRole(item: ServiceRequest): string {
     const role = item.assignee?.employeeRole ?? item.assignee?.accessRole;
     return role ? role.replaceAll('_', ' ') : 'No role';
-  }
-
-  protected timeLabel(item: ServiceRequest): string {
-    const value = item.completedAt ?? item.acceptedAt ?? item.createdAt;
-    if (!value) {
-      return 'No timestamp';
-    }
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-    return date.toLocaleString();
   }
 
   protected dateTimeLabel(value: string | null | undefined): string {
@@ -358,12 +354,7 @@ export class RequestsPage implements OnInit {
 
   private buildRequestPayload(
     item: ServiceRequest,
-    overrides: {
-      status?: RequestStatus | null;
-      assigneeId?: number | null;
-      acceptedAt?: string | null;
-      completedAt?: string | null;
-    }
+    overrides: RequestActionPatch
   ): RequestWritePayload {
     return {
       hotelId: item.hotel?.id ?? 0,
@@ -391,5 +382,17 @@ export class RequestsPage implements OnInit {
       const bTime = Date.parse(b.createdAt ?? '') || 0;
       return bTime - aTime;
     });
+  }
+
+  private canManageRequestState(user: AppUser | null): boolean {
+    return (
+      user?.accessRole === 'SUPERADMIN' ||
+      user?.accessRole === 'HOTEL_ADMIN' ||
+      user?.accessRole === 'ADMIN'
+    );
+  }
+
+  private nowIso(): string {
+    return new Date().toISOString();
   }
 }
