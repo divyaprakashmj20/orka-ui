@@ -17,6 +17,7 @@ type HotelGroupForm = {
 
 @Component({
   selector: 'app-hotel-groups-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,

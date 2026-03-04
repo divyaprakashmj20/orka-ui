@@ -26,6 +26,7 @@ type Draft = {
 
 @Component({
   selector: 'app-staff-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,

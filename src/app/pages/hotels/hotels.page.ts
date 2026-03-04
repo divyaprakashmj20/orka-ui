@@ -24,6 +24,7 @@ type HotelForm = {
 
 @Component({
   selector: 'app-hotels-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,

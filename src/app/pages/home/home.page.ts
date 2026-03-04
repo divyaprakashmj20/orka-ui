@@ -34,6 +34,7 @@ type DashboardSection = {
 
 @Component({
   selector: 'app-home-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,

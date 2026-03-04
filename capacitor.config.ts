@@ -7,7 +7,10 @@ const config: CapacitorConfig = {
   appId: 'com.lytspeed.orka',
   appName: 'Orka',
   webDir: 'dist/orka-ui/browser',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
+  android: {
+    adjustMarginsForEdgeToEdge: 'auto'
+  }
 };
 
 if (isLocalMode) {

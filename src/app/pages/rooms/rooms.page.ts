@@ -24,6 +24,7 @@ type RoomForm = {
 
 @Component({
   selector: 'app-rooms-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,

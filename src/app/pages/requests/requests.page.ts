@@ -31,6 +31,7 @@ type RequestActionPatch = {
 
 @Component({
   selector: 'app-requests-page',
+  host: { class: 'ion-page' },
   standalone: true,
   imports: [
     CommonModule,
