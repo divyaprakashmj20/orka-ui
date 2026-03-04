@@ -397,6 +397,6 @@ export class HomePage implements OnInit {
   }
 
   protected navigate(path: string): void {
-    void this.router.navigateByUrl(path, { replaceUrl: true });
+    void this.router.navigateByUrl(path);
   }
 }

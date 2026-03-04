@@ -116,19 +116,8 @@ function roleGuard(allowedRoles: AppUser['accessRole'][]): CanActivateFn {
   };
 }
 
-export const guestGuard: CanActivateFn = (route) => {
-  const auth = inject(FirebaseAuthService);
-  const router = inject(Router);
-
-  return auth.authState$.pipe(
-    take(1),
-    map((user) => {
-      if (!user) {
-        return true;
-      }
-
-      const redirectTo = route.queryParamMap.get('redirectTo');
-      return redirectTo ? router.parseUrl(redirectTo) : router.createUrlTree(['/']);
-    })
-  );
+export const guestGuard: CanActivateFn = () => {
+  // Keep guest pages (login/register/forgot-password) always accessible.
+  // Main app routes are already protected by authGuard/role guards.
+  return of(true);
 };

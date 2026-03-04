@@ -36,6 +36,7 @@ export const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage)
   },

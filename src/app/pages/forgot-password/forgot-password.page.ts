@@ -34,7 +34,7 @@ export class ForgotPasswordPage {
   protected readonly success = signal('');
 
   protected go(path: string): void {
-    void this.nav.navigateRoot(path);
+    void this.nav.navigateForward(path);
   }
 
   protected async sendReset(): Promise<void> {

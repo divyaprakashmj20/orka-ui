@@ -148,7 +148,7 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   protected goToRequests(): void {
     this.dismissToast();
-    void this.router.navigateByUrl('/requests', { replaceUrl: true });
+    void this.router.navigateByUrl('/requests');
   }
 
   protected toastTypeLabel(req: ServiceRequest): string {
@@ -176,7 +176,7 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   protected navigate(path: string): void {
     this.closeSidebar();
-    void this.router.navigateByUrl(path, { replaceUrl: true });
+    void this.router.navigateByUrl(path);
   }
 
   protected isActive(path: string): boolean {

@@ -48,7 +48,7 @@ export class RegisterPage {
   protected readonly error = signal('');
 
   protected go(path: string): void {
-    void this.nav.navigateRoot(path);
+    void this.nav.navigateForward(path);
   }
 
   protected async register(): Promise<void> {

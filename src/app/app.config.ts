@@ -1,8 +1,9 @@
 import { APP_INITIALIZER, ApplicationConfig, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
+import { IonicRouteStrategy } from '@ionic/angular/common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 import { routes } from './app.routes';
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([firebaseAuthInterceptor])),
     provideRouter(routes),
     provideIonicAngular({ mode: 'md' }),
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     {
       provide: APP_INITIALIZER,
       useFactory: firebaseConfigInitializer,

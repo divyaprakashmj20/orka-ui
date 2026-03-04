@@ -400,7 +400,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 .o-sidebar-footer {
   flex-shrink: 0;
   border-top: 1px solid var(--o-border);
-  padding: 12px;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
 .o-user-card {
@@ -538,7 +538,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 
 .o-body {
   flex: 1;
-  padding: 28px 28px 48px;
+  padding: 28px 28px calc(48px + env(safe-area-inset-bottom, 0px));
   width: 100%;
   max-width: 1400px;
 }
@@ -906,7 +906,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 24px 16px;
+  padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
   background:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,102,241,0.12), transparent),
     var(--o-bg);
@@ -997,7 +997,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 
   .o-main { margin-left: 0; }
   .o-burger { display: flex; }
-  .o-body { padding: 18px 16px 40px; }
+  .o-body { padding: 18px 16px calc(40px + env(safe-area-inset-bottom, 0px)); }
   /* only override horizontal padding — preserve safe-area padding-top set on the base rule */
   .o-topbar { padding-left: 16px; padding-right: 16px; }
   /* subtitle adds no value in the narrow topbar on mobile — hide it */

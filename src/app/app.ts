@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { App as CapApp } from '@capacitor/app';
 import { PushNotificationsService } from './core/notifications/push-notifications.service';
 
 @Component({
@@ -9,7 +10,23 @@ import { PushNotificationsService } from './core/notifications/push-notification
   styleUrl: './app.scss'
 })
 export class App {
-  constructor(private readonly pushNotifications: PushNotificationsService) {
+  @ViewChild(IonRouterOutlet, { static: true })
+  private routerOutlet?: IonRouterOutlet;
+
+  constructor(
+    private readonly pushNotifications: PushNotificationsService
+  ) {
     void this.pushNotifications.start();
+    this.registerBackButton();
+  }
+
+  private registerBackButton(): void {
+    void CapApp.addListener('backButton', () => {
+      if (this.routerOutlet?.canGoBack()) {
+        void this.routerOutlet.pop();
+      } else {
+        void CapApp.exitApp();
+      }
+    });
   }
 }
