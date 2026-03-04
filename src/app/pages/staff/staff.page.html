@@ -219,119 +219,98 @@
     </div>
 
     <div class="inline-actions inline-actions-compact">
-      <ion-button type="button" fill="outline"  size="small" (click)="toggleEditor(user.id)">
-        {{ expandedUserId() === user.id ? 'Close editor' : 'Edit member' }}
+      <ion-button type="button" fill="outline" size="small" (click)="openEditor(user)">
+        Edit member
       </ion-button>
     </div>
+  </article>
+</ng-template>
 
-    @if (user.id != null && expandedUserId() === user.id) {
-      <div class="staff-grid">
-        <div class="o-field">
-          <label>Name</label>
-          <ion-input
-            [(ngModel)]="drafts[user.id].name"
-            [ngModelOptions]="{ standalone: true }"
-          />
-        </div>
-
-        <div class="o-field">
-          <label>Phone</label>
-          <ion-input
-            [(ngModel)]="drafts[user.id].phone"
-            [ngModelOptions]="{ standalone: true }"
-          />
-        </div>
-
-        <div class="o-field">
-          <label>Access Role</label>
-          <ion-select
-            [(ngModel)]="drafts[user.id].accessRole"
-            [ngModelOptions]="{ standalone: true }"
-            (ngModelChange)="onRoleChange(user.id)"
-            interface="alert"
-          >
-            @for (role of roleOptionsForUser(); track role) {
-              <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
-            }
-          </ion-select>
-        </div>
-
-        @if (needsGroupAssignment(drafts[user.id].accessRole)) {
-          <div class="o-field">
-            <label>Assigned Hotel Group</label>
-            <ion-select
-              [(ngModel)]="drafts[user.id].assignedHotelGroupId"
-              [ngModelOptions]="{ standalone: true }"
-              interface="alert"
-            >
-              <ion-select-option [value]="null">Select group</ion-select-option>
-              @for (group of assignableHotelGroups(); track group.id ?? group.name) {
-                <ion-select-option [value]="group.id ?? null">
-                  {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                </ion-select-option>
-              }
-            </ion-select>
+@if (editingUser(); as user) {
+  @if (user.id != null) {
+    <div class="sf-popup-overlay" (click)="closeEditor()">
+      <section class="sf-popup-card" (click)="$event.stopPropagation()">
+        <div class="sf-popup-head">
+          <div>
+            <p class="o-page-eyebrow">Edit Member</p>
+            <h3>{{ user.name }}</h3>
+            <p>{{ user.email }}</p>
           </div>
-        }
+          <ion-button fill="clear" size="small" (click)="closeEditor()">Close</ion-button>
+        </div>
 
-        @if (needsHotelAssignment(drafts[user.id].accessRole)) {
+        <div class="staff-grid">
           <div class="o-field">
-            <label>Assigned Hotel</label>
-            <ion-select
-              [(ngModel)]="drafts[user.id].assignedHotelId"
-              [ngModelOptions]="{ standalone: true }"
-              interface="alert"
-            >
-              <ion-select-option [value]="null">Select hotel</ion-select-option>
-              @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
-                <ion-select-option [value]="hotel.id ?? null">
-                  {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                </ion-select-option>
-              }
-            </ion-select>
+            <label>Name</label>
+            <ion-input [(ngModel)]="drafts[user.id].name" [ngModelOptions]="{ standalone: true }" />
           </div>
-        }
-
-        @if (needsEmployeeRole(drafts[user.id].accessRole)) {
           <div class="o-field">
-            <label>Operational Role</label>
-            <ion-select
-              [(ngModel)]="drafts[user.id].employeeRole"
-              [ngModelOptions]="{ standalone: true }"
-              interface="alert"
-            >
-              <ion-select-option [value]="null">Select role</ion-select-option>
-              @for (role of employeeRoles; track role) {
+            <label>Phone</label>
+            <ion-input [(ngModel)]="drafts[user.id].phone" [ngModelOptions]="{ standalone: true }" />
+          </div>
+          <div class="o-field">
+            <label>Access Role</label>
+            <ion-select [(ngModel)]="drafts[user.id].accessRole" [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="onRoleChange(user.id)" interface="alert">
+              @for (role of roleOptionsForUser(); track role) {
                 <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
               }
             </ion-select>
           </div>
-        }
-
-        <div class="o-field">
-          <ion-checkbox
-            slot="start"
-            type="checkbox"
-            [(ngModel)]="drafts[user.id].active"
-            [ngModelOptions]="{ standalone: true }"
-          />
-          <label>Access Active</label>
+          @if (needsGroupAssignment(drafts[user.id].accessRole)) {
+            <div class="o-field">
+              <label>Assigned Hotel Group</label>
+              <ion-select [(ngModel)]="drafts[user.id].assignedHotelGroupId"
+                [ngModelOptions]="{ standalone: true }" interface="alert">
+                <ion-select-option [value]="null">Select group</ion-select-option>
+                @for (group of assignableHotelGroups(); track group.id ?? group.name) {
+                  <ion-select-option [value]="group.id ?? null">
+                    {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </div>
+          }
+          @if (needsHotelAssignment(drafts[user.id].accessRole)) {
+            <div class="o-field">
+              <label>Assigned Hotel</label>
+              <ion-select [(ngModel)]="drafts[user.id].assignedHotelId"
+                [ngModelOptions]="{ standalone: true }" interface="alert">
+                <ion-select-option [value]="null">Select hotel</ion-select-option>
+                @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
+                  <ion-select-option [value]="hotel.id ?? null">
+                    {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </div>
+          }
+          @if (needsEmployeeRole(drafts[user.id].accessRole)) {
+            <div class="o-field">
+              <label>Operational Role</label>
+              <ion-select [(ngModel)]="drafts[user.id].employeeRole"
+                [ngModelOptions]="{ standalone: true }" interface="alert">
+                <ion-select-option [value]="null">Select role</ion-select-option>
+                @for (role of employeeRoles; track role) {
+                  <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
+                }
+              </ion-select>
+            </div>
+          }
+          <div class="o-field">
+            <ion-checkbox slot="start" type="checkbox"
+              [(ngModel)]="drafts[user.id].active" [ngModelOptions]="{ standalone: true }" />
+            <label>Access Active</label>
+          </div>
         </div>
+
+        @if (error()) { <p class="o-error">{{ error() }}</p> }
 
         <div class="o-form-actions">
-          <ion-button type="button" [disabled]="isBusy(user.id)" (click)="save(user)">
-            Save Changes
-          </ion-button>
-          <ion-button
-            type="button"
-            fill="outline"
-            [disabled]="isBusy(user.id)"
-            (click)="toggleEditor(user.id)"
-          >
-            Cancel
-          </ion-button>
+          <ion-button type="button" [disabled]="isBusy(user.id)" (click)="save(user)">Save Changes</ion-button>
+          <ion-button type="button" fill="outline" [disabled]="isBusy(user.id)" (click)="closeEditor()">Cancel</ion-button>
         </div>
-      </div>
-    }
-  </article>
-</ng-template>
+      </section>
+    </div>
+  }
+}

@@ -32,8 +32,11 @@ export class HotelGroupsPage implements OnInit {
   protected readonly items = signal<HotelGroup[]>([]);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly modalSaving = signal(false);
+  protected readonly editModalOpen = signal(false);
   protected readonly error = signal('');
   protected form: HotelGroupForm = this.emptyForm();
+  protected editForm: HotelGroupForm = this.emptyForm();
 
   constructor(private readonly api: OrcaApiService) {}
 
@@ -85,11 +88,30 @@ export class HotelGroupsPage implements OnInit {
   }
 
   protected edit(item: HotelGroup): void {
-    this.form = {
+    this.editForm = {
       id: item.id ?? null,
       name: item.name ?? '',
       code: item.code ?? ''
     };
+    this.editModalOpen.set(true);
+  }
+
+  protected closeModal(): void {
+    this.editModalOpen.set(false);
+    this.editForm = this.emptyForm();
+    this.error.set('');
+  }
+
+  protected saveEdit(): void {
+    const name = this.editForm.name.trim();
+    if (!name) { this.error.set('Name is required.'); return; }
+    this.modalSaving.set(true);
+    this.error.set('');
+    const payload: HotelGroup = { id: this.editForm.id ?? undefined, name, code: this.editForm.code.trim() || null };
+    this.api.saveHotelGroup(payload).subscribe({
+      next: () => { this.modalSaving.set(false); this.closeModal(); this.load(); },
+      error: () => { this.error.set('Save failed.'); this.modalSaving.set(false); }
+    });
   }
 
   protected remove(item: HotelGroup): void {

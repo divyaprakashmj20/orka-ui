@@ -9,24 +9,19 @@
         </p>
       </div>
       <div class="o-page-head-meta">
-        <span class="o-badge">{{ pendingUsers().length }} pending user(s)</span>
+        <span class="o-badge" [class.pending]="pendingUsers().length > 0">{{ pendingUsers().length }} pending</span>
       </div>
     </div>
 
     <div class="o-card">
-      <div class="o-card-head">
-        <h3>Pending App Users</h3>
-        <p class="o-card-copy">Only approvals inside your role scope are shown here.</p>
+      <div class="o-card-head au-card-head">
+        <div>
+          <h3>Pending Approvals</h3>
+          <p class="o-card-copy">Only users inside your scope are shown.</p>
+        </div>
+        <ion-button type="button" fill="outline" size="small" (click)="refreshAll()">Refresh</ion-button>
       </div>
       <div class="o-card-body">
-        <div class="o-page-head-row">
-          <div class="o-page-head-meta">
-            <span class="o-badge">Role-aware approval queue</span>
-          </div>
-          <div class="o-form-actions">
-            <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
-          </div>
-        </div>
 
         @if (error()) {
           <p class="o-error">{{ error() }}</p>
@@ -43,6 +38,7 @@
                     <h3>{{ user.name }}</h3>
                     <p>{{ user.email }}</p>
                   </div>
+                  <span class="o-badge pending au-badge-push">Pending</span>
                 </div>
                 <div class="o-record-meta">
                   <span class="o-badge">
@@ -54,6 +50,8 @@
                 </div>
 
                 @if (user.id != null) {
+                  <hr class="o-divider">
+                  <p class="au-section-label">Assign Access</p>
                   <div class="approval-grid">
                     <div class="o-field">
                       <label>Role</label>
@@ -164,18 +162,18 @@
     <div class="o-card-body">
       <div class="o-list">
         @for (user of rejectedUsers(); track user.id ?? user.firebaseUid) {
-          <article class="o-record">
+          <article class="o-record au-record--rejected">
             <div class="o-record-head">
-              <div class="o-record-tag" aria-hidden="true">{{ user.name.charAt(0).toUpperCase() }}</div>
+              <div class="o-record-tag au-record-tag--rejected" aria-hidden="true">{{ user.name.charAt(0).toUpperCase() }}</div>
               <div>
                 <h3>{{ user.name }}</h3>
                 <p>{{ user.email }}</p>
               </div>
+              <span class="o-badge au-badge--rejected au-badge-push">Rejected</span>
             </div>
             <div class="o-record-meta">
-              <span class="o-badge" style="background:hsl(0 72% 51%/0.15);color:hsl(0 72% 40%)">Rejected</span>
-              <span class="o-badge">Requested Group: {{ user.requestedHotelGroup?.name || '-' }}</span>
-              <span class="o-badge">Requested Hotel: {{ user.requestedHotel?.name || '-' }}</span>
+              <span class="o-badge">Requested Group: {{ user.requestedHotelGroup?.name || '—' }}</span>
+              <span class="o-badge">Requested Hotel: {{ user.requestedHotel?.name || '—' }}</span>
             </div>
             <div class="o-form-actions" style="margin-top:.75rem">
               <ion-button

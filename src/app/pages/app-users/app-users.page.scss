@@ -3,7 +3,52 @@
 }
 
 .approval-grid {
-  margin-top: 14px;
   display: grid;
   gap: 12px;
+}
+
+/* Card head with side action button */
+.au-card-head {
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+
+  > div { display: flex; flex-direction: column; gap: 2px; }
+}
+
+/* "Assign Access" separator label inside pending record */
+.au-section-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--o-text-2);
+  margin: 0;
+}
+
+/* Push a badge to the far right in a flex record-head */
+.au-badge-push {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Rejected record card — red tint */
+.au-record--rejected {
+  border-color: hsl(var(--orka-danger-hue) 84% 60% / 0.35) !important;
+  background:   hsl(var(--orka-danger-hue) 84% 60% / 0.06);
+}
+
+/* Rejected avatar circle */
+.au-record-tag--rejected {
+  background:   hsl(var(--orka-danger-hue) 84% 60% / 0.13) !important;
+  border-color: hsl(var(--orka-danger-hue) 84% 60% / 0.28) !important;
+  color:        hsl(var(--orka-danger-hue) 84% 60%)         !important;
+}
+
+/* Rejected status badge */
+.au-badge--rejected {
+  background:   var(--o-danger-dim)                         !important;
+  border-color: hsl(var(--orka-danger-hue) 84% 60% / 0.3)  !important;
+  color:        var(--o-danger)                             !important;
 }

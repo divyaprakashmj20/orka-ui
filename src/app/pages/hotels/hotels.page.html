@@ -17,7 +17,7 @@
     <div class="o-cols">
       <div class="o-card">
         <div class="o-card-head">
-          <h3>{{ form.id ? 'Edit Hotel' : 'Create Hotel' }}</h3>
+          <h3>Create Hotel</h3>
           <p class="o-card-copy">
             Each hotel inherits its broader admin scope from a hotel group.
           </p>
@@ -63,7 +63,7 @@
 
             <div class="o-form-actions">
               <ion-button type="submit" [disabled]="saving()">
-                {{ saving() ? 'Saving...' : form.id ? 'Update' : 'Create' }}
+                {{ saving() ? 'Saving...' : 'Create' }}
               </ion-button>
               <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
               <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
@@ -95,18 +95,12 @@
                     </div>
                   </div>
                   <div class="o-record-meta">
-                    <span class="o-badge">Code: {{ item.code || '-' }}</span>
-                    <span class="o-badge">
-                      Group: {{ item.hotelGroup?.name || ('#' + (item.hotelGroup?.id ?? '?')) }}
-                    </span>
+                    @if (item.code) { <span class="o-badge">{{ item.code }}</span> }
+                    <span class="o-badge role">{{ item.hotelGroup?.name || ('Group #' + (item.hotelGroup?.id ?? '?')) }}</span>
                   </div>
                   <div class="o-row-actions">
-                    <ion-button type="button" fill="outline"  size="small" (click)="edit(item)">
-                      Edit
-                    </ion-button>
-                    <ion-button type="button" fill="outline"  size="small" (click)="remove(item)">
-                      Delete
-                    </ion-button>
+                    <ion-button type="button" fill="outline" size="small" (click)="edit(item)">Edit</ion-button>
+                    <ion-button type="button" fill="outline" size="small" color="danger" (click)="remove(item)">Delete</ion-button>
                   </div>
                 </article>
               } @empty {
@@ -118,3 +112,60 @@
       </div>
     </div>
 </app-shell>
+
+@if (editModalOpen()) {
+  <div class="ht-popup-overlay" (click)="closeModal()">
+    <section class="ht-popup-card" (click)="$event.stopPropagation()">
+      <div class="ht-popup-head">
+        <div>
+          <p class="o-page-eyebrow">Edit Hotel</p>
+          <h3>{{ editForm.name || 'Hotel' }}</h3>
+        </div>
+        <ion-button fill="clear" size="small" (click)="closeModal()">Close</ion-button>
+      </div>
+      <form class="o-form" (ngSubmit)="saveEdit()">
+        <div class="o-form-grid">
+          <div class="o-field">
+            <label>Name</label>
+            <ion-input [(ngModel)]="editForm.name" name="editName" required />
+          </div>
+          <div class="o-field">
+            <label>Code</label>
+            <ion-input [(ngModel)]="editForm.code" name="editCode" />
+          </div>
+          <div class="o-field">
+            <label>City</label>
+            <ion-input [(ngModel)]="editForm.city" name="editCity" />
+          </div>
+          <div class="o-field">
+            <label>Country</label>
+            <ion-input [(ngModel)]="editForm.country" name="editCountry" />
+          </div>
+          @if (showHotelGroupSelector()) {
+            <div class="o-field o-field--wide">
+              <label>Hotel Group</label>
+              <ion-select [(ngModel)]="editForm.hotelGroupId" name="editHotelGroupId" interface="alert" required>
+                <ion-select-option [value]="null">Select a group</ion-select-option>
+                @for (group of hotelGroups(); track group.id ?? group.name) {
+                  <ion-select-option [value]="group.id ?? null">
+                    {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </div>
+          } @else {
+            <div class="o-field o-field--wide">
+              <label>Hotel Group</label>
+              <ion-input [value]="fixedHotelGroupName()" readonly />
+            </div>
+          }
+        </div>
+        @if (error()) { <p class="o-error">{{ error() }}</p> }
+        <div class="o-form-actions">
+          <ion-button type="submit" [disabled]="modalSaving()">{{ modalSaving() ? 'Saving...' : 'Update' }}</ion-button>
+          <ion-button type="button" fill="outline" (click)="closeModal()">Cancel</ion-button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

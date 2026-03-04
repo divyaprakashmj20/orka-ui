@@ -51,6 +51,7 @@ export class StaffPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly error = signal('');
   protected readonly busyIds = signal<number[]>([]);
+  protected readonly editingUser = signal<AppUser | null>(null);
   protected readonly expandedUserId = signal<number | null>(null);
   protected readonly roleFilter = signal<'ALL' | AccessRole>('ALL');
   protected readonly statusFilter = signal<'ALL' | 'ACTIVE' | 'DISABLED'>('ALL');
@@ -187,10 +188,19 @@ export class StaffPage implements OnInit {
   }
 
   protected toggleEditor(userId: number | undefined): void {
-    if (userId == null) {
-      return;
-    }
+    if (userId == null) return;
     this.expandedUserId.set(this.expandedUserId() === userId ? null : userId);
+  }
+
+  protected openEditor(user: AppUser): void {
+    this.editingUser.set(user);
+    this.expandedUserId.set(user.id ?? null);
+  }
+
+  protected closeEditor(): void {
+    this.editingUser.set(null);
+    this.expandedUserId.set(null);
+    this.error.set('');
   }
 
   protected setRoleFilter(role: 'ALL' | AccessRole): void {
@@ -402,7 +412,7 @@ export class StaffPage implements OnInit {
           this.markBusy(id, false);
           this.users.set(this.users().map((existing) => (existing.id === updated.id ? updated : existing)));
           this.seedDrafts(this.users());
-          this.expandedUserId.set(null);
+          this.closeEditor();
         },
         error: () => {
           this.markBusy(id, false);

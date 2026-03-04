@@ -85,3 +85,44 @@
 @media (min-width: 1080px) {
   .roster-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ── Staff edit popup overlay ────────────────────────────── */
+.sf-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(7,12,24,.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sf-popup-card {
+  width: min(100%, 560px);
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  border-radius: 24px;
+  border: 1px solid var(--o-border);
+  background: rgba(15,23,42,.96);
+  box-shadow: 0 32px 64px rgba(0,0,0,.6);
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+
+  .staff-grid {
+    border-top: 1px solid var(--o-border);
+    padding-top: 16px;
+  }
+}
+
+.sf-popup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 { margin: 6px 0 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.015em; }
+  p  { margin: 0; font-size: 0.84rem; color: var(--o-muted); }
+}
