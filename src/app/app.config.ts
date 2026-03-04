@@ -5,6 +5,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { IonicRouteStrategy } from '@ionic/angular/common';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { Capacitor } from '@capacitor/core';
 
 import { routes } from './app.routes';
 import { firebaseAuthInterceptor } from './core/auth/firebase-auth.interceptor';
@@ -15,12 +16,14 @@ const firebaseConfigInitializer = () => {
   return () => configService.load();
 };
 
+const isAndroid = Capacitor.getPlatform() === 'android';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([firebaseAuthInterceptor])),
     provideRouter(routes),
-    provideIonicAngular({ mode: 'md' }),
+    provideIonicAngular({ mode: 'md', animated: !isAndroid }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     {
       provide: APP_INITIALIZER,
