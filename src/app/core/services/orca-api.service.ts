@@ -14,6 +14,8 @@ import {
   GuestSessionBootstrapResult,
   Hotel,
   HotelGroup,
+  ProfileUpdatePayload,
+  ReportOverview,
   RequestWritePayload,
   Room,
   ServiceRequest
@@ -47,6 +49,10 @@ export class OrcaApiService {
 
   updateAppUser(id: number, input: Partial<AppUser>): Observable<AppUser> {
     return this.http.put<AppUser>(`${this.apiBase}/app-users/${id}`, input);
+  }
+
+  restoreAppUser(id: number): Observable<AppUser> {
+    return this.http.put<AppUser>(`${this.apiBase}/app-users/${id}/restore`, {});
   }
 
   registerDeviceToken(input: DeviceTokenRegisterPayload): Observable<void> {
@@ -126,5 +132,21 @@ export class OrcaApiService {
 
   deleteRequest(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiBase}/requests/${id}`);
+  }
+
+  getMyProfile(): Observable<AppUser> {
+    return this.http.get<AppUser>(`${this.apiBase}/app-users/me`);
+  }
+
+  updateMyProfile(input: ProfileUpdatePayload): Observable<AppUser> {
+    return this.http.put<AppUser>(`${this.apiBase}/app-users/me/profile`, input);
+  }
+
+  listAllAppUsers(): Observable<AppUser[]> {
+    return this.http.get<AppUser[]>(`${this.apiBase}/app-users`);
+  }
+
+  getReportOverview(): Observable<ReportOverview> {
+    return this.http.get<ReportOverview>(`${this.apiBase}/reports/overview`);
   }
 }

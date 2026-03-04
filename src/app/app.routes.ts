@@ -30,6 +30,11 @@ export const routes: Routes = [
       import('./pages/forgot-password/forgot-password.page').then((m) => m.ForgotPasswordPage)
   },
   {
+    path: 're-apply',
+    loadComponent: () =>
+      import('./pages/re-apply/re-apply.page').then((m) => m.ReApplyPage)
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage)
@@ -64,6 +69,16 @@ export const routes: Routes = [
     path: 'requests',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/requests/requests.page').then((m) => m.RequestsPage)
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/profile/profile.page').then((m) => m.ProfilePage)
+  },
+  {
+    path: 'reports',
+    canActivate: [hotelAdminGuard],
+    loadComponent: () => import('./pages/reports/reports.page').then((m) => m.ReportsPage)
   },
   {
     path: '**',

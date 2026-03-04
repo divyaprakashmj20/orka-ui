@@ -62,6 +62,9 @@
               </ion-button>
               <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
               <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
+              <ion-button type="button" fill="outline" [disabled]="bulkExporting()" (click)="exportAllQrCodes()">
+                {{ bulkExporting() ? 'Generating...' : 'Export All QR Codes' }}
+              </ion-button>
             </div>
           </form>
           @if (error()) {

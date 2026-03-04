@@ -50,12 +50,14 @@ export class AppUsersPage implements OnInit {
 
   protected readonly currentAppUser = signal<AppUser | null>(null);
   protected readonly pendingUsers = signal<AppUser[]>([]);
+  protected readonly rejectedUsers = signal<AppUser[]>([]);
   protected readonly hotelGroups = signal<HotelGroup[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
   protected readonly employeeRoles = EMPLOYEE_ROLES;
   protected readonly loading = signal(false);
   protected readonly error = signal('');
   protected readonly busyIds = signal<number[]>([]);
+  protected readonly restoringIds = signal<number[]>([]);
 
   protected drafts: Record<number, Draft> = {};
 
@@ -85,6 +87,14 @@ export class AppUsersPage implements OnInit {
         this.error.set('Failed to load pending users.');
         this.loading.set(false);
       }
+    });
+
+    this.api.listAllAppUsers().subscribe({
+      next: (users) => {
+        const rejected = users.filter((u) => u.status === 'REJECTED');
+        this.rejectedUsers.set(this.filterPendingUsersForActor(rejected, actor));
+      },
+      error: () => { /* non-critical — silently ignore */ }
     });
 
     this.api.listHotelGroups().subscribe({
@@ -149,6 +159,33 @@ export class AppUsersPage implements OnInit {
         this.error.set('Approval failed.');
       }
     });
+  }
+
+  protected restore(user: AppUser): void {
+    const actor = this.currentAppUser();
+    const id = user.id;
+    if (id == null || !actor || !this.canActorManageUser(actor, user)) return;
+
+    const current = this.restoringIds();
+    this.restoringIds.set([...current, id]);
+    this.error.set('');
+    this.api.restoreAppUser(id).subscribe({
+      next: (restored) => {
+        this.restoringIds.set(this.restoringIds().filter(x => x !== id));
+        this.rejectedUsers.set(this.rejectedUsers().filter(u => u.id !== id));
+        // Immediately add to pending so it's visible without a full refresh
+        this.pendingUsers.update(list => [...list, restored]);
+        this.seedDrafts([restored]);
+      },
+      error: () => {
+        this.restoringIds.set(this.restoringIds().filter(x => x !== id));
+        this.error.set('Failed to restore user.');
+      }
+    });
+  }
+
+  protected isRestoring(userId: number | undefined): boolean {
+    return userId != null && this.restoringIds().includes(userId);
   }
 
   protected reject(user: AppUser): void {

@@ -98,6 +98,7 @@ export interface AppUser {
   assignedHotel?: HotelRef | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  fcmEnabled?: boolean;
 }
 
 export interface AppUserRegistrationPayload {
@@ -175,4 +176,31 @@ export interface GuestRequestCreatePayload {
   sessionToken: string;
   type: RequestType;
   message?: string | null;
+}
+
+export interface ProfileUpdatePayload {
+  name?: string;
+  phone?: string | null;
+  fcmEnabled?: boolean;
+}
+
+export interface ReportTopRoom {
+  roomNumber: string;
+  floor: number | null;
+  count: number;
+}
+
+export interface ReportDayCount {
+  date: string;
+  count: number;
+}
+
+export interface ReportOverview {
+  totalRequests: number;
+  byStatus: Partial<Record<RequestStatus, number>>;
+  byType: Partial<Record<RequestType, number>>;
+  avgAcceptMinutes: number | null;
+  avgCompleteMinutes: number | null;
+  topRooms: ReportTopRoom[];
+  requestsPerDay: ReportDayCount[];
 }

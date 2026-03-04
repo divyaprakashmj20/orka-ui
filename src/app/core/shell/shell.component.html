@@ -90,6 +90,12 @@
       </header>
 
       <div class="o-body">
+        @if (!isOnline()) {
+          <div class="o-offline-banner" role="alert">
+            <ion-icon name="wifi-outline"></ion-icon>
+            You are offline — live updates paused. Reconnecting when network returns.
+          </div>
+        }
         <ng-content></ng-content>
       </div>
 

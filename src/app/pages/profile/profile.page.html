@@ -1,0 +1,65 @@
+<app-shell pageTitle="Profile">
+  @if (loading()) {
+    <p class="o-empty">Loading profile…</p>
+  } @else if (user(); as u) {
+    <div class="pf-wrap">
+
+      <div class="pf-hero">
+        <div class="pf-avatar">{{ (u.name || u.email || '?').slice(0, 2).toUpperCase() }}</div>
+        <div class="pf-hero-info">
+          <h1 class="pf-name">{{ u.name || 'Unnamed' }}</h1>
+          <p class="pf-email">{{ u.email }}</p>
+          <div class="pf-chips">
+            <span class="pf-chip pf-chip--role">{{ roleLabel(u.accessRole) }}</span>
+            <span class="pf-chip pf-chip--scope">{{ scopeLabel(u) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="o-card">
+        <div class="o-card-head">
+          <h3>Personal Details</h3>
+          <p class="o-card-copy">Update how your name and phone appear in the system.</p>
+        </div>
+        <div class="o-card-body">
+          <div class="o-form">
+            <div class="o-form-grid">
+              <div class="o-field">
+                <label>Display name</label>
+                <ion-input fill="solid" type="text" placeholder="Your name" [(ngModel)]="form.name"/>
+              </div>
+              <div class="o-field">
+                <label>Phone <span class="o-field-opt">optional</span></label>
+                <ion-input fill="solid" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="o-card">
+        <div class="o-card-head">
+          <h3>Push Notifications</h3>
+          <p class="o-card-copy">Control whether this account receives FCM push alerts for new requests.</p>
+        </div>
+        <div class="o-card-body">
+          <div class="pf-toggle-row">
+            <div class="pf-toggle-text">
+              <strong>New request alerts</strong>
+              <p>Get notified on your device whenever a new service request arrives at your property.</p>
+            </div>
+            <ion-toggle [(ngModel)]="form.fcmEnabled" color="primary"></ion-toggle>
+          </div>
+        </div>
+      </div>
+
+      @if (error()) { <p class="o-error">{{ error() }}</p> }
+      @if (success()) { <p class="pf-success">Changes saved.</p> }
+
+      <ion-button expand="block" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Saving…' : 'Save Changes' }}
+      </ion-button>
+
+    </div>
+  }
+</app-shell>

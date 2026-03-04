@@ -88,7 +88,7 @@
               @for (item of items(); track item.id ?? item.name) {
                 <article class="o-record">
                   <div class="o-record-head">
-                    <div class="o-record-tag" aria-hidden="true">{{ item.name?.charAt(0)?.toUpperCase() }}</div>
+                    <div class="o-record-tag" aria-hidden="true">{{ item.name.charAt(0).toUpperCase() }}</div>
                     <div>
                       <h3>{{ item.name }}</h3>
                       <p>{{ item.city || '-' }}, {{ item.country || '-' }}</p>

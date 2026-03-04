@@ -1,0 +1,64 @@
+<div class="o-auth-scroll">
+<div class="o-auth-page">
+  <div class="o-auth-box">
+    <div class="o-auth-brand">
+      <div class="o-auth-mark">O</div>
+      <span class="o-auth-wordmark">Orka</span>
+    </div>
+    <div class="o-auth-card">
+
+      @if (loading()) {
+        <div style="text-align:center; padding: 2rem"><ion-spinner></ion-spinner></div>
+      } @else if (success()) {
+        <div style="text-align:center; padding: 1rem 0">
+          <div style="font-size:2.5rem; margin-bottom:.75rem">✓</div>
+          <h1 class="o-auth-heading">Application re-submitted</h1>
+          <p class="o-auth-sub">Your request is pending review. You will be notified once approved.</p>
+          <ion-button expand="block" fill="outline" (click)="signOut()">Sign out</ion-button>
+        </div>
+      } @else {
+        <h1 class="o-auth-heading" style="margin-bottom:.25rem">Re-apply for Access</h1>
+        <p class="o-auth-sub">Your previous application was not approved. Use an updated code if needed.</p>
+        <p class="o-auth-sub" style="opacity:.65; font-size:.8rem">Signed in as <strong>{{ email }}</strong></p>
+
+        @if (error()) {
+          <div class="o-error">{{ error() }}</div>
+        }
+
+        <form class="o-form" (ngSubmit)="submit()">
+          <div class="o-form-grid">
+            <div class="o-field">
+              <label>Full Name *</label>
+              <ion-input fill="solid" type="text" placeholder="Your name" [(ngModel)]="form.name" name="name"/>
+            </div>
+            <div class="o-field">
+              <label>Phone <span class="o-field-opt">(optional)</span></label>
+              <ion-input fill="solid" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone" name="phone"/>
+            </div>
+            <div class="o-field">
+              <label>Hotel Group Code <span class="o-field-opt">(use one or the other)</span></label>
+              <ion-input fill="solid" type="text" placeholder="GRP-XXXX" [(ngModel)]="form.hotelGroupCode" name="hotelGroupCode"/>
+            </div>
+            <div class="o-field">
+              <label>Hotel Code</label>
+              <ion-input fill="solid" type="text" placeholder="HTL-XXXX" [(ngModel)]="form.hotelCode" name="hotelCode"/>
+            </div>
+          </div>
+          <ion-button expand="block" type="submit" [disabled]="saving()">
+            @if (saving()) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner> Submitting…
+            } @else {
+              Re-submit Application
+            }
+          </ion-button>
+        </form>
+
+        <div class="o-auth-footer">
+          <a (click)="signOut()">Sign out and use a different account</a>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+</div>

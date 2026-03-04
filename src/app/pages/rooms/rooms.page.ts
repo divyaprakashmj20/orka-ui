@@ -52,6 +52,7 @@ export class RoomsPage implements OnInit {
   protected readonly roomModalMode = signal<'details' | 'edit'>('details');
   protected readonly qrCodeDataUrl = signal('');
   protected readonly qrLoading = signal(false);
+  protected readonly bulkExporting = signal(false);
   protected readonly groupedRooms = computed(() => {
     const hotelMap = new Map<
       string,
@@ -317,6 +318,73 @@ export class RoomsPage implements OnInit {
     link.href = dataUrl;
     link.download = `orka-room-${room.number}-qr.png`;
     link.click();
+  }
+
+  protected async exportAllQrCodes(): Promise<void> {
+    const rooms = this.items().filter((r) => !!r.guestAccessToken);
+    if (!rooms.length) {
+      this.error.set('No rooms with guest links to export.');
+      return;
+    }
+
+    this.bulkExporting.set(true);
+    this.error.set('');
+    try {
+      const entries: Array<{ room: Room; dataUrl: string }> = [];
+      for (const room of rooms) {
+        const url = this.guestUrl(room);
+        const dataUrl = await QRCode.toDataURL(url, {
+          errorCorrectionLevel: 'M',
+          margin: 1,
+          width: 280,
+          color: { dark: '#0f172a', light: '#ffffff' }
+        });
+        entries.push({ room, dataUrl });
+      }
+
+      const printWin = window.open('', '_blank', 'width=900,height=700');
+      if (!printWin) {
+        this.error.set('Pop-up blocked — allow pop-ups and try again.');
+        return;
+      }
+
+      const cards = entries
+        .map(
+          ({ room, dataUrl }) =>
+            `<div class="qr-card">
+              <img src="${dataUrl}" alt="QR code for room ${room.number}" />
+              <div class="qr-label">
+                <strong>${room.hotel?.name ?? ''}</strong>
+                <span>Room ${room.number}${room.floor != null ? ` · Floor ${room.floor}` : ''}</span>
+              </div>
+            </div>`
+        )
+        .join('');
+
+      printWin.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Orka — Room QR Codes</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 24px; }
+  h1 { font-size: 18px; margin-bottom: 20px; color: #0f172a; }
+  .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+  .qr-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: center; width: 200px; page-break-inside: avoid; }
+  .qr-card img { width: 160px; height: 160px; display: block; margin: 0 auto 8px; }
+  .qr-label strong { display: block; font-size: 13px; color: #0f172a; }
+  .qr-label span { font-size: 12px; color: #64748b; }
+  @media print { button { display: none; } body { margin: 10px; } }
+</style></head>
+<body>
+  <h1>Room QR Codes — ${new Date().toLocaleDateString()}</h1>
+  <p style="margin-bottom:16px;font-size:13px;color:#64748b">${entries.length} room(s)</p>
+  <button onclick="window.print()" style="margin-bottom:20px;padding:8px 16px;cursor:pointer;">Print / Save as PDF</button>
+  <div class="grid">${cards}</div>
+</body></html>`);
+      printWin.document.close();
+    } catch {
+      this.error.set('Failed to generate bulk QR codes.');
+    } finally {
+      this.bulkExporting.set(false);
+    }
   }
 
   protected selectedGuestUrl(): string {

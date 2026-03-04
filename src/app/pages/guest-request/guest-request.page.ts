@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -42,10 +42,13 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
   templateUrl: './guest-request.page.html',
   styleUrl: './guest-request.page.scss'
 })
-export class GuestRequestPage implements OnInit {
+export class GuestRequestPage implements OnInit, OnDestroy {
   private readonly route    = inject(ActivatedRoute);
   private readonly api      = inject(OrcaApiService);
   private readonly document = inject(DOCUMENT);
+
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private prevStatuses = new Map<number, RequestStatus>();
 
   protected readonly loading = signal(true);
   protected readonly isDark  = signal(true);
@@ -93,10 +96,19 @@ export class GuestRequestPage implements OnInit {
 
     try {
       await this.bootstrap(token);
+      this.snapshotStatuses();
+      this.startPolling(token);
     } catch {
       this.error.set('This room link is invalid or no longer available.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollInterval != null) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
     }
   }
 
@@ -124,8 +136,10 @@ export class GuestRequestPage implements OnInit {
         })
       );
       await this.bootstrap(token);
+      this.snapshotStatuses();
       this.success.set(true);
       this.message = '';
+      void this.requestNotificationPermission();
     } catch {
       this.error.set('Failed to submit the request. Please try again.');
     } finally {
@@ -189,6 +203,64 @@ export class GuestRequestPage implements OnInit {
       default:
         return 'help-circle-outline';
     }
+  }
+
+  private startPolling(token: string): void {
+    if (this.pollInterval != null) {
+      return;
+    }
+    this.pollInterval = setInterval(() => void this.poll(token), 20_000);
+  }
+
+  private async poll(token: string): Promise<void> {
+    try {
+      await this.bootstrap(token);
+      this.detectStatusChangesAndNotify();
+      this.snapshotStatuses();
+    } catch {
+      // Silently ignore poll errors — network may be temporarily unavailable
+    }
+  }
+
+  private snapshotStatuses(): void {
+    this.prevStatuses.clear();
+    for (const req of this.requests()) {
+      if (req.id != null && req.status) {
+        this.prevStatuses.set(req.id, req.status);
+      }
+    }
+  }
+
+  private detectStatusChangesAndNotify(): void {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+      return;
+    }
+    for (const req of this.requests()) {
+      if (req.id == null || !req.status) {
+        continue;
+      }
+      const prev = this.prevStatuses.get(req.id);
+      if (prev && prev !== req.status) {
+        if (req.status === 'ACCEPTED') {
+          new Notification('Request accepted', {
+            body: `Your ${this.requestTypeLabel(req.type!)} request is now in progress.`,
+            icon: '/favicon.png'
+          });
+        } else if (req.status === 'COMPLETED') {
+          new Notification('Request completed', {
+            body: `Your ${this.requestTypeLabel(req.type!)} request has been completed.`,
+            icon: '/favicon.png'
+          });
+        }
+      }
+    }
+  }
+
+  private async requestNotificationPermission(): Promise<void> {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') {
+      return;
+    }
+    await Notification.requestPermission();
   }
 
   private async bootstrap(token: string): Promise<void> {

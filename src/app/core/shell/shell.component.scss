@@ -213,6 +213,19 @@ ion-content { --background: var(--o-bg); }
   flex-shrink: 0;
 }
 
+/* ── Offline banner ──────────────────────────────── */
+.o-offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: hsl(var(--o-warning-h, 38) 90% 55% / 1);
+  color: #1a1000;
+  font-size: 0.8rem;
+  font-weight: 600;
+  ion-icon { font-size: 1rem; flex-shrink: 0; }
+}
+
 /* ── New-request toast ───────────────────────────── */
 @keyframes toast-in {
   from { transform: translateY(100%); opacity: 0; }

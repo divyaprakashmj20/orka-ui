@@ -39,6 +39,14 @@ function requireActiveAppUser(stateUrl: string | undefined) {
             return of({ ok: true as const, appUser });
           }
 
+          // Rejected users can re-apply — don't sign them out
+          if (appUser.status === 'REJECTED') {
+            return of({
+              ok: false as const,
+              redirect: router.createUrlTree(['/re-apply'])
+            });
+          }
+
           return from(auth.signOutAndWaitForState()).pipe(
             map(() => ({
               ok: false as const,

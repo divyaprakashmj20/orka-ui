@@ -7,6 +7,7 @@ import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
+  barChartOutline,
   bedOutline,
   businessOutline,
   chevronForwardOutline,
@@ -19,9 +20,11 @@ import {
   notificationsOutline,
   peopleOutline,
   personAddOutline,
+  personCircleOutline,
   sparklesOutline,
   sunny,
   sunnyOutline,
+  wifiOutline,
 } from 'ionicons/icons';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../auth/firebase-auth.service';
@@ -38,13 +41,15 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard',      path: '/',            icon: 'home-outline',       roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
-  { label: 'Requests',       path: '/requests',    icon: 'sparkles-outline',   roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
-  { label: 'Rooms',          path: '/rooms',       icon: 'bed-outline',        roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
-  { label: 'Staff',          path: '/staff',       icon: 'people-outline',     roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
-  { label: 'User Approvals', path: '/app-users',   icon: 'person-add-outline', roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
-  { label: 'Hotels',         path: '/hotels',      icon: 'home-outline',       roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','ADMIN'] },
-  { label: 'Hotel Groups',   path: '/hotel-groups',icon: 'business-outline',   roles: ['SUPERADMIN'] },
+  { label: 'Dashboard',      path: '/',            icon: 'home-outline',         roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
+  { label: 'Requests',       path: '/requests',    icon: 'sparkles-outline',     roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
+  { label: 'Rooms',          path: '/rooms',       icon: 'bed-outline',          roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
+  { label: 'Staff',          path: '/staff',       icon: 'people-outline',       roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
+  { label: 'User Approvals', path: '/app-users',   icon: 'person-add-outline',   roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
+  { label: 'Hotels',         path: '/hotels',      icon: 'home-outline',         roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','ADMIN'] },
+  { label: 'Hotel Groups',   path: '/hotel-groups',icon: 'business-outline',     roles: ['SUPERADMIN'] },
+  { label: 'Reports',        path: '/reports',     icon: 'bar-chart-outline',    roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN'] },
+  { label: 'Profile',        path: '/profile',     icon: 'person-circle-outline',roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
 ];
 
 @Component({
@@ -72,6 +77,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   protected readonly loggingOut  = signal(false);
   protected readonly logoutError = signal('');
   protected readonly isDark      = signal(true);
+  protected readonly isOnline    = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
   protected readonly requestsUnreadCount = toSignal(this.sseService.unreadCount$, { initialValue: 0 });
   /** The request shown in the toast. Null = toast hidden. */
   protected readonly toastRequest = signal<ServiceRequest | null>(null);
@@ -106,13 +112,20 @@ export class ShellComponent implements OnInit, OnDestroy {
       homeOutline, sparklesOutline, bedOutline, peopleOutline,
       personAddOutline, businessOutline, logOutOutline, menuOutline,
       chevronForwardOutline, alertCircleOutline, moonOutline, sunnyOutline,
-      moon, sunny, notificationsOutline, closeOutline
+      moon, sunny, notificationsOutline, closeOutline,
+      barChartOutline, personCircleOutline, wifiOutline
     });
     // Restore persisted theme
     const saved = localStorage.getItem('orka-theme');
     const dark = saved !== 'light';
     this.isDark.set(dark);
     this.applyTheme(dark);
+
+    // Track online/offline state
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online',  () => this.isOnline.set(true));
+      window.addEventListener('offline', () => this.isOnline.set(false));
+    }
   }
 
   ngOnInit(): void {
