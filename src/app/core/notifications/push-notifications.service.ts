@@ -193,7 +193,7 @@ export class PushNotificationsService {
         this.api.registerDeviceToken({
           firebaseUid: user.uid,
           fcmToken: this.currentToken,
-          platform: 'ANDROID'
+          platform: (Capacitor.getPlatform().toUpperCase() as 'ANDROID' | 'IOS' | 'WEB')
         })
       );
       this.lastRegisteredKey = key;
