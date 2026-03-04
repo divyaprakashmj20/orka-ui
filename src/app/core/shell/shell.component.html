@@ -62,29 +62,19 @@
           </div>
         </div>
         <div class="o-topbar-right">
-          <!-- Theme toggle pill -->
-          <button
-            class="o-theme-toggle"
-            [class.is-dark]="isDark()"
-            (click)="toggleTheme()"
-            [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
-            <span class="o-tt-track">
-              <!-- stars (dark side) -->
-              <span class="o-tt-star s1"></span>
-              <span class="o-tt-star s2"></span>
-              <span class="o-tt-star s3"></span>
-              <span class="o-tt-star s4"></span>
-              <!-- fixed-position icons in track -->
-              <ion-icon name="sunny" class="o-tt-sun"></ion-icon>
-              <ion-icon name="moon" class="o-tt-moon"></ion-icon>
-              <!-- sliding thumb -->
-              <span class="o-tt-thumb">
-                <ion-icon name="sunny" class="o-tt-icon-sun"></ion-icon>
-                <ion-icon name="moon" class="o-tt-icon-moon"></ion-icon>
-              </span>
-            </span>
-          </button>
+          <!-- Theme picker -->
+          <div class="o-theme-picker" role="group" aria-label="Choose theme">
+            @for (t of themes; track t.id) {
+              <button
+                class="o-theme-dot"
+                [class.is-active]="currentTheme() === t.id"
+                [style.background]="t.accent"
+                (click)="setTheme(t.id)"
+                [attr.aria-label]="t.label + ' theme'"
+                [attr.title]="t.label"
+              ></button>
+            }
+          </div>
           <span class="o-scope-chip">{{ userScopeLine() }}</span>
         </div>
       </header>

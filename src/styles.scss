@@ -131,6 +131,639 @@
   --o-topbar-bg:     hsl(var(--orka-neutral-hue) 19% calc(var(--orka-l-bg-l) * 1%) / 0.88);
 }
 
+/* ─ Slate Theme — cool-gray professional light ────── */
+/* Like a modern SaaS dashboard: cool gray bg, white cards, strong blue accent */
+[data-theme="slate"] {
+  --orka-hue:         213;
+  --orka-neutral-hue: 220;
+
+  --o-bg:        hsl(220 18% 93%);
+  --o-bg-2:      hsl(220 16% 88%);
+  --o-surface:   hsl(0   0% 100%);
+  --o-surface-2: hsl(220 14% 96%);
+  --o-overlay:   rgba(15,23,42,0.40);
+
+  /* dark borders on light bg */
+  --o-border:    hsl(220 14% 0% /  9%);
+  --o-border-md: hsl(220 14% 0% / 14%);
+  --o-border-lg: hsl(220 14% 0% / 22%);
+
+  --o-text:   hsl(220 26%  12%);
+  --o-text-2: hsl(220 16%  38%);
+  --o-text-3: hsl(220 12%  58%);
+
+  --o-accent:      hsl(213 90% 50%);
+  --o-accent-lt:   hsl(213 90% 42%);
+  --o-accent-dim:  hsl(213 90% 50% / 0.10);
+  --o-accent-glow: hsl(213 90% 50% / 0.20);
+
+  --o-success:     hsl(142 72% 36%);
+  --o-success-dim: hsl(142 72% 36% / 0.10);
+  --o-warning:     hsl(38  90% 44%);
+  --o-warning-dim: hsl(38  90% 44% / 0.10);
+  --o-danger:      hsl(0   78% 52%);
+  --o-danger-dim:  hsl(0   78% 52% / 0.10);
+
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,0.10),0 2px 6px rgba(15,23,42,0.07);
+  --shadow-lg: 0 16px 48px rgba(15,23,42,0.12),0 6px 20px rgba(15,23,42,0.08);
+  --shadow-xl: 0 32px 64px rgba(15,23,42,0.15);
+
+  --o-surface-hover: hsl(220 14% 92%);
+  --o-topbar-bg:     hsl(220 18% 93% / 0.90);
+  --o-muted:         hsl(220 12% 56%);
+  --o-muted-2:       rgba(0,0,0,0.10);
+  --o-text-primary:  hsl(220 26% 12%);
+  --o-text-muted:    hsl(220 12% 56%);
+}
+
+/* ─ Warm Theme — parchment professional light ─────── */
+/* Warm cream surfaces, rich brown text, amber accent — editorial / hospitality feel */
+[data-theme="warm"] {
+  --orka-hue:         32;
+  --orka-neutral-hue: 30;
+
+  --o-bg:        hsl(38 28% 92%);
+  --o-bg-2:      hsl(36 24% 86%);
+  --o-surface:   hsl(38 30% 98%);
+  --o-surface-2: hsl(36 22% 90%);
+  --o-overlay:   rgba(30,16,4,0.40);
+
+  --o-border:    hsl(30 16% 0% /  9%);
+  --o-border-md: hsl(30 16% 0% / 14%);
+  --o-border-lg: hsl(30 16% 0% / 22%);
+
+  --o-text:   hsl(24 28%  14%);
+  --o-text-2: hsl(24 18%  40%);
+  --o-text-3: hsl(24 12%  58%);
+
+  --o-accent:      hsl(32 92% 42%);
+  --o-accent-lt:   hsl(32 88% 34%);
+  --o-accent-dim:  hsl(32 92% 42% / 0.11);
+  --o-accent-glow: hsl(32 92% 42% / 0.22);
+
+  --o-success:     hsl(142 60% 34%);
+  --o-success-dim: hsl(142 60% 34% / 0.10);
+  --o-warning:     hsl(38  88% 40%);
+  --o-warning-dim: hsl(38  88% 40% / 0.10);
+  --o-danger:      hsl(4   72% 50%);
+  --o-danger-dim:  hsl(4   72% 50% / 0.10);
+
+  --shadow-sm: 0 1px 3px rgba(30,14,4,0.09), 0 1px 2px rgba(30,14,4,0.06);
+  --shadow-md: 0 4px 12px rgba(30,14,4,0.11),0 2px 6px rgba(30,14,4,0.07);
+  --shadow-lg: 0 16px 48px rgba(30,14,4,0.13),0 6px 20px rgba(30,14,4,0.08);
+  --shadow-xl: 0 32px 64px rgba(30,14,4,0.16);
+
+  --o-surface-hover: hsl(36 22% 84%);
+  --o-topbar-bg:     hsl(38 28% 92% / 0.90);
+  --o-muted:         hsl(24 12% 56%);
+  --o-muted-2:       rgba(0,0,0,0.10);
+  --o-text-primary:  hsl(24 28% 14%);
+  --o-text-muted:    hsl(24 12% 58%);
+}
+
+/* ─ Midnight Theme — pure deep-blue dark ─────────── */
+/* Clean blue-black like Vercel/Linear dark — no purple tint */
+[data-theme="midnight"] {
+  --orka-hue:         217;
+  --orka-neutral-hue: 222;
+
+  --o-bg:        hsl(222 32%  4%);
+  --o-bg-2:      hsl(222 28%  8%);
+  --o-surface:   hsl(220 24% 10%);
+  --o-surface-2: hsl(218 20% 14%);
+  --o-overlay:   rgba(0,4,18,0.80);
+
+  --o-border:    hsl(220 20% 100% /  7%);
+  --o-border-md: hsl(220 20% 100% / 11%);
+  --o-border-lg: hsl(220 20% 100% / 18%);
+
+  --o-text:   hsl(214 22% 96%);
+  --o-text-2: hsl(214 14% 60%);
+  --o-text-3: hsl(214 10% 40%);
+
+  --o-accent:      hsl(217 88% 60%);
+  --o-accent-lt:   hsl(217 92% 70%);
+  --o-accent-dim:  hsl(217 88% 60% / 0.13);
+  --o-accent-glow: hsl(217 88% 60% / 0.28);
+
+  --shadow-sm: 0 1px 3px rgba(0,4,18,0.55), 0 1px 2px rgba(0,4,18,0.40);
+  --shadow-md: 0 4px 12px rgba(0,4,18,0.65),0 2px 6px rgba(0,4,18,0.40);
+  --shadow-lg: 0 16px 48px rgba(0,4,18,0.75),0 6px 20px rgba(0,4,18,0.45);
+  --shadow-xl: 0 32px 64px rgba(0,4,18,0.90);
+
+  --o-surface-hover: hsl(218 20% 18%);
+  --o-topbar-bg:     hsl(222 32% 4% / 0.90);
+  --o-muted:         hsl(214 10% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(214 22% 96%);
+  --o-text-muted:    hsl(214 10% 40%);
+}
+
+/* ─ Cobalt Theme — rich navy dark ────────────────── */
+/* Saturated deep-navy surfaces — high-end enterprise feel */
+[data-theme="cobalt"] {
+  --orka-hue:         225;
+  --orka-neutral-hue: 228;
+
+  --o-bg:        hsl(228 55%  6%);
+  --o-bg-2:      hsl(228 50% 10%);
+  --o-surface:   hsl(226 46% 13%);
+  --o-surface-2: hsl(224 40% 18%);
+  --o-overlay:   rgba(2,5,30,0.80);
+
+  --o-border:    hsl(228 30% 100% /  9%);
+  --o-border-md: hsl(228 30% 100% / 14%);
+  --o-border-lg: hsl(228 30% 100% / 22%);
+
+  --o-text:   hsl(224 30% 96%);
+  --o-text-2: hsl(224 20% 64%);
+  --o-text-3: hsl(224 14% 44%);
+
+  --o-accent:      hsl(225 92% 68%);
+  --o-accent-lt:   hsl(225 96% 78%);
+  --o-accent-dim:  hsl(225 92% 68% / 0.14);
+  --o-accent-glow: hsl(225 92% 68% / 0.32);
+
+  --shadow-sm: 0 1px 3px rgba(2,5,30,0.60), 0 1px 2px rgba(2,5,30,0.45);
+  --shadow-md: 0 4px 12px rgba(2,5,30,0.70),0 2px 6px rgba(2,5,30,0.45);
+  --shadow-lg: 0 16px 48px rgba(2,5,30,0.80),0 6px 20px rgba(2,5,30,0.50);
+  --shadow-xl: 0 32px 64px rgba(2,5,30,0.92);
+
+  --o-surface-hover: hsl(224 40% 22%);
+  --o-topbar-bg:     hsl(228 55% 6% / 0.90);
+  --o-muted:         hsl(224 14% 46%);
+  --o-muted-2:       rgba(255,255,255,0.12);
+  --o-text-primary:  hsl(224 30% 96%);
+  --o-text-muted:    hsl(224 14% 44%);
+}
+
+/* ─ Charcoal Theme — achromatic minimal dark ─────── */
+/* Zero hue — pure neutral gray used in pro tools like Figma, Linear */
+[data-theme="charcoal"] {
+  --orka-hue:         240;
+  --orka-neutral-hue: 0;
+
+  --o-bg:        hsl(0 0%  6%);
+  --o-bg-2:      hsl(0 0% 10%);
+  --o-surface:   hsl(0 0% 13%);
+  --o-surface-2: hsl(0 0% 17%);
+  --o-overlay:   rgba(0,0,0,0.78);
+
+  --o-border:    hsl(0 0% 100% /  8%);
+  --o-border-md: hsl(0 0% 100% / 13%);
+  --o-border-lg: hsl(0 0% 100% / 20%);
+
+  --o-text:   hsl(0 0% 95%);
+  --o-text-2: hsl(0 0% 60%);
+  --o-text-3: hsl(0 0% 40%);
+
+  --o-accent:      hsl(240 80% 68%);
+  --o-accent-lt:   hsl(240 84% 76%);
+  --o-accent-dim:  hsl(240 80% 68% / 0.13);
+  --o-accent-glow: hsl(240 80% 68% / 0.26);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.40);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.65),0 2px 6px rgba(0,0,0,0.42);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.75),0 6px 20px rgba(0,0,0,0.46);
+  --shadow-xl: 0 32px 64px rgba(0,0,0,0.90);
+
+  --o-surface-hover: hsl(0 0% 21%);
+  --o-topbar-bg:     hsl(0 0% 6% / 0.90);
+  --o-muted:         hsl(0 0% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(0 0% 95%);
+  --o-text-muted:    hsl(0 0% 40%);
+}
+
+/* ─ Gold Theme — dark slate + amber gold accent ───── */
+[data-theme="gold"] {
+  --orka-hue:         45;
+  --orka-neutral-hue: 240;
+
+  --o-bg:        hsl(240 12%  4%);
+  --o-bg-2:      hsl(240 10%  8%);
+  --o-surface:   hsl(240  9% 10%);
+  --o-surface-2: hsl(240  8% 14%);
+  --o-overlay:   rgba(0,0,0,0.78);
+
+  --o-border:    hsl(240 10% 100% /  7%);
+  --o-border-md: hsl(240 10% 100% / 12%);
+  --o-border-lg: hsl(240 10% 100% / 18%);
+
+  --o-text:   hsl(48 20% 94%);
+  --o-text-2: hsl(48 10% 62%);
+  --o-text-3: hsl(48  7% 42%);
+
+  --o-accent:      hsl(45 92% 52%);
+  --o-accent-lt:   hsl(45 96% 64%);
+  --o-accent-dim:  hsl(45 92% 52% / 0.14);
+  --o-accent-glow: hsl(45 92% 52% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.50), 0 1px 2px rgba(0,0,0,0.38);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.58),0 2px 6px rgba(0,0,0,0.38);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.68),0 6px 20px rgba(0,0,0,0.40);
+  --shadow-xl: 0 32px 64px rgba(0,0,0,0.84);
+
+  --o-surface-hover: hsl(240 8% 18%);
+  --o-topbar-bg:     hsl(240 12% 4% / 0.90);
+  --o-muted:         hsl(48 7% 44%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(48 20% 94%);
+  --o-text-muted:    hsl(48 7% 42%);
+}
+
+/* ─ Emerald Theme — crisp light, rich green accent ── */
+[data-theme="emerald"] {
+  --orka-hue:         152;
+  --orka-neutral-hue: 148;
+
+  --o-bg:        hsl(148 18% 93%);
+  --o-bg-2:      hsl(148 14% 87%);
+  --o-surface:   hsl(0   0% 100%);
+  --o-surface-2: hsl(148 12% 96%);
+  --o-overlay:   rgba(4,24,14,0.38);
+
+  --o-border:    hsl(148 14% 0% /  9%);
+  --o-border-md: hsl(148 14% 0% / 14%);
+  --o-border-lg: hsl(148 14% 0% / 22%);
+
+  --o-text:   hsl(152 28%  10%);
+  --o-text-2: hsl(152 16%  36%);
+  --o-text-3: hsl(152 10%  54%);
+
+  --o-accent:      hsl(152 74% 34%);
+  --o-accent-lt:   hsl(152 68% 28%);
+  --o-accent-dim:  hsl(152 74% 34% / 0.10);
+  --o-accent-glow: hsl(152 74% 34% / 0.20);
+
+  --o-success:     hsl(142 68% 32%);
+  --o-success-dim: hsl(142 68% 32% / 0.10);
+  --o-warning:     hsl(38  88% 42%);
+  --o-warning-dim: hsl(38  88% 42% / 0.10);
+  --o-danger:      hsl(0   76% 50%);
+  --o-danger-dim:  hsl(0   76% 50% / 0.10);
+
+  --shadow-sm: 0 1px 3px rgba(4,24,14,0.08), 0 1px 2px rgba(4,24,14,0.06);
+  --shadow-md: 0 4px 12px rgba(4,24,14,0.10),0 2px 6px rgba(4,24,14,0.07);
+  --shadow-lg: 0 16px 48px rgba(4,24,14,0.13),0 6px 20px rgba(4,24,14,0.08);
+  --shadow-xl: 0 32px 64px rgba(4,24,14,0.16);
+
+  --o-surface-hover: hsl(148 12% 89%);
+  --o-topbar-bg:     hsl(148 18% 93% / 0.90);
+  --o-muted:         hsl(152 10% 52%);
+  --o-muted-2:       rgba(0,0,0,0.10);
+  --o-text-primary:  hsl(152 28% 10%);
+  --o-text-muted:    hsl(152 10% 52%);
+}
+
+/* ─ Violet Theme — deep purple-eggplant dark ────────  */
+[data-theme="violet"] {
+  --orka-hue:         268;
+  --orka-neutral-hue: 268;
+
+  --o-bg:        hsl(268 38%  5%);
+  --o-bg-2:      hsl(268 34%  9%);
+  --o-surface:   hsl(265 30% 12%);
+  --o-surface-2: hsl(262 26% 16%);
+  --o-overlay:   rgba(8,2,24,0.80);
+
+  --o-border:    hsl(268 20% 100% /  7%);
+  --o-border-md: hsl(268 20% 100% / 12%);
+  --o-border-lg: hsl(268 20% 100% / 19%);
+
+  --o-text:   hsl(270 24% 96%);
+  --o-text-2: hsl(270 16% 62%);
+  --o-text-3: hsl(270 10% 42%);
+
+  --o-accent:      hsl(268 80% 68%);
+  --o-accent-lt:   hsl(268 84% 76%);
+  --o-accent-dim:  hsl(268 80% 68% / 0.14);
+  --o-accent-glow: hsl(268 80% 68% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(8,2,24,0.58), 0 1px 2px rgba(8,2,24,0.42);
+  --shadow-md: 0 4px 12px rgba(8,2,24,0.68),0 2px 6px rgba(8,2,24,0.42);
+  --shadow-lg: 0 16px 48px rgba(8,2,24,0.78),0 6px 20px rgba(8,2,24,0.46);
+  --shadow-xl: 0 32px 64px rgba(8,2,24,0.92);
+
+  --o-surface-hover: hsl(262 26% 20%);
+  --o-topbar-bg:     hsl(268 38% 5% / 0.90);
+  --o-muted:         hsl(270 10% 44%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(270 24% 96%);
+  --o-text-muted:    hsl(270 10% 42%);
+}
+
+/* ─ Crimson Theme — deep wine-red dark ──────────────── */
+[data-theme="crimson"] {
+  --orka-hue:         355;
+  --orka-neutral-hue: 348;
+
+  --o-bg:        hsl(348 30%  5%);
+  --o-bg-2:      hsl(348 26%  9%);
+  --o-surface:   hsl(345 22% 11%);
+  --o-surface-2: hsl(342 18% 15%);
+  --o-overlay:   rgba(22,2,6,0.80);
+
+  --o-border:    hsl(348 18% 100% /  7%);
+  --o-border-md: hsl(348 18% 100% / 12%);
+  --o-border-lg: hsl(348 18% 100% / 19%);
+
+  --o-text:   hsl(350 20% 95%);
+  --o-text-2: hsl(350 12% 60%);
+  --o-text-3: hsl(350  8% 40%);
+
+  --o-accent:      hsl(355 82% 58%);
+  --o-accent-lt:   hsl(355 86% 68%);
+  --o-accent-dim:  hsl(355 82% 58% / 0.14);
+  --o-accent-glow: hsl(355 82% 58% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(22,2,6,0.58), 0 1px 2px rgba(22,2,6,0.42);
+  --shadow-md: 0 4px 12px rgba(22,2,6,0.68),0 2px 6px rgba(22,2,6,0.42);
+  --shadow-lg: 0 16px 48px rgba(22,2,6,0.78),0 6px 20px rgba(22,2,6,0.46);
+  --shadow-xl: 0 32px 64px rgba(22,2,6,0.92);
+
+  --o-surface-hover: hsl(342 18% 19%);
+  --o-topbar-bg:     hsl(348 30% 5% / 0.90);
+  --o-muted:         hsl(350 8% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(350 20% 95%);
+  --o-text-muted:    hsl(350 8% 40%);
+}
+
+/* ─ Teal Theme — dark teal-slate surfaces ───────────── */
+[data-theme="teal"] {
+  --orka-hue:         174;
+  --orka-neutral-hue: 192;
+
+  --o-bg:        hsl(192 32%  4%);
+  --o-bg-2:      hsl(192 28%  8%);
+  --o-surface:   hsl(188 24% 10%);
+  --o-surface-2: hsl(184 20% 14%);
+  --o-overlay:   rgba(0,16,18,0.80);
+
+  --o-border:    hsl(192 20% 100% /  7%);
+  --o-border-md: hsl(192 20% 100% / 12%);
+  --o-border-lg: hsl(192 20% 100% / 19%);
+
+  --o-text:   hsl(180 22% 95%);
+  --o-text-2: hsl(180 14% 60%);
+  --o-text-3: hsl(180 10% 40%);
+
+  --o-accent:      hsl(174 72% 46%);
+  --o-accent-lt:   hsl(174 76% 58%);
+  --o-accent-dim:  hsl(174 72% 46% / 0.13);
+  --o-accent-glow: hsl(174 72% 46% / 0.28);
+
+  --shadow-sm: 0 1px 3px rgba(0,16,18,0.55), 0 1px 2px rgba(0,16,18,0.40);
+  --shadow-md: 0 4px 12px rgba(0,16,18,0.65),0 2px 6px rgba(0,16,18,0.40);
+  --shadow-lg: 0 16px 48px rgba(0,16,18,0.75),0 6px 20px rgba(0,16,18,0.44);
+  --shadow-xl: 0 32px 64px rgba(0,16,18,0.90);
+
+  --o-surface-hover: hsl(184 20% 18%);
+  --o-topbar-bg:     hsl(192 32% 4% / 0.90);
+  --o-muted:         hsl(180 10% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(180 22% 95%);
+  --o-text-muted:    hsl(180 10% 40%);
+}
+
+/* ─ Coffee Theme — espresso brown dark surfaces ─────── */
+[data-theme="coffee"] {
+  --orka-hue:         28;
+  --orka-neutral-hue: 22;
+
+  --o-bg:        hsl(22 28%  5%);
+  --o-bg-2:      hsl(22 24%  9%);
+  --o-surface:   hsl(20 20% 11%);
+  --o-surface-2: hsl(18 17% 15%);
+  --o-overlay:   rgba(18,8,2,0.80);
+
+  --o-border:    hsl(22 16% 100% /  7%);
+  --o-border-md: hsl(22 16% 100% / 12%);
+  --o-border-lg: hsl(22 16% 100% / 19%);
+
+  --o-text:   hsl(32 24% 94%);
+  --o-text-2: hsl(32 14% 60%);
+  --o-text-3: hsl(32 10% 40%);
+
+  --o-accent:      hsl(28 70% 54%);
+  --o-accent-lt:   hsl(28 74% 64%);
+  --o-accent-dim:  hsl(28 70% 54% / 0.14);
+  --o-accent-glow: hsl(28 70% 54% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(18,8,2,0.56), 0 1px 2px rgba(18,8,2,0.42);
+  --shadow-md: 0 4px 12px rgba(18,8,2,0.66),0 2px 6px rgba(18,8,2,0.42);
+  --shadow-lg: 0 16px 48px rgba(18,8,2,0.76),0 6px 20px rgba(18,8,2,0.44);
+  --shadow-xl: 0 32px 64px rgba(18,8,2,0.90);
+
+  --o-surface-hover: hsl(18 17% 19%);
+  --o-topbar-bg:     hsl(22 28% 5% / 0.90);
+  --o-muted:         hsl(32 10% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(32 24% 94%);
+  --o-text-muted:    hsl(32 10% 40%);
+}
+
+/* ─ Arctic Theme — icy white light, cyan accent ─────── */
+[data-theme="arctic"] {
+  --orka-hue:         196;
+  --orka-neutral-hue: 204;
+
+  --o-bg:        hsl(204 34% 95%);
+  --o-bg-2:      hsl(204 28% 89%);
+  --o-surface:   hsl(0   0% 100%);
+  --o-surface-2: hsl(204 22% 96%);
+  --o-overlay:   rgba(4,18,28,0.38);
+
+  --o-border:    hsl(204 14% 0% /  8%);
+  --o-border-md: hsl(204 14% 0% / 13%);
+  --o-border-lg: hsl(204 14% 0% / 20%);
+
+  --o-text:   hsl(210 34%  10%);
+  --o-text-2: hsl(210 18%  36%);
+  --o-text-3: hsl(210 12%  56%);
+
+  --o-accent:      hsl(196 90% 40%);
+  --o-accent-lt:   hsl(196 86% 34%);
+  --o-accent-dim:  hsl(196 90% 40% / 0.10);
+  --o-accent-glow: hsl(196 90% 40% / 0.20);
+
+  --o-success:     hsl(142 68% 34%);
+  --o-success-dim: hsl(142 68% 34% / 0.10);
+  --o-warning:     hsl(38  88% 42%);
+  --o-warning-dim: hsl(38  88% 42% / 0.10);
+  --o-danger:      hsl(0   76% 50%);
+  --o-danger-dim:  hsl(0   76% 50% / 0.10);
+
+  --shadow-sm: 0 1px 3px rgba(4,18,28,0.08), 0 1px 2px rgba(4,18,28,0.06);
+  --shadow-md: 0 4px 12px rgba(4,18,28,0.10),0 2px 6px rgba(4,18,28,0.07);
+  --shadow-lg: 0 16px 48px rgba(4,18,28,0.12),0 6px 20px rgba(4,18,28,0.08);
+  --shadow-xl: 0 32px 64px rgba(4,18,28,0.16);
+
+  --o-surface-hover: hsl(204 22% 90%);
+  --o-topbar-bg:     hsl(204 34% 95% / 0.90);
+  --o-muted:         hsl(210 12% 54%);
+  --o-muted-2:       rgba(0,0,0,0.09);
+  --o-text-primary:  hsl(210 34% 10%);
+  --o-text-muted:    hsl(210 12% 54%);
+}
+
+/* ─ Dusk Theme — deep mauve-grape dark ──────────────── */
+[data-theme="dusk"] {
+  --orka-hue:         290;
+  --orka-neutral-hue: 286;
+
+  --o-bg:        hsl(286 24%  5%);
+  --o-bg-2:      hsl(286 20%  9%);
+  --o-surface:   hsl(282 17% 12%);
+  --o-surface-2: hsl(278 14% 16%);
+  --o-overlay:   rgba(12,4,22,0.80);
+
+  --o-border:    hsl(286 16% 100% /  7%);
+  --o-border-md: hsl(286 16% 100% / 12%);
+  --o-border-lg: hsl(286 16% 100% / 19%);
+
+  --o-text:   hsl(288 20% 95%);
+  --o-text-2: hsl(288 12% 60%);
+  --o-text-3: hsl(288  8% 40%);
+
+  --o-accent:      hsl(290 72% 62%);
+  --o-accent-lt:   hsl(290 76% 72%);
+  --o-accent-dim:  hsl(290 72% 62% / 0.14);
+  --o-accent-glow: hsl(290 72% 62% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(12,4,22,0.56), 0 1px 2px rgba(12,4,22,0.42);
+  --shadow-md: 0 4px 12px rgba(12,4,22,0.66),0 2px 6px rgba(12,4,22,0.42);
+  --shadow-lg: 0 16px 48px rgba(12,4,22,0.76),0 6px 20px rgba(12,4,22,0.44);
+  --shadow-xl: 0 32px 64px rgba(12,4,22,0.92);
+
+  --o-surface-hover: hsl(278 14% 20%);
+  --o-topbar-bg:     hsl(286 24% 5% / 0.90);
+  --o-muted:         hsl(288 8% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(288 20% 95%);
+  --o-text-muted:    hsl(288 8% 40%);
+}
+
+/* ─ Sage Theme — sage-gray light, forest green accent ── */
+[data-theme="sage"] {
+  --orka-hue:         140;
+  --orka-neutral-hue: 138;
+
+  --o-bg:        hsl(138 12% 90%);
+  --o-bg-2:      hsl(138  9% 83%);
+  --o-surface:   hsl(0   0% 100%);
+  --o-surface-2: hsl(138  8% 94%);
+  --o-overlay:   rgba(8,18,10,0.36);
+
+  --o-border:    hsl(138 10% 0% /  8%);
+  --o-border-md: hsl(138 10% 0% / 13%);
+  --o-border-lg: hsl(138 10% 0% / 20%);
+
+  --o-text:   hsl(140 22%  11%);
+  --o-text-2: hsl(140 12%  36%);
+  --o-text-3: hsl(140  8%  54%);
+
+  --o-accent:      hsl(140 56% 34%);
+  --o-accent-lt:   hsl(140 50% 28%);
+  --o-accent-dim:  hsl(140 56% 34% / 0.10);
+  --o-accent-glow: hsl(140 56% 34% / 0.20);
+
+  --o-success:     hsl(142 60% 32%);
+  --o-success-dim: hsl(142 60% 32% / 0.10);
+  --o-warning:     hsl(38  86% 40%);
+  --o-warning-dim: hsl(38  86% 40% / 0.10);
+  --o-danger:      hsl(4   72% 48%);
+  --o-danger-dim:  hsl(4   72% 48% / 0.10);
+
+  --shadow-sm: 0 1px 3px rgba(8,18,10,0.08), 0 1px 2px rgba(8,18,10,0.06);
+  --shadow-md: 0 4px 12px rgba(8,18,10,0.10),0 2px 6px rgba(8,18,10,0.07);
+  --shadow-lg: 0 16px 48px rgba(8,18,10,0.12),0 6px 20px rgba(8,18,10,0.08);
+  --shadow-xl: 0 32px 64px rgba(8,18,10,0.15);
+
+  --o-surface-hover: hsl(138 8% 86%);
+  --o-topbar-bg:     hsl(138 12% 90% / 0.90);
+  --o-muted:         hsl(140 8% 52%);
+  --o-muted-2:       rgba(0,0,0,0.09);
+  --o-text-primary:  hsl(140 22% 11%);
+  --o-text-muted:    hsl(140 8% 52%);
+}
+
+/* ─ Noir Theme — near-absolute black, vivid red accent ─ */
+[data-theme="noir"] {
+  --orka-hue:         355;
+  --orka-neutral-hue: 0;
+
+  --o-bg:        hsl(0 0%  2%);
+  --o-bg-2:      hsl(0 0%  5%);
+  --o-surface:   hsl(0 0%  7%);
+  --o-surface-2: hsl(0 0% 10%);
+  --o-overlay:   rgba(0,0,0,0.88);
+
+  --o-border:    hsl(0 0% 100% /  7%);
+  --o-border-md: hsl(0 0% 100% / 11%);
+  --o-border-lg: hsl(0 0% 100% / 17%);
+
+  --o-text:   hsl(0 0% 95%);
+  --o-text-2: hsl(0 0% 56%);
+  --o-text-3: hsl(0 0% 36%);
+
+  --o-accent:      hsl(355 90% 54%);
+  --o-accent-lt:   hsl(355 94% 64%);
+  --o-accent-dim:  hsl(355 90% 54% / 0.14);
+  --o-accent-glow: hsl(355 90% 54% / 0.30);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.65), 0 1px 2px rgba(0,0,0,0.50);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.75),0 2px 6px rgba(0,0,0,0.52);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.85),0 6px 20px rgba(0,0,0,0.55);
+  --shadow-xl: 0 32px 64px rgba(0,0,0,0.95);
+
+  --o-surface-hover: hsl(0 0% 13%);
+  --o-topbar-bg:     hsl(0 0% 2% / 0.94);
+  --o-muted:         hsl(0 0% 38%);
+  --o-muted-2:       rgba(255,255,255,0.10);
+  --o-text-primary:  hsl(0 0% 95%);
+  --o-text-muted:    hsl(0 0% 36%);
+}
+
+/* ─ Plasma Theme — ultra-dark + vivid magenta accent ─── */
+[data-theme="plasma"] {
+  --orka-hue:         320;
+  --orka-neutral-hue: 248;
+
+  --o-bg:        hsl(248 22%  4%);
+  --o-bg-2:      hsl(248 20%  8%);
+  --o-surface:   hsl(245 17% 10%);
+  --o-surface-2: hsl(242 14% 14%);
+  --o-overlay:   rgba(4,2,18,0.82);
+
+  --o-border:    hsl(248 18% 100% /  7%);
+  --o-border-md: hsl(248 18% 100% / 12%);
+  --o-border-lg: hsl(248 18% 100% / 19%);
+
+  --o-text:   hsl(316 20% 95%);
+  --o-text-2: hsl(316 12% 60%);
+  --o-text-3: hsl(316  8% 40%);
+
+  --o-accent:      hsl(320 88% 62%);
+  --o-accent-lt:   hsl(320 92% 72%);
+  --o-accent-dim:  hsl(320 88% 62% / 0.14);
+  --o-accent-glow: hsl(320 88% 62% / 0.32);
+
+  --shadow-sm: 0 1px 3px rgba(4,2,18,0.58), 0 1px 2px rgba(4,2,18,0.42);
+  --shadow-md: 0 4px 12px rgba(4,2,18,0.68),0 2px 6px rgba(4,2,18,0.42);
+  --shadow-lg: 0 16px 48px rgba(4,2,18,0.78),0 6px 20px rgba(4,2,18,0.46);
+  --shadow-xl: 0 32px 64px rgba(4,2,18,0.92);
+
+  --o-surface-hover: hsl(242 14% 18%);
+  --o-topbar-bg:     hsl(248 22% 4% / 0.90);
+  --o-muted:         hsl(316 8% 42%);
+  --o-muted-2:       rgba(255,255,255,0.11);
+  --o-text-primary:  hsl(316 20% 95%);
+  --o-text-muted:    hsl(316 8% 40%);
+}
+
 /* ─ 2. Reset & Base ──────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

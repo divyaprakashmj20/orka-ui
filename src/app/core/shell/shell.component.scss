@@ -9,148 +9,52 @@
 
 ion-content { --background: var(--o-bg); }
 
-/* ── Theme toggle pill ────────────────────────────── */
-.o-theme-toggle {
-  position: relative;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
+/* ── Theme picker ─────────────────────────────────── */
+.o-theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
 }
 
-.o-tt-track {
-  position: relative;
-  display: block;
-  width: 72px;
-  height: 34px;
-  border-radius: 999px;
-  overflow: hidden;
-  transition: background 0.45s ease;
-
-  /* Light mode — warm golden sky */
-  background: linear-gradient(120deg, #fbbf24 0%, #f97316 100%);
-  box-shadow: 0 0 0 2px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-
-  .is-dark & {
-    /* Dark mode — deep indigo night */
-    background: linear-gradient(120deg, #312e81 0%, #0f0a2a 100%);
-    box-shadow: 0 0 0 2px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-}
-
-/* Star dots (hidden in light, visible in dark) */
-.o-tt-star {
-  position: absolute;
+.o-theme-dot {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #fff;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  opacity: 0;
+  border: 2px solid transparent;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease,
+              box-shadow 0.15s ease,
+              border-color 0.15s ease,
+              opacity 0.15s ease;
+  opacity: 0.55;
 
-  .is-dark & { opacity: 1; }
-}
-.s1 { width: 3px; height: 3px; top:  6px; right: 18px; transition-delay: 0.05s; }
-.s2 { width: 2px; height: 2px; top: 14px; right: 24px; transition-delay: 0.12s; }
-.s3 { width: 2px; height: 2px; top:  9px; right: 30px; transition-delay: 0.18s; }
-.s4 { width: 3px; height: 3px; top: 20px; right: 14px; transition-delay: 0.08s; }
-
-/* Fixed sun icon (left side of track) */
-.o-tt-sun {
-  position: absolute;
-  left: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  transition: opacity 0.3s ease;
-  opacity: 0;              /* hidden: thumb covers it */
-
-  .is-dark & { opacity: 0.45; }
-}
-
-/* Fixed moon icon (right side of track) */
-.o-tt-moon {
-  position: absolute;
-  right: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
-  transition: opacity 0.3s ease;
-  opacity: 0.45;           /* faint in light mode */
-
-  .is-dark & { opacity: 0; }
-}
-
-/* Sliding thumb */
-.o-tt-thumb {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
-              background 0.38s ease,
-              box-shadow 0.38s ease;
-
-  /* Light: warm white thumb, glow */
-  background: #fffbeb;
-  box-shadow: 0 2px 8px rgba(251,191,36,0.6), 0 1px 3px rgba(0,0,0,0.2);
-
-  .is-dark & {
-    transform: translateX(38px);
-    background: #c7d2fe;
-    box-shadow: 0 2px 10px rgba(99,102,241,0.7), 0 1px 3px rgba(0,0,0,0.4);
-  }
-}
-
-/* Thumb icons */
-.o-tt-icon-sun,
-.o-tt-icon-moon {
-  position: absolute;
-  font-size: 15px;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.o-tt-icon-sun {
-  color: #f59e0b;
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-
-  .is-dark & {
-    opacity: 0;
-    transform: scale(0.5) rotate(-90deg);
-  }
-}
-
-.o-tt-icon-moon {
-  color: #6366f1;
-  opacity: 0;
-  transform: scale(0.5) rotate(90deg);
-
-  .is-dark & {
+  &:hover {
+    transform: scale(1.25);
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 8px var(--o-accent-glow);
   }
+
+  &.is-active {
+    border-color: rgba(255,255,255,0.75);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.18);
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  &:active { transform: scale(1.05); }
 }
 
-/* Hover: subtle lift + scale */
-.o-theme-toggle:hover .o-tt-track {
-  filter: brightness(1.08);
-}
-.o-theme-toggle:hover .o-tt-thumb {
-  filter: brightness(1.1);
-}
-.o-theme-toggle:active .o-tt-track {
-  filter: brightness(0.95);
-}
-.o-theme-toggle:active .o-tt-thumb {
-  transform: translateX(0) scale(0.92);
-  .is-dark & { transform: translateX(38px) scale(0.92); }
+[data-theme="light"]   .o-theme-dot.is-active,
+[data-theme="slate"]   .o-theme-dot.is-active,
+[data-theme="warm"]    .o-theme-dot.is-active,
+[data-theme="emerald"] .o-theme-dot.is-active,
+[data-theme="arctic"]  .o-theme-dot.is-active,
+[data-theme="sage"]    .o-theme-dot.is-active {
+  border-color: rgba(0,0,0,0.40);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.10);
 }
 
 /* Sidebar error */

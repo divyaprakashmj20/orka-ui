@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
@@ -76,7 +76,29 @@ export class ShellComponent implements OnInit, OnDestroy {
   protected readonly sidebarOpen = signal(false);
   protected readonly loggingOut  = signal(false);
   protected readonly logoutError = signal('');
-  protected readonly isDark      = signal(true);
+  protected readonly themes = [
+    { id: 'dark',      label: 'Dark',      accent: '#818cf8' },
+    { id: 'light',     label: 'Light',     accent: '#94a3b8' },
+    { id: 'slate',     label: 'Slate',     accent: '#2563eb' },
+    { id: 'warm',      label: 'Warm',      accent: '#b45309' },
+    { id: 'midnight',  label: 'Midnight',  accent: '#60a5fa' },
+    { id: 'cobalt',    label: 'Cobalt',    accent: '#4f46e5' },
+    { id: 'charcoal',  label: 'Charcoal',  accent: '#737373' },
+    { id: 'gold',      label: 'Gold',      accent: '#f59e0b' },
+    { id: 'emerald',   label: 'Emerald',   accent: '#059669' },
+    { id: 'violet',    label: 'Violet',    accent: '#8b5cf6' },
+    { id: 'crimson',   label: 'Crimson',   accent: '#ef4444' },
+    { id: 'teal',      label: 'Teal',      accent: '#14b8a6' },
+    { id: 'coffee',    label: 'Coffee',    accent: '#c2754a' },
+    { id: 'arctic',    label: 'Arctic',    accent: '#0891b2' },
+    { id: 'dusk',      label: 'Dusk',      accent: '#c084fc' },
+    { id: 'sage',      label: 'Sage',      accent: '#16a34a' },
+    { id: 'noir',      label: 'Noir',      accent: '#f43f5e' },
+    { id: 'plasma',    label: 'Plasma',    accent: '#ec4899' },
+  ] as const;
+
+  protected readonly currentTheme: WritableSignal<string> = signal('dark');
+  protected readonly isDark = computed(() => this.currentTheme() !== 'light');
   protected readonly isOnline    = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
   protected readonly requestsUnreadCount = toSignal(this.sseService.unreadCount$, { initialValue: 0 });
   /** The request shown in the toast. Null = toast hidden. */
@@ -116,10 +138,9 @@ export class ShellComponent implements OnInit, OnDestroy {
       barChartOutline, personCircleOutline, wifiOutline
     });
     // Restore persisted theme
-    const saved = localStorage.getItem('orka-theme');
-    const dark = saved !== 'light';
-    this.isDark.set(dark);
-    this.applyTheme(dark);
+    const saved = localStorage.getItem('orka-theme') ?? 'dark';
+    this.currentTheme.set(saved);
+    this.applyTheme(saved);
 
     // Track online/offline state
     if (typeof window !== 'undefined') {
@@ -155,15 +176,14 @@ export class ShellComponent implements OnInit, OnDestroy {
     return req.type?.replace(/_/g, ' ') ?? 'Request';
   }
 
-  protected toggleTheme(): void {
-    const next = !this.isDark();
-    this.isDark.set(next);
-    this.applyTheme(next);
-    localStorage.setItem('orka-theme', next ? 'dark' : 'light');
+  protected setTheme(id: string): void {
+    this.currentTheme.set(id);
+    this.applyTheme(id);
+    localStorage.setItem('orka-theme', id);
   }
 
-  private applyTheme(dark: boolean): void {
-    this.document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  private applyTheme(theme: string): void {
+    this.document.documentElement.setAttribute('data-theme', theme);
   }
 
   protected toggleSidebar(): void {
