@@ -11,6 +11,16 @@ type PushPlugin = {
   checkPermissions: () => Promise<{ receive?: string }>;
   requestPermissions: () => Promise<{ receive?: string }>;
   register: () => Promise<void>;
+  createChannel?: (channel: {
+    id: string;
+    name: string;
+    description?: string;
+    importance?: number;
+    visibility?: number;
+    sound?: string;
+    vibration?: boolean;
+    lights?: boolean;
+  }) => Promise<void>;
   addListener: (eventName: string, listener: (event: any) => void) => Promise<any>;
 };
 
@@ -23,6 +33,9 @@ type CapacitorAppPlugin = {
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationsService {
+  private static readonly ANDROID_HIGH_PRIORITY_CHANNEL_ID = 'orka-high-priority';
+  private static readonly ANDROID_HIGH_PRIORITY_CHANNEL_NAME = 'Urgent Requests';
+
   private readonly auth = inject(FirebaseAuthService);
   private readonly api = inject(OrcaApiService);
   private readonly router = inject(Router);
@@ -60,6 +73,7 @@ export class PushNotificationsService {
       }
       this.pushPlugin = loaded.plugin;
       await this.registerAppStateListener();
+      await this.ensureAndroidNotificationChannel();
 
       await this.registerListeners();
 
@@ -78,6 +92,27 @@ export class PushNotificationsService {
       await this.pushPlugin.register();
     } catch (error) {
       console.error('Push notification initialization failed.', error);
+    }
+  }
+
+  private async ensureAndroidNotificationChannel(): Promise<void> {
+    if (!this.pushPlugin || Capacitor.getPlatform() !== 'android' || !this.pushPlugin.createChannel) {
+      return;
+    }
+
+    try {
+      await this.pushPlugin.createChannel({
+        id: PushNotificationsService.ANDROID_HIGH_PRIORITY_CHANNEL_ID,
+        name: PushNotificationsService.ANDROID_HIGH_PRIORITY_CHANNEL_NAME,
+        description: 'Critical service request alerts',
+        importance: 5,
+        visibility: 1,
+        sound: 'default',
+        vibration: true,
+        lights: true
+      });
+    } catch (error) {
+      console.warn('Failed to create Android high-priority notification channel.', error);
     }
   }
 
