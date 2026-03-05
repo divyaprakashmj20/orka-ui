@@ -333,6 +333,26 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
   flex-shrink: 0;
 }
 
+.o-brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #0f1020;
+  padding: 3px;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px rgba(99,102,241,0.25),
+              0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.4),
+                0 4px 12px rgba(99,102,241,0.2);
+  }
+}
+
 .o-brand-name {
   font-size: 0.9375rem;
   font-weight: 700;
@@ -921,7 +941,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 .o-auth-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 .o-auth-mark {
@@ -936,10 +956,23 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
   color: white;
 }
 
+.o-auth-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  object-fit: contain;
+  background: #0f1020;
+  padding: 6px;
+  display: block;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.3),
+              0 4px 16px rgba(99,102,241,0.15),
+              0 8px 32px rgba(0,0,0,0.25);
+}
+
 .o-auth-wordmark {
-  font-size: 1.125rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
   color: var(--o-text);
 }
 

@@ -2,15 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>OrkaUi</title>
+  <title>Orka</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Inline splash screen (removed once Angular boots) ── */
+    .app-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      transition: opacity .4s ease, visibility .4s ease;
+    }
+    .app-splash.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .app-splash-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      object-fit: contain;
+      background: #0f1020;
+      padding: 8px;
+      box-shadow:
+        0 0 0 2px rgba(99,102,241,0.3),
+        0 8px 40px rgba(99,102,241,0.2),
+        0 16px 64px rgba(0,0,0,0.4);
+      animation: splash-pulse 2s ease-in-out infinite;
+    }
+    .app-splash-name {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #f1f1f3;
+    }
+    .app-splash-bar {
+      width: 120px;
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .app-splash-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      animation: splash-loader 1.2s ease-in-out infinite;
+    }
+    @keyframes splash-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.04); }
+    }
+    @keyframes splash-loader {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+  </style>
 </head>
 <body>
+  <!-- Splash screen — hidden once Angular app-root renders -->
+  <div class="app-splash" id="appSplash">
+    <img class="app-splash-logo" src="assets/logo-mark.svg" alt="Orka">
+    <span class="app-splash-name">Orka</span>
+    <div class="app-splash-bar"></div>
+  </div>
+
   <app-root></app-root>
+
+  <script>
+    // Hide splash once Angular has rendered
+    var _splashObs = new MutationObserver(function () {
+      var root = document.querySelector('app-root');
+      if (root && root.children.length > 0) {
+        document.getElementById('appSplash').classList.add('hide');
+        setTimeout(function () {
+          var el = document.getElementById('appSplash');
+          if (el) el.remove();
+        }, 500);
+        _splashObs.disconnect();
+      }
+    });
+    _splashObs.observe(document.querySelector('app-root'), { childList: true });
+  </script>
 </body>
 </html>

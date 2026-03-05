@@ -1,0 +1,22 @@
+<svg width="960" height="320" viewBox="0 0 960 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="c3g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="320" rx="32" fill="#0A0A0F"/>
+
+  <g transform="translate(86 78)">
+    <rect width="164" height="164" rx="44" fill="#151527" stroke="#2F3150" stroke-width="2"/>
+    <path d="M30 102C44 61 79 36 123 34C101 50 89 71 89 92C89 116 103 131 132 144C95 153 60 143 30 102Z" fill="url(#c3g)"/>
+    <path d="M58 105C68 79 88 63 112 60C97 73 90 84 90 97C90 111 99 121 117 130C95 134 73 126 58 105Z" fill="#F1F1F3"/>
+    <circle cx="111" cy="70" r="4" fill="#0A0A0F"/>
+  </g>
+
+  <g transform="translate(300 98)">
+    <text x="0" y="74" fill="#F1F1F3" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="96" font-weight="800" letter-spacing="-2">ORKA</text>
+    <text x="2" y="112" fill="#818CF8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="3">GUEST CARE</text>
+  </g>
+</svg>

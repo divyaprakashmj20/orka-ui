@@ -58,6 +58,18 @@ ion-content { --background: var(--o-bg); }
   letter-spacing: -0.02em;
 }
 
+.guest-brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #0f1020;
+  padding: 3px;
+  display: block;
+  box-shadow: 0 0 0 1.5px rgba(99,102,241,0.25),
+              0 2px 8px rgba(0,0,0,0.3);
+}
+
 .guest-brand-sub {
   font-size: 0.75rem;
   color: var(--o-text-muted);
