@@ -114,6 +114,9 @@
               <span class="rq-time" [class.rq-time-urgent]="isUrgent(item)">
                 {{ elapsedMetricValue(item) }}
               </span>
+              <span class="rq-status-label" [class]="'status-' + (item.status ?? 'NEW').toLowerCase()">
+                {{ statusLabel(item) }}
+              </span>
               <div class="rq-status-dot" [class]="'dot-' + (item.status ?? 'NEW').toLowerCase()"></div>
             </div>
 
