@@ -2,8 +2,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonButton,
-  IonInput
+  IonButton
 } from '@ionic/angular/standalone';
 import { HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
@@ -23,7 +22,6 @@ type HotelGroupForm = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonInput,
     IonButton
   ],
   templateUrl: './hotel-groups.page.html',

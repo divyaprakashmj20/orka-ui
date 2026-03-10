@@ -242,14 +242,61 @@ ion-content { --background: var(--o-bg); }
   }
 }
 
-/* Textarea override */
-.guest-form-card ion-textarea {
-  --background: var(--o-surface-2);
-  --border-radius: 14px;
-  --border-color: var(--o-border);
-  --highlight-color-focused: var(--o-accent);
-  --placeholder-color: var(--o-muted);
-  --color: var(--o-text);
+/* ─── Custom textbox (Ionic outline mimic) ──────── */
+.guest-textbox {
+  position: relative;
+  border-radius: 10px;
+  border: 1.5px solid var(--o-border-md);
+  background: var(--o-surface-2);
+  padding: 10px 14px 4px;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--o-text-2);
+  }
+
+  &.is-focused,
+  &:focus-within {
+    border-color: var(--o-accent);
+    border-width: 2px;
+    padding: 9px 13px 3px; /* compensate 1px extra border so content doesn't shift */
+
+    .guest-textbox-label {
+      color: var(--o-accent);
+    }
+  }
+}
+
+.guest-textbox-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--o-text-muted);
+  margin-bottom: 4px;
+  transition: color 0.15s ease;
+  pointer-events: none;
+}
+
+.guest-textbox-control {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  box-sizing: border-box;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--o-text);
+  caret-color: var(--o-accent);
+
+  &::placeholder {
+    color: var(--o-muted);
+  }
 }
 
 .guest-note {
@@ -349,6 +396,15 @@ ion-content { --background: var(--o-bg); }
       border-color: rgba(99,102,241,.4);
       background: rgba(99,102,241,.08);
       box-shadow: 0 8px 20px rgba(99,102,241,.1);
+    }
+  }
+
+  .guest-textbox {
+    &:hover { border-color: var(--o-text-2); }
+    &.is-focused,
+    &:focus-within {
+      border-color: #6366f1;
+      .guest-textbox-label { color: #6366f1; }
     }
   }
 }

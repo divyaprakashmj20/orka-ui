@@ -84,14 +84,18 @@
             <p class="guest-kicker">Step 2</p>
             <h2>Add a note</h2>
           </div>
-          <ion-textarea
-            fill="outline"
-            label="Details for the staff"
-            labelPlacement="stacked"
-            placeholder="Example: Please bring two fresh towels."
-            autoGrow="true"
-            [(ngModel)]="message"
-          ></ion-textarea>
+          <div class="guest-textbox" [class.is-focused]="textboxFocused">
+            <label class="guest-textbox-label" for="guest-note-textarea">Details for the staff</label>
+            <textarea
+              id="guest-note-textarea"
+              class="guest-textbox-control"
+              placeholder="Example: Please bring two fresh towels."
+              rows="4"
+              [(ngModel)]="message"
+              (focus)="textboxFocused = true"
+              (blur)="textboxFocused = false"
+            ></textarea>
+          </div>
           <p class="guest-note">Short, clear notes help the hotel team respond faster.</p>
           <ion-button expand="block" [disabled]="!canSubmit()" (click)="submit()">
             @if (saving()) {

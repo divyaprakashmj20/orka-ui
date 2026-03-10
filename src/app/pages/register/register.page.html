@@ -15,31 +15,31 @@
         <div class="o-form-grid">
           <div class="o-field">
             <label>Full Name</label>
-            <ion-input fill="solid" type="text" placeholder="Jane Smith" [(ngModel)]="form.name" name="name" autocomplete="name"/>
+            <input class="o-input" type="text" placeholder="Jane Smith" [(ngModel)]="form.name" name="name" autocomplete="name"/>
           </div>
           <div class="o-field">
             <label>Email</label>
-            <ion-input fill="solid" type="email" placeholder="you@company.com" [(ngModel)]="form.email" name="email" autocomplete="email" inputmode="email"/>
+            <input class="o-input" type="email" placeholder="you@company.com" [(ngModel)]="form.email" name="email" autocomplete="email" inputmode="email"/>
           </div>
           <div class="o-field">
             <label>Phone <span class="o-field-opt">(optional)</span></label>
-            <ion-input fill="solid" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone" name="phone" autocomplete="tel"/>
+            <input class="o-input" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone" name="phone" autocomplete="tel"/>
           </div>
           <div class="o-field">
             <label>Hotel Group Code <span class="o-field-opt">(use one or the other)</span></label>
-            <ion-input fill="solid" type="text" placeholder="GRP-XXXX" [(ngModel)]="form.hotelGroupCode" name="hotelGroupCode"/>
+            <input class="o-input" type="text" placeholder="GRP-XXXX" [(ngModel)]="form.hotelGroupCode" name="hotelGroupCode"/>
           </div>
           <div class="o-field">
             <label>Hotel Code</label>
-            <ion-input fill="solid" type="text" placeholder="HTL-XXXX" [(ngModel)]="form.hotelCode" name="hotelCode"/>
+            <input class="o-input" type="text" placeholder="HTL-XXXX" [(ngModel)]="form.hotelCode" name="hotelCode"/>
           </div>
           <div class="o-field">
             <label>Password</label>
-            <ion-input fill="solid" type="password" placeholder="Min 6 characters" [(ngModel)]="form.password" name="password" autocomplete="new-password"/>
+            <input class="o-input" type="password" placeholder="Min 6 characters" [(ngModel)]="form.password" name="password" autocomplete="new-password"/>
           </div>
           <div class="o-field">
             <label>Confirm Password</label>
-            <ion-input fill="solid" type="password" placeholder="Repeat password" [(ngModel)]="form.confirmPassword" name="confirmPassword" autocomplete="new-password"/>
+            <input class="o-input" type="password" placeholder="Repeat password" [(ngModel)]="form.confirmPassword" name="confirmPassword" autocomplete="new-password"/>
           </div>
         </div>
         <ion-button expand="block" [disabled]="loading()" (click)="register()">

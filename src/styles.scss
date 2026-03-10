@@ -204,6 +204,44 @@ ion-input {
   overflow: hidden;
 }
 
+/* ─── Custom native input (.o-input) ─────────────── */
+.o-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--o-surface-2);
+  border: 1.5px solid var(--o-border-md);
+  border-radius: var(--r-md);
+  color: var(--o-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &::placeholder {
+    color: var(--o-text-3);
+  }
+
+  &:hover {
+    border-color: var(--o-border-lg);
+  }
+
+  &:focus {
+    border-color: var(--o-accent);
+    box-shadow: 0 0 0 3px var(--o-accent-glow);
+  }
+
+  &[readonly] {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
 ion-textarea {
   --background: var(--o-surface-2);
   --border-color: var(--o-border-md);

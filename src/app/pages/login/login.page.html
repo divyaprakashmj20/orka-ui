@@ -16,8 +16,7 @@
       <form (ngSubmit)="login()" #f="ngForm" class="o-form">
         <div class="o-field">
           <label>Email</label>
-          <ion-input
-            fill="solid"
+          <input class="o-input"
             type="email"
             placeholder="you@company.com"
             [(ngModel)]="form.email"
@@ -29,8 +28,7 @@
 
         <div class="o-field">
           <label>Password</label>
-          <ion-input
-            fill="solid"
+          <input class="o-input"
             type="password"
             placeholder="••••••••"
             [(ngModel)]="form.password"

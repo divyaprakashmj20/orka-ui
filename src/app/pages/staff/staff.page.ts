@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import {
   IonButton,
   IonCheckbox,
-  IonInput,
   IonSelect,
   IonSelectOption
 } from '@ionic/angular/standalone';
@@ -32,7 +31,6 @@ type Draft = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonInput,
     IonSelect,
     IonSelectOption,
     IonCheckbox,

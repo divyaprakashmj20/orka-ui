@@ -24,11 +24,11 @@
           <div class="o-form-grid">
             <div class="o-field">
               <label>Name</label>
-              <ion-input [(ngModel)]="form.name" name="name" placeholder="Group name" required />
+              <input class="o-input" [(ngModel)]="form.name" name="name" placeholder="Group name" required />
             </div>
             <div class="o-field">
               <label>Code</label>
-              <ion-input [(ngModel)]="form.code" name="code" placeholder="Optional code" />
+              <input class="o-input" [(ngModel)]="form.code" name="code" placeholder="Optional code" />
             </div>
           </div>
 
@@ -36,7 +36,7 @@
             <ion-button type="submit" [disabled]="saving()">
               {{ saving() ? 'Saving...' : 'Create' }}
             </ion-button>
-            <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+            <ion-button type="button" (click)="resetForm()">Reset</ion-button>
             <ion-button type="button" fill="clear" (click)="load()">Refresh</ion-button>
           </div>
         </form>
@@ -66,8 +66,8 @@
                     </div>
                   </div>
                   <div class="o-row-actions">
-                    <ion-button type="button" fill="outline" size="small" (click)="edit(item)">Edit</ion-button>
-                    <ion-button type="button" fill="outline" size="small" color="danger" (click)="remove(item)">Delete</ion-button>
+                    <ion-button type="button" size="small" (click)="edit(item)">Edit</ion-button>
+                    <ion-button type="button" size="small" color="danger" (click)="remove(item)">Delete</ion-button>
                   </div>
               </article>
             } @empty {
@@ -94,17 +94,17 @@
         <div class="o-form-grid">
           <div class="o-field">
             <label>Name</label>
-            <ion-input [(ngModel)]="editForm.name" name="editName" placeholder="Group name" required />
+            <input class="o-input" [(ngModel)]="editForm.name" name="editName" placeholder="Group name" required />
           </div>
           <div class="o-field">
             <label>Code</label>
-            <ion-input [(ngModel)]="editForm.code" name="editCode" placeholder="Optional code" />
+            <input class="o-input" [(ngModel)]="editForm.code" name="editCode" placeholder="Optional code" />
           </div>
         </div>
         @if (error()) { <p class="o-error">{{ error() }}</p> }
         <div class="o-form-actions">
           <ion-button type="submit" [disabled]="modalSaving()">{{ modalSaving() ? 'Saving...' : 'Update' }}</ion-button>
-          <ion-button type="button" fill="outline" (click)="closeModal()">Cancel</ion-button>
+          <ion-button type="button" (click)="closeModal()">Cancel</ion-button>
         </div>
       </form>
     </section>

@@ -86,7 +86,7 @@
 
         <div class="o-form-actions">
           <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
-          <ion-button type="button" fill="outline" (click)="clearFilters()">Clear filters</ion-button>
+          <ion-button type="button" (click)="clearFilters()">Clear filters</ion-button>
         </div>
       </div>
     </div>
@@ -219,7 +219,7 @@
     </div>
 
     <div class="inline-actions inline-actions-compact">
-      <ion-button type="button" fill="outline" size="small" (click)="openEditor(user)">
+      <ion-button type="button" size="small" (click)="openEditor(user)">
         Edit member
       </ion-button>
     </div>
@@ -242,11 +242,11 @@
         <div class="staff-grid">
           <div class="o-field">
             <label>Name</label>
-            <ion-input [(ngModel)]="drafts[user.id].name" [ngModelOptions]="{ standalone: true }" />
+            <input class="o-input" [(ngModel)]="drafts[user.id].name" [ngModelOptions]="{ standalone: true }" />
           </div>
           <div class="o-field">
             <label>Phone</label>
-            <ion-input [(ngModel)]="drafts[user.id].phone" [ngModelOptions]="{ standalone: true }" />
+            <input class="o-input" [(ngModel)]="drafts[user.id].phone" [ngModelOptions]="{ standalone: true }" />
           </div>
           <div class="o-field">
             <label>Access Role</label>
@@ -308,7 +308,7 @@
 
         <div class="o-form-actions">
           <ion-button type="button" [disabled]="isBusy(user.id)" (click)="save(user)">Save Changes</ion-button>
-          <ion-button type="button" fill="outline" [disabled]="isBusy(user.id)" (click)="closeEditor()">Cancel</ion-button>
+          <ion-button type="button" [disabled]="isBusy(user.id)" (click)="closeEditor()">Cancel</ion-button>
         </div>
       </section>
     </div>

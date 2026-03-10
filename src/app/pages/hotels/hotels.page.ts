@@ -3,7 +3,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonInput,
   IonSelect,
   IonSelectOption
 } from '@ionic/angular/standalone';
@@ -30,7 +29,6 @@ type HotelForm = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonInput,
     IonSelect,
     IonSelectOption,
     IonButton

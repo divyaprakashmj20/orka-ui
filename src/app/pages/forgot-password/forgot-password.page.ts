@@ -1,9 +1,8 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonInput,
   IonSpinner,
   NavController
 } from '@ionic/angular/standalone';
@@ -17,7 +16,6 @@ import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
   imports: [
     CommonModule,
     FormsModule,
-    IonInput,
     IonButton,
     IonSpinner
   ],

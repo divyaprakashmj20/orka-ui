@@ -65,6 +65,7 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   protected readonly requests = signal<ServiceRequest[]>([]);
   protected readonly selectedType = signal<RequestType | null>(null);
   protected message = '';
+  protected textboxFocused = false;
 
   protected readonly canSubmit = computed(
     () => !!this.context() && !!this.selectedType() && !this.saving() && !this.sessionExpired()

@@ -25,11 +25,11 @@
             <div class="o-form-grid">
               <div class="o-field">
                 <label>Room Number</label>
-                <ion-input [(ngModel)]="form.number" name="number" required />
+                <input class="o-input" [(ngModel)]="form.number" name="number" required />
               </div>
               <div class="o-field">
                 <label>Floor</label>
-                <ion-input
+                <input class="o-input"
                   [(ngModel)]="form.floor"
                   name="floor"
                   type="number"
@@ -51,7 +51,7 @@
               } @else {
                 <div class="o-field o-field--wide">
                   <label>Hotel</label>
-                  <ion-input [value]="fixedHotelName()" readonly />
+                  <input class="o-input" [value]="fixedHotelName()" readonly />
                 </div>
               }
             </div>
@@ -60,9 +60,9 @@
               <ion-button type="submit" [disabled]="saving()">
                 {{ saving() ? 'Saving...' : 'Create' }}
               </ion-button>
-              <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+              <ion-button type="button" (click)="resetForm()">Reset</ion-button>
               <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
-              <ion-button type="button" fill="outline" [disabled]="bulkExporting()" (click)="exportAllQrCodes()">
+              <ion-button type="button" [disabled]="bulkExporting()" (click)="exportAllQrCodes()">
                 {{ bulkExporting() ? 'Generating...' : 'Export All QR Codes' }}
               </ion-button>
             </div>
@@ -147,11 +147,11 @@
               <div class="o-form-grid">
                 <div class="o-field">
                   <label>Room Number</label>
-                  <ion-input [(ngModel)]="editForm.number" name="editNumber" required />
+                  <input class="o-input" [(ngModel)]="editForm.number" name="editNumber" required />
                 </div>
                 <div class="o-field">
                   <label>Floor</label>
-                  <ion-input
+                  <input class="o-input"
                     [(ngModel)]="editForm.floor"
                     name="editFloor"
                     type="number"
@@ -173,7 +173,7 @@
                 } @else {
                   <div class="o-field o-field--wide">
                     <label>Hotel</label>
-                    <ion-input [value]="fixedHotelName()" readonly />
+                    <input class="o-input" [value]="fixedHotelName()" readonly />
                   </div>
                 }
               </div>
@@ -182,7 +182,7 @@
                 <ion-button type="submit" [disabled]="modalSaving()">
                   {{ modalSaving() ? 'Updating...' : 'Update' }}
                 </ion-button>
-                <ion-button type="button" fill="outline" (click)="closeEdit()">Cancel</ion-button>
+                <ion-button type="button" (click)="closeEdit()">Cancel</ion-button>
               </div>
             </form>
           } @else {
@@ -221,12 +221,11 @@
               }
 
               <div class="o-row-actions">
-                <ion-button type="button" fill="outline"  size="small" (click)="startEditFromSelected()">
+                <ion-button type="button"  size="small" (click)="startEditFromSelected()">
                   Edit
                 </ion-button>
                 <ion-button
                   type="button"
-                  fill="outline"
                   
                   size="small"
                   [disabled]="!room.guestAccessToken"
@@ -236,7 +235,6 @@
                 </ion-button>
                 <ion-button
                   type="button"
-                  fill="outline"
                   
                   size="small"
                   [disabled]="!room.guestAccessToken || qrLoading()"
@@ -244,7 +242,7 @@
                 >
                   Download QR
                 </ion-button>
-                <ion-button type="button" fill="outline"  size="small" (click)="remove(room)">
+                <ion-button type="button"  size="small" (click)="remove(room)">
                   Delete
                 </ion-button>
               </div>

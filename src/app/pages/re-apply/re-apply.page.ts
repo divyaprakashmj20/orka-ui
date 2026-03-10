@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonInput,
   IonSpinner,
   NavController
 } from '@ionic/angular/standalone';
@@ -16,7 +15,7 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
   selector: 'app-re-apply-page',
   standalone: true,
   host: { class: 'ion-page' },
-  imports: [CommonModule, FormsModule, IonInput, IonButton, IonSpinner],
+  imports: [CommonModule, FormsModule, IonButton, IonSpinner],
   templateUrl: './re-apply.page.html',
   styleUrl: './re-apply.page.scss'
 })

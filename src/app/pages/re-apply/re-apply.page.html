@@ -1,4 +1,4 @@
-<div class="o-auth-scroll">
+﻿<div class="o-auth-scroll">
 <div class="o-auth-page">
   <div class="o-auth-box">
     <div class="o-auth-brand">
@@ -14,7 +14,7 @@
           <div style="font-size:2.5rem; margin-bottom:.75rem">✓</div>
           <h1 class="o-auth-heading">Application re-submitted</h1>
           <p class="o-auth-sub">Your request is pending review. You will be notified once approved.</p>
-          <ion-button expand="block" fill="outline" (click)="signOut()">Sign out</ion-button>
+          <ion-button expand="block" (click)="signOut()">Sign out</ion-button>
         </div>
       } @else {
         <h1 class="o-auth-heading" style="margin-bottom:.25rem">Re-apply for Access</h1>
@@ -29,19 +29,19 @@
           <div class="o-form-grid">
             <div class="o-field">
               <label>Full Name *</label>
-              <ion-input fill="solid" type="text" placeholder="Your name" [(ngModel)]="form.name" name="name"/>
+              <input class="o-input" type="text" placeholder="Your name" [(ngModel)]="form.name" name="name"/>
             </div>
             <div class="o-field">
               <label>Phone <span class="o-field-opt">(optional)</span></label>
-              <ion-input fill="solid" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone" name="phone"/>
+              <input class="o-input" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone" name="phone"/>
             </div>
             <div class="o-field">
               <label>Hotel Group Code <span class="o-field-opt">(use one or the other)</span></label>
-              <ion-input fill="solid" type="text" placeholder="GRP-XXXX" [(ngModel)]="form.hotelGroupCode" name="hotelGroupCode"/>
+              <input class="o-input" type="text" placeholder="GRP-XXXX" [(ngModel)]="form.hotelGroupCode" name="hotelGroupCode"/>
             </div>
             <div class="o-field">
               <label>Hotel Code</label>
-              <ion-input fill="solid" type="text" placeholder="HTL-XXXX" [(ngModel)]="form.hotelCode" name="hotelCode"/>
+              <input class="o-input" type="text" placeholder="HTL-XXXX" [(ngModel)]="form.hotelCode" name="hotelCode"/>
             </div>
           </div>
           <ion-button expand="block" type="submit" [disabled]="saving()">

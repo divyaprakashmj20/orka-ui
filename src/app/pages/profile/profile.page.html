@@ -1,4 +1,4 @@
-<app-shell pageTitle="Profile">
+﻿<app-shell pageTitle="Profile">
   @if (loading()) {
     <p class="o-empty">Loading profile…</p>
   } @else if (user(); as u) {
@@ -26,11 +26,11 @@
             <div class="o-form-grid">
               <div class="o-field">
                 <label>Display name</label>
-                <ion-input fill="solid" type="text" placeholder="Your name" [(ngModel)]="form.name"/>
+                <input class="o-input" type="text" placeholder="Your name" [(ngModel)]="form.name"/>
               </div>
               <div class="o-field">
                 <label>Phone <span class="o-field-opt">optional</span></label>
-                <ion-input fill="solid" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone"/>
+                <input class="o-input" type="tel" placeholder="+1 555 000 0000" [(ngModel)]="form.phone"/>
               </div>
             </div>
           </div>

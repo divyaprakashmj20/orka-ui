@@ -27,19 +27,19 @@
             <div class="o-form-grid">
               <div class="o-field">
                 <label>Name</label>
-                <ion-input [(ngModel)]="form.name" name="name" required />
+                <input class="o-input" [(ngModel)]="form.name" name="name" required />
               </div>
               <div class="o-field">
                 <label>Code</label>
-                <ion-input [(ngModel)]="form.code" name="code" />
+                <input class="o-input" [(ngModel)]="form.code" name="code" />
               </div>
               <div class="o-field">
                 <label>City</label>
-                <ion-input [(ngModel)]="form.city" name="city" />
+                <input class="o-input" [(ngModel)]="form.city" name="city" />
               </div>
               <div class="o-field">
                 <label>Country</label>
-                <ion-input [(ngModel)]="form.country" name="country" />
+                <input class="o-input" [(ngModel)]="form.country" name="country" />
               </div>
               @if (showHotelGroupSelector()) {
                 <div class="o-field o-field--wide">
@@ -56,7 +56,7 @@
               } @else {
                 <div class="o-field o-field--wide">
                   <label>Hotel Group</label>
-                  <ion-input [value]="fixedHotelGroupName()" readonly />
+                  <input class="o-input" [value]="fixedHotelGroupName()" readonly />
                 </div>
               }
             </div>
@@ -65,7 +65,7 @@
               <ion-button type="submit" [disabled]="saving()">
                 {{ saving() ? 'Saving...' : 'Create' }}
               </ion-button>
-              <ion-button type="button" fill="outline" (click)="resetForm()">Reset</ion-button>
+              <ion-button type="button" (click)="resetForm()">Reset</ion-button>
               <ion-button type="button" fill="clear" (click)="refreshAll()">Refresh</ion-button>
             </div>
           </form>
@@ -99,8 +99,8 @@
                     <span class="o-badge role">{{ item.hotelGroup?.name || ('Group #' + (item.hotelGroup?.id ?? '?')) }}</span>
                   </div>
                   <div class="o-row-actions">
-                    <ion-button type="button" fill="outline" size="small" (click)="edit(item)">Edit</ion-button>
-                    <ion-button type="button" fill="outline" size="small" color="danger" (click)="remove(item)">Delete</ion-button>
+                    <ion-button type="button" size="small" (click)="edit(item)">Edit</ion-button>
+                    <ion-button type="button" size="small" color="danger" (click)="remove(item)">Delete</ion-button>
                   </div>
                 </article>
               } @empty {
@@ -127,19 +127,19 @@
         <div class="o-form-grid">
           <div class="o-field">
             <label>Name</label>
-            <ion-input [(ngModel)]="editForm.name" name="editName" required />
+            <input class="o-input" [(ngModel)]="editForm.name" name="editName" required />
           </div>
           <div class="o-field">
             <label>Code</label>
-            <ion-input [(ngModel)]="editForm.code" name="editCode" />
+            <input class="o-input" [(ngModel)]="editForm.code" name="editCode" />
           </div>
           <div class="o-field">
             <label>City</label>
-            <ion-input [(ngModel)]="editForm.city" name="editCity" />
+            <input class="o-input" [(ngModel)]="editForm.city" name="editCity" />
           </div>
           <div class="o-field">
             <label>Country</label>
-            <ion-input [(ngModel)]="editForm.country" name="editCountry" />
+            <input class="o-input" [(ngModel)]="editForm.country" name="editCountry" />
           </div>
           @if (showHotelGroupSelector()) {
             <div class="o-field o-field--wide">
@@ -156,14 +156,14 @@
           } @else {
             <div class="o-field o-field--wide">
               <label>Hotel Group</label>
-              <ion-input [value]="fixedHotelGroupName()" readonly />
+              <input class="o-input" [value]="fixedHotelGroupName()" readonly />
             </div>
           }
         </div>
         @if (error()) { <p class="o-error">{{ error() }}</p> }
         <div class="o-form-actions">
           <ion-button type="submit" [disabled]="modalSaving()">{{ modalSaving() ? 'Saving...' : 'Update' }}</ion-button>
-          <ion-button type="button" fill="outline" (click)="closeModal()">Cancel</ion-button>
+          <ion-button type="button" (click)="closeModal()">Cancel</ion-button>
         </div>
       </form>
     </section>

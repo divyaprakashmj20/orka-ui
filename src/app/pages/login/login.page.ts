@@ -1,11 +1,10 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
   IonButton,
-  IonInput,
   IonSpinner,
   NavController
 } from '@ionic/angular/standalone';
@@ -21,7 +20,6 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
   imports: [
     CommonModule,
     FormsModule,
-    IonInput,
     IonButton,
     IonSpinner
   ],

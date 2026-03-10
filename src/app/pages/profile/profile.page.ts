@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonInput, IonToggle } from '@ionic/angular/standalone';
+import { IonButton, IonToggle } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser } from '../../core/models/orca.models';
@@ -12,7 +12,7 @@ import { ShellComponent } from '../../core/shell/shell.component';
   selector: 'app-profile-page',
   standalone: true,
   host: { class: 'ion-page' },
-  imports: [CommonModule, FormsModule, ShellComponent, IonInput, IonButton, IonToggle],
+  imports: [CommonModule, FormsModule, ShellComponent, IonButton, IonToggle],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss'
 })
