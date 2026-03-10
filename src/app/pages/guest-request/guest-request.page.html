@@ -31,7 +31,7 @@
     } @else if (error()) {
       <section class="guest-state-card guest-error">
         <ion-icon name="location-outline"></ion-icon>
-        <h1>Room link unavailable</h1>
+        <h1>{{ sessionExpired() ? 'Session expired' : 'Room link unavailable' }}</h1>
         <p>{{ error() }}</p>
       </section>
     } @else if (context(); as roomContext) {

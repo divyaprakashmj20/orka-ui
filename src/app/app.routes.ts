@@ -9,6 +9,11 @@ import {
 
 export const routes: Routes = [
   {
+    path: 'guest/request',
+    loadComponent: () =>
+      import('./pages/guest-request/guest-request.page').then((m) => m.GuestRequestPage)
+  },
+  {
     path: 'guest/request/:token',
     loadComponent: () =>
       import('./pages/guest-request/guest-request.page').then((m) => m.GuestRequestPage)

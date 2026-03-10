@@ -1,8 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   IonButton,
   IonContent,
@@ -46,8 +48,10 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   private readonly route    = inject(ActivatedRoute);
   private readonly api      = inject(OrcaApiService);
   private readonly document = inject(DOCUMENT);
+  private readonly router   = inject(Router);
 
   private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private sessionExpiryTimeout: ReturnType<typeof setTimeout> | null = null;
   private prevStatuses = new Map<number, RequestStatus>();
 
   protected readonly loading = signal(true);
@@ -55,13 +59,15 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly success = signal(false);
+  protected readonly sessionExpired = signal(false);
+  protected readonly sessionExpiresAt = signal<string | null>(null);
   protected readonly context = signal<GuestRoomContext | null>(null);
   protected readonly requests = signal<ServiceRequest[]>([]);
   protected readonly selectedType = signal<RequestType | null>(null);
   protected message = '';
 
   protected readonly canSubmit = computed(
-    () => !!this.context() && !!this.selectedType() && !this.saving()
+    () => !!this.context() && !!this.selectedType() && !this.saving() && !this.sessionExpired()
   );
 
   constructor() {
@@ -87,9 +93,9 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    const token = this.route.snapshot.paramMap.get('token');
+    const token = this.resolveRoomToken();
     if (!token) {
-      this.error.set('Missing room access token.');
+      this.error.set('Session expired or missing room access. Please scan the QR code again.');
       this.loading.set(false);
       return;
     }
@@ -98,8 +104,8 @@ export class GuestRequestPage implements OnInit, OnDestroy {
       await this.bootstrap(token);
       this.snapshotStatuses();
       this.startPolling(token);
-    } catch {
-      this.error.set('This room link is invalid or no longer available.');
+    } catch (error) {
+      this.handleBootstrapFailure(token, error);
     } finally {
       this.loading.set(false);
     }
@@ -109,6 +115,10 @@ export class GuestRequestPage implements OnInit, OnDestroy {
     if (this.pollInterval != null) {
       clearInterval(this.pollInterval);
       this.pollInterval = null;
+    }
+    if (this.sessionExpiryTimeout != null) {
+      clearTimeout(this.sessionExpiryTimeout);
+      this.sessionExpiryTimeout = null;
     }
   }
 
@@ -140,7 +150,11 @@ export class GuestRequestPage implements OnInit, OnDestroy {
       this.success.set(true);
       this.message = '';
       void this.requestNotificationPermission();
-    } catch {
+    } catch (error) {
+      if (token && this.isExpiredSessionError(error)) {
+        this.expireSession(token);
+        return;
+      }
       this.error.set('Failed to submit the request. Please try again.');
     } finally {
       this.saving.set(false);
@@ -217,7 +231,10 @@ export class GuestRequestPage implements OnInit, OnDestroy {
       await this.bootstrap(token);
       this.detectStatusChangesAndNotify();
       this.snapshotStatuses();
-    } catch {
+    } catch (error) {
+      if (this.isExpiredSessionError(error)) {
+        this.expireSession(token);
+      }
       // Silently ignore poll errors — network may be temporarily unavailable
     }
   }
@@ -264,36 +281,178 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   }
 
   private async bootstrap(token: string): Promise<void> {
+    const storedSession = this.readGuestAccessRecord();
     const result = await firstValueFrom(
       this.api.bootstrapGuestSession(token, {
-        sessionToken: this.readGuestSessionToken(token)
+        sessionToken: storedSession?.sessionToken ?? null
       })
     );
 
+    this.error.set('');
+    this.sessionExpired.set(false);
     this.context.set(result.context);
     this.requests.set(result.requests);
-    this.storeGuestSessionToken(token, result.sessionToken);
+    this.sessionExpiresAt.set(result.sessionExpiresAt);
+    this.storeGuestAccess(token, result.sessionToken, result.sessionExpiresAt);
+    this.scheduleSessionExpiry(token, result.sessionExpiresAt);
 
     if (!this.selectedType() && result.context.availableRequestTypes.length) {
       this.selectedType.set(result.context.availableRequestTypes[0] ?? null);
     }
   }
 
-  private guestSessionStorageKey(roomToken: string): string {
-    return `orka_guest_session_${roomToken}`;
+  private handleBootstrapFailure(token: string, error: unknown): void {
+    if (this.isExpiredSessionError(error)) {
+      this.expireSession(token);
+      return;
+    }
+
+    this.error.set('This room link is invalid or no longer available.');
+  }
+
+  private scheduleSessionExpiry(roomToken: string, expiresAt: string | null | undefined): void {
+    if (this.sessionExpiryTimeout != null) {
+      clearTimeout(this.sessionExpiryTimeout);
+      this.sessionExpiryTimeout = null;
+    }
+
+    if (!expiresAt) {
+      return;
+    }
+
+    const expiresAtMs = new Date(expiresAt).getTime();
+    if (Number.isNaN(expiresAtMs)) {
+      return;
+    }
+
+    const delay = expiresAtMs - Date.now();
+    if (delay <= 0) {
+      this.expireSession(roomToken);
+      return;
+    }
+
+    this.sessionExpiryTimeout = setTimeout(() => {
+      this.expireSession(roomToken);
+    }, delay);
+  }
+
+  private expireSession(roomToken: string): void {
+    this.clearGuestAccess();
+    this.sessionExpired.set(true);
+    this.sessionExpiresAt.set(null);
+    this.context.set(null);
+    this.requests.set([]);
+    this.selectedType.set(null);
+    this.success.set(false);
+    this.saving.set(false);
+    this.error.set('Your guest session has expired. Please scan the room QR code again to continue.');
+
+    if (this.pollInterval != null) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+
+    if (this.sessionExpiryTimeout != null) {
+      clearTimeout(this.sessionExpiryTimeout);
+      this.sessionExpiryTimeout = null;
+    }
+  }
+
+  private isExpiredSessionError(error: unknown): boolean {
+    return error instanceof HttpErrorResponse && error.status === 401;
+  }
+
+  private resolveRoomToken(): string | null {
+    const routeToken = this.route.snapshot.paramMap.get('token');
+    if (routeToken) {
+      const existingSessionToken = this.readGuestAccessRecord()?.sessionToken ?? null;
+      this.storeGuestAccess(routeToken, existingSessionToken, null);
+      this.hideRoomTokenFromUrl();
+      return routeToken;
+    }
+
+    const stored = this.readGuestAccessRecord();
+    if (!stored?.roomToken) {
+      return null;
+    }
+
+    if (stored.sessionExpiresAt) {
+      const expiry = new Date(stored.sessionExpiresAt).getTime();
+      if (Number.isNaN(expiry) || expiry <= Date.now()) {
+        this.clearGuestAccess();
+        this.sessionExpired.set(true);
+        return null;
+      }
+    }
+
+    return stored.roomToken;
+  }
+
+  private hideRoomTokenFromUrl(): void {
+    const history = this.document.defaultView?.history;
+    if (!history) {
+      return;
+    }
+
+    const cleanUrl = this.router.serializeUrl(this.router.createUrlTree(['/guest/request']));
+    history.replaceState(history.state, '', cleanUrl);
+  }
+
+  private guestAccessStorageKey(): string {
+    return 'orka_guest_access';
+  }
+
+  private readGuestAccessRecord(): { roomToken: string; sessionToken: string | null; sessionExpiresAt: string | null } | null {
+    if (typeof sessionStorage === 'undefined') {
+      return null;
+    }
+
+    const raw = sessionStorage.getItem(this.guestAccessStorageKey());
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as { roomToken?: unknown; sessionToken?: unknown; sessionExpiresAt?: unknown };
+      if (typeof parsed?.roomToken === 'string' && parsed.roomToken.trim()) {
+        return {
+          roomToken: parsed.roomToken,
+          sessionToken: typeof parsed.sessionToken === 'string' && parsed.sessionToken.trim()
+            ? parsed.sessionToken
+            : null,
+          sessionExpiresAt: typeof parsed.sessionExpiresAt === 'string' ? parsed.sessionExpiresAt : null
+        };
+      }
+    } catch {
+      // Ignore malformed session data.
+    }
+
+    return null;
   }
 
   private readGuestSessionToken(roomToken: string | null | undefined): string | null {
-    if (!roomToken || typeof localStorage === 'undefined') {
+    const stored = this.readGuestAccessRecord();
+    if (!roomToken || !stored || stored.roomToken !== roomToken) {
       return null;
     }
-    return localStorage.getItem(this.guestSessionStorageKey(roomToken));
+    return stored.sessionToken;
   }
 
-  private storeGuestSessionToken(roomToken: string, sessionToken: string): void {
-    if (typeof localStorage === 'undefined') {
+  private storeGuestAccess(roomToken: string, sessionToken: string | null, sessionExpiresAt: string | null): void {
+    if (typeof sessionStorage === 'undefined') {
       return;
     }
-    localStorage.setItem(this.guestSessionStorageKey(roomToken), sessionToken);
+    sessionStorage.setItem(this.guestAccessStorageKey(), JSON.stringify({
+      roomToken,
+      sessionToken,
+      sessionExpiresAt
+    }));
+  }
+
+  private clearGuestAccess(): void {
+    if (typeof sessionStorage === 'undefined') {
+      return;
+    }
+    sessionStorage.removeItem(this.guestAccessStorageKey());
   }
 }

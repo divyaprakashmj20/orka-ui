@@ -168,6 +168,7 @@ export interface GuestRoomContext {
 
 export interface GuestSessionBootstrapResult {
   sessionToken: string;
+  sessionExpiresAt: string;
   context: GuestRoomContext;
   requests: ServiceRequest[];
 }
