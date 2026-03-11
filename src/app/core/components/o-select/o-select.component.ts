@@ -17,7 +17,7 @@ import { OOptionComponent } from './o-option.component';
 @Component({
   selector: 'o-select',
   standalone: true,
-  imports: [OOptionComponent],
+  imports: [],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

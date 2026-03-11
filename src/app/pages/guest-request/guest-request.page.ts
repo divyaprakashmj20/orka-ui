@@ -9,8 +9,7 @@ import {
   IonButton,
   IonContent,
   IonIcon,
-  IonSpinner,
-  IonTextarea
+  IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -38,8 +37,7 @@ import { OrcaApiService } from '../../core/services/orca-api.service';
     IonButton,
     IonContent,
     IonIcon,
-    IonSpinner,
-    IonTextarea
+    IonSpinner
   ],
   templateUrl: './guest-request.page.html',
   styleUrl: './guest-request.page.scss'

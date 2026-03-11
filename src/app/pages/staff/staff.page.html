@@ -216,7 +216,7 @@
     <section class="sf-popup-card sf-view-card" (click)="$event.stopPropagation()">
       <div class="sf-popup-head">
         <div class="sf-view-avatar-row">
-          <div class="sf-view-avatar">{{ user.name?.charAt(0)?.toUpperCase() }}</div>
+          <div class="sf-view-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
           <div>
             <h3>{{ user.name }} @if (isSelf(user)) { <span class="self-you-badge">You</span> }</h3>
             <p>{{ user.email }}</p>

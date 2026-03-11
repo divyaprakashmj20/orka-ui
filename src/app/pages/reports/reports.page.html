@@ -1,9 +1,10 @@
-<app-shell pageTitle="Reports">
+﻿<app-shell pageTitle="Reports">
+
   @if (loading()) {
-    <p class="o-empty">Loading report�</p>
+    <p class="o-empty">Loading report...</p>
   } @else if (error()) {
     <p class="o-error">{{ error() }}</p>
-  } @else if (data(); as d) {
+  } @else {
 
     <div class="o-page-head">
       <div>
@@ -12,54 +13,166 @@
         <p>Performance metrics scoped to your access level.</p>
       </div>
       <div class="o-page-head-meta">
-        <span class="o-badge">{{ d.totalRequests }} total requests</span>
+        <span class="o-badge">{{ totalRequests() }} requests</span>
+        @if (selectedGroupId() != null || selectedHotelId() != null) {
+          <span class="o-badge">Filtered scope</span>
+        }
       </div>
     </div>
 
-    <!-- Status breakdown -->
-    <div class="rp-stat-row">
-      <div class="rp-stat rp-stat--accent">
-        <span class="rp-stat-n">{{ d.totalRequests }}</span>
-        <span class="rp-stat-l">All Requests</span>
-      </div>
-      <div class="rp-stat rp-stat--new">
-        <span class="rp-stat-n">{{ d.byStatus['NEW'] ?? 0 }}</span>
-        <span class="rp-stat-l">Pending</span>
-      </div>
-      <div class="rp-stat rp-stat--accepted">
-        <span class="rp-stat-n">{{ d.byStatus['ACCEPTED'] ?? 0 }}</span>
-        <span class="rp-stat-l">In Progress</span>
-      </div>
-      <div class="rp-stat rp-stat--completed">
-        <span class="rp-stat-n">{{ d.byStatus['COMPLETED'] ?? 0 }}</span>
-        <span class="rp-stat-l">Completed</span>
-      </div>
-      <div class="rp-stat rp-stat--cancelled">
-        <span class="rp-stat-n">{{ d.byStatus['CANCELLED'] ?? 0 }}</span>
-        <span class="rp-stat-l">Cancelled</span>
-      </div>
-    </div>
-
-    <!-- Response times -->
-    <div class="o-card">
-      <div class="o-card-head">
-        <h3>Response Times</h3>
-        <p class="o-card-copy">Average durations from submission to each milestone.</p>
-      </div>
+    <!-- Filters -->
+    <div class="o-card rp-filters-card">
       <div class="o-card-body">
-        <div class="rp-times">
-          <div class="rp-time">
-            <span class="rp-time-val">{{ minuteLabel(d.avgAcceptMinutes) }}</span>
-            <span class="rp-time-lbl">Avg. time to accept</span>
+        <div class="rp-filters">
+
+          @if (showGroupFilter()) {
+            <div class="o-field">
+              <label>Hotel Group</label>
+              <o-select [value]="selectedGroupId()" (change)="setGroupFilter($event)">
+                <o-option [value]="null">All groups</o-option>
+                @for (g of visibleGroupOptions(); track g.id) {
+                  <o-option [value]="g.id ?? null">{{ g.name }}</o-option>
+                }
+              </o-select>
+            </div>
+          }
+
+          @if (showHotelFilter()) {
+            <div class="o-field">
+              <label>Hotel</label>
+              <o-select [value]="selectedHotelId()" (change)="setHotelFilter($event)">
+                <o-option [value]="null">All hotels</o-option>
+                @for (h of visibleHotelOptions(); track h.id) {
+                  <o-option [value]="h.id ?? null">{{ h.name }}</o-option>
+                }
+              </o-select>
+            </div>
+          } @else if (showGroupFilter() && selectedGroupId() === null) {
+            <div class="o-field">
+              <label>Hotel</label>
+              <p class="o-field-hint">Select a group first</p>
+            </div>
+          }
+
+          <div class="o-field">
+            <label>Date range</label>
+            <div class="rp-range-pills">
+              <button class="rp-range-pill" [class.is-active]="dateRange() === '7d'"  (click)="setDateRange('7d')">7 days</button>
+              <button class="rp-range-pill" [class.is-active]="dateRange() === '30d'" (click)="setDateRange('30d')">30 days</button>
+              <button class="rp-range-pill" [class.is-active]="dateRange() === 'all'" (click)="setDateRange('all')">All time</button>
+            </div>
           </div>
-          <div class="rp-time-divider"></div>
-          <div class="rp-time">
-            <span class="rp-time-val">{{ minuteLabel(d.avgCompleteMinutes) }}</span>
-            <span class="rp-time-lbl">Avg. time to complete</span>
+
+          <div class="o-field rp-filter-actions">
+            <label>&nbsp;</label>
+            <button class="rp-clear-btn" (click)="clearFilters()">Clear filters</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Headline stat tiles -->
+    <div class="rp-stat-row">
+      <div class="rp-stat rp-stat--accent">
+        <span class="rp-stat-n">{{ totalRequests() }}</span>
+        <span class="rp-stat-l">All Requests</span>
+      </div>
+      <div class="rp-stat rp-stat--new">
+        <span class="rp-stat-n">{{ byStatus()['NEW'] ?? 0 }}</span>
+        <span class="rp-stat-l">Pending</span>
+      </div>
+      <div class="rp-stat rp-stat--accepted">
+        <span class="rp-stat-n">{{ byStatus()['ACCEPTED'] ?? 0 }}</span>
+        <span class="rp-stat-l">In Progress</span>
+      </div>
+      <div class="rp-stat rp-stat--completed">
+        <span class="rp-stat-n">{{ byStatus()['COMPLETED'] ?? 0 }}</span>
+        <span class="rp-stat-l">Completed</span>
+      </div>
+      <div class="rp-stat rp-stat--cancelled">
+        <span class="rp-stat-n">{{ byStatus()['CANCELLED'] ?? 0 }}</span>
+        <span class="rp-stat-l">Cancelled</span>
+      </div>
+    </div>
+
+    <!-- Rate + time metrics -->
+    <div class="rp-metrics-row">
+      <div class="o-card rp-metric-card">
+        <div class="rp-metric-val rp-metric-val--green">{{ completionRate() }}%</div>
+        <div class="rp-metric-lbl">Completion rate</div>
+        <div class="rp-metric-track">
+          <div class="rp-metric-fill rp-metric-fill--green" [style.width.%]="completionRate()"></div>
+        </div>
+      </div>
+      <div class="o-card rp-metric-card">
+        <div class="rp-metric-val rp-metric-val--amber">{{ openRate() }}%</div>
+        <div class="rp-metric-lbl">Open rate</div>
+        <div class="rp-metric-track">
+          <div class="rp-metric-fill rp-metric-fill--amber" [style.width.%]="openRate()"></div>
+        </div>
+      </div>
+      <div class="o-card rp-metric-card">
+        <div class="rp-metric-val">{{ minuteLabel(avgAcceptMinutes()) }}</div>
+        <div class="rp-metric-lbl">Avg. time to accept</div>
+      </div>
+      <div class="o-card rp-metric-card">
+        <div class="rp-metric-val">{{ minuteLabel(avgCompleteMinutes()) }}</div>
+        <div class="rp-metric-lbl">Avg. time to complete</div>
+      </div>
+    </div>
+
+    <!-- Staff performance -->
+    @if (canSeeStaff() && staffStats().length > 0) {
+      <div class="o-card">
+        <div class="o-card-head">
+          <h3>Staff Performance</h3>
+          <p class="o-card-copy">Requests handled per staff member in the current scope and period.</p>
+        </div>
+        <div class="o-card-body">
+          <div class="rp-staff-table-wrap">
+            <table class="rp-staff-table">
+              <thead>
+                <tr>
+                  <th class="rp-th-name">Name</th>
+                  <th class="rp-th-role">Role</th>
+                  <th>Assigned</th>
+                  <th>Completed</th>
+                  <th>Cancelled</th>
+                  <th>Rate</th>
+                  <th>Avg time</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of staffStats(); track s.user.id; let i = $index) {
+                  <tr [class.rp-row-top]="i < 3">
+                    <td class="rp-td-name">
+                      <span class="rp-staff-avatar">{{ s.user.name.charAt(0).toUpperCase() }}</span>
+                      {{ s.user.name }}
+                    </td>
+                    <td class="rp-td-role">{{ staffRoleLabel(s.user) }}</td>
+                    <td>{{ s.assigned }}</td>
+                    <td><strong>{{ s.completed }}</strong></td>
+                    <td>{{ s.cancelled }}</td>
+                    <td>
+                      <div class="rp-rate-cell">
+                        <div class="rp-rate-track">
+                          <div class="rp-rate-fill" [style.width.%]="s.completionRate"
+                            [class.rp-rate-fill--high]="s.completionRate >= 80"
+                            [class.rp-rate-fill--mid]="s.completionRate >= 50 && s.completionRate < 80"
+                          ></div>
+                        </div>
+                        <span>{{ s.completionRate }}%</span>
+                      </div>
+                    </td>
+                    <td>{{ minuteLabel(s.avgCompleteMinutes) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
 
     <!-- By type + 7-day chart -->
     <div class="rp-cols">
@@ -70,12 +183,12 @@
             @for (type of requestTypes; track type) {
               <div class="rp-type-row">
                 <div class="rp-type-icon">
-                  {{ type === 'HOUSEKEEPING' ? '??' : type === 'FOOD' ? '?' : type === 'MAINTENANCE' ? '??' : '??' }}
+                  {{ type === 'HOUSEKEEPING' ? '🧹' : type === 'FOOD' ? '🍽️' : type === 'MAINTENANCE' ? '🔧' : '📋' }}
                 </div>
                 <div class="rp-type-info">
                   <div class="rp-type-bar-row">
                     <span class="rp-type-name">{{ typeLabel(type) }}</span>
-                    <span class="rp-type-count">{{ d.byType[type] ?? 0 }}</span>
+                    <span class="rp-type-count">{{ byType()[type] ?? 0 }}</span>
                   </div>
                   <div class="rp-type-track">
                     <div class="rp-type-fill" [style.width.%]="typePct(type)"></div>
@@ -92,7 +205,7 @@
         <div class="o-card-head"><h3>Last 7 Days</h3></div>
         <div class="o-card-body">
           <div class="rp-chart">
-            @for (day of d.requestsPerDay; track day.date) {
+            @for (day of requestsPerDay(); track day.date) {
               <div class="rp-col">
                 <span class="rp-col-val">{{ day.count || '' }}</span>
                 <div class="rp-col-track">
@@ -107,15 +220,15 @@
     </div>
 
     <!-- Top rooms leaderboard -->
-    @if (d.topRooms.length > 0) {
+    @if (topRooms().length > 0) {
       <div class="o-card">
         <div class="o-card-head">
           <h3>Busiest Rooms</h3>
-          <p class="o-card-copy">Rooms that generated the most service requests this period.</p>
+          <p class="o-card-copy">Rooms that generated the most service requests in this period.</p>
         </div>
         <div class="o-card-body">
           <div class="rp-rooms">
-            @for (room of d.topRooms; track room.roomNumber; let i = $index) {
+            @for (room of topRooms(); track room.roomNumber; let i = $index) {
               <div class="rp-room">
                 <span class="rp-room-rank" [class.rp-room-rank--top]="i < 3">{{ i + 1 }}</span>
                 <div class="rp-room-info">
@@ -125,7 +238,7 @@
                   }
                 </div>
                 <div class="rp-room-bar-wrap">
-                  <div class="rp-room-bar" [style.width.%]="(room.count / d.topRooms[0].count) * 100"></div>
+                  <div class="rp-room-bar" [style.width.%]="(room.count / topRooms()[0].count) * 100"></div>
                 </div>
                 <span class="rp-room-count">{{ room.count }}</span>
               </div>
