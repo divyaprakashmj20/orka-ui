@@ -3,9 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonCheckbox,
-  IonSelect,
-  IonSelectOption
+  IonCheckbox
 } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
@@ -23,6 +21,8 @@ type Draft = {
   assignedHotelId: number | null;
 };
 
+import { OOptionComponent } from '../../core/components/o-select/o-option.component';
+import { OSelectComponent } from '../../core/components/o-select/o-select.component';
 @Component({
   selector: 'app-staff-page',
   host: { class: 'ion-page' },
@@ -31,11 +31,11 @@ type Draft = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonSelect,
-    IonSelectOption,
     IonCheckbox,
     IonButton
-  ],
+  ,
+    OOptionComponent,
+    OSelectComponent],
   templateUrl: './staff.page.html',
   styleUrl: './staff.page.scss'
 })
@@ -51,8 +51,8 @@ export class StaffPage implements OnInit {
   protected readonly error = signal('');
   protected readonly busyIds = signal<number[]>([]);
   protected readonly editingUser = signal<AppUser | null>(null);
+  protected readonly viewingUser = signal<AppUser | null>(null);
   protected readonly expandedUserId = signal<number | null>(null);
-  protected readonly roleFilter = signal<'ALL' | AccessRole>('ALL');
   protected readonly statusFilter = signal<'ALL' | 'ACTIVE' | 'DISABLED'>('ALL');
   protected readonly selectedGroupId = signal<number | null>(null);
   protected readonly selectedHotelId = signal<number | null>(null);
@@ -62,38 +62,36 @@ export class StaffPage implements OnInit {
   protected drafts: Record<number, Draft> = {};
 
   protected readonly managedUsers = computed(() => {
-    const actorId = this.currentAppUser()?.id;
     return this.users().filter((user) => {
       if (
         user.id == null ||
-        user.id === actorId ||
         user.status === 'PENDING_APPROVAL' ||
         user.status === 'REJECTED'
       ) {
         return false;
       }
 
-      if (this.roleFilter() !== 'ALL' && user.accessRole !== this.roleFilter()) {
-        return false;
-      }
-
       const active = user.active ?? true;
-      if (this.statusFilter() === 'ACTIVE' && !active) {
-        return false;
-      }
-      if (this.statusFilter() === 'DISABLED' && active) {
-        return false;
-      }
+      if (this.statusFilter() === 'ACTIVE' && !active) return false;
+      if (this.statusFilter() === 'DISABLED' && active) return false;
+
+      const role = user.accessRole;
+
+      // Superadmins are platform-wide — never filtered by group or hotel scope
+      if (role === 'SUPERADMIN') return true;
 
       const groupId = user.assignedHotelGroup?.id ?? user.assignedHotel?.hotelGroup?.id ?? null;
-      const hotelId = user.assignedHotel?.id ?? null;
 
-      if (this.selectedGroupId() != null && groupId !== this.selectedGroupId()) {
-        return false;
+      // Group admins are group-scoped — filtered by group only, never by hotel
+      if (role === 'HOTEL_GROUP_ADMIN' || role === 'ADMIN') {
+        if (this.selectedGroupId() != null && groupId !== this.selectedGroupId()) return false;
+        return true;
       }
-      if (this.selectedHotelId() != null && hotelId !== this.selectedHotelId()) {
-        return false;
-      }
+
+      // Hotel admins and staff — scoped to both group and hotel
+      const hotelId = user.assignedHotel?.id ?? null;
+      if (this.selectedGroupId() != null && groupId !== this.selectedGroupId()) return false;
+      if (this.selectedHotelId() != null && hotelId !== this.selectedHotelId()) return false;
 
       return true;
     });
@@ -191,6 +189,21 @@ export class StaffPage implements OnInit {
     this.expandedUserId.set(this.expandedUserId() === userId ? null : userId);
   }
 
+  protected openViewer(user: AppUser): void {
+    this.viewingUser.set(user);
+  }
+
+  protected closeViewer(): void {
+    this.viewingUser.set(null);
+  }
+
+  protected editFromViewer(): void {
+    const user = this.viewingUser();
+    if (!user) return;
+    this.closeViewer();
+    this.openEditor(user);
+  }
+
   protected openEditor(user: AppUser): void {
     this.editingUser.set(user);
     this.expandedUserId.set(user.id ?? null);
@@ -200,10 +213,6 @@ export class StaffPage implements OnInit {
     this.editingUser.set(null);
     this.expandedUserId.set(null);
     this.error.set('');
-  }
-
-  protected setRoleFilter(role: 'ALL' | AccessRole): void {
-    this.roleFilter.set(role);
   }
 
   protected setStatusFilter(status: 'ALL' | 'ACTIVE' | 'DISABLED'): void {
@@ -225,7 +234,6 @@ export class StaffPage implements OnInit {
   }
 
   protected clearFilters(): void {
-    this.roleFilter.set('ALL');
     this.statusFilter.set('ALL');
     if (!this.isHotelAdmin(this.currentAppUser())) {
       this.selectedHotelId.set(null);
@@ -233,6 +241,10 @@ export class StaffPage implements OnInit {
     if (!this.isHotelGroupAdmin(this.currentAppUser())) {
       this.selectedGroupId.set(null);
     }
+  }
+
+  protected isSelf(user: AppUser): boolean {
+    return user.id != null && user.id === this.currentAppUser()?.id;
   }
 
   protected showPlatformSection(): boolean {
@@ -246,7 +258,10 @@ export class StaffPage implements OnInit {
 
   protected showHotelFilter(): boolean {
     const actor = this.currentAppUser();
-    return actor != null && !this.isHotelAdmin(actor);
+    if (!actor) return false;
+    if (this.isHotelAdmin(actor)) return false; // locked to their hotel, no picker needed
+    if (this.isSuperAdmin(actor)) return this.selectedGroupId() != null; // group must come first
+    return true; // hotel group admin is already scoped to one group
   }
 
   protected directorySummary(): string {

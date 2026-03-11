@@ -2,21 +2,25 @@
    Requests page
    ========================================================= */
 
-/* --- Sticky header --------------------------------------- */
+/* --- Sticky zone (header + tabs together) --------------- */
+.rq-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: linear-gradient(180deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.92) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 10px;
+}
+
+/* --- Header row ------------------------------------------ */
 .rq-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 0 14px;
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  background: linear-gradient(180deg, rgba(10,10,15,0.96), rgba(10,10,15,0.78));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  margin-bottom: 10px;
+  padding: 8px 0 10px;
 }
 
 .rq-header-counts {
@@ -140,8 +144,7 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   border-bottom: 2px solid var(--o-border);
-  margin-bottom: 20px;
-  /* no overflow, no scroll — all tabs always visible */
+  /* sits inside .rq-sticky — no separate margin needed */
 }
 
 .rq-tab {
@@ -794,10 +797,10 @@
 }
 
 /* --- Light mode ------------------------------------------ */
-[data-theme="light"] {
+:host-context([data-theme="light"]) {
 
-  .rq-header {
-    background: linear-gradient(180deg, rgba(248,250,252,0.96), rgba(248,250,252,0.82));
+  .rq-sticky {
+    background: linear-gradient(180deg, rgba(248,250,252,0.97) 0%, rgba(248,250,252,0.92) 100%);
     border-bottom-color: rgba(148,163,184,0.25);
   }
 

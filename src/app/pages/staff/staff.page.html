@@ -24,63 +24,48 @@
           @if (showGroupFilter()) {
             <div class="o-field">
               <label>Hotel Group</label>
-              <ion-select
+              <o-select
                 [value]="selectedGroupId()"
-                (ionChange)="setGroupFilter($event.detail.value ?? null)"
-                interface="alert"
+                (change)="setGroupFilter($event)"
               >
-                <ion-select-option [value]="null">All groups</ion-select-option>
+                <o-option [value]="null">All groups</o-option>
                 @for (group of visibleGroupOptions(); track group.id ?? group.name) {
-                  <ion-select-option [value]="group.id ?? null">{{ group.name }}</ion-select-option>
+                  <o-option [value]="group.id ?? null">{{ group.name }}</o-option>
                 }
-              </ion-select>
+              </o-select>
             </div>
           }
 
           @if (showHotelFilter()) {
             <div class="o-field">
               <label>Hotel</label>
-              <ion-select
+              <o-select
                 [value]="selectedHotelId()"
-                (ionChange)="setHotelFilter($event.detail.value ?? null)"
-                interface="alert"
+                (change)="setHotelFilter($event)"
               >
-                <ion-select-option [value]="null">All hotels</ion-select-option>
+                <o-option [value]="null">All hotels</o-option>
                 @for (hotel of visibleHotelOptions(); track hotel.id ?? hotel.name) {
-                  <ion-select-option [value]="hotel.id ?? null">{{ hotel.name }}</ion-select-option>
+                  <o-option [value]="hotel.id ?? null">{{ hotel.name }}</o-option>
                 }
-              </ion-select>
+              </o-select>
+            </div>
+          } @else if (showGroupFilter() && selectedGroupId() === null) {
+            <div class="o-field">
+              <label>Hotel</label>
+              <p class="o-field-hint">Select a group first</p>
             </div>
           }
 
           <div class="o-field">
-            <label>Role</label>
-            <ion-select
-              [value]="roleFilter()"
-              (ionChange)="setRoleFilter($event.detail.value)"
-              interface="alert"
-            >
-              <ion-select-option value="ALL">All roles</ion-select-option>
-              @if (showPlatformSection()) {
-                <ion-select-option value="SUPERADMIN">Superadmins</ion-select-option>
-              }
-              <ion-select-option value="HOTEL_GROUP_ADMIN">Group admins</ion-select-option>
-              <ion-select-option value="HOTEL_ADMIN">Hotel admins</ion-select-option>
-              <ion-select-option value="STAFF">Staff</ion-select-option>
-            </ion-select>
-          </div>
-
-          <div class="o-field">
             <label>Status</label>
-            <ion-select
+            <o-select
               [value]="statusFilter()"
-              (ionChange)="setStatusFilter($event.detail.value)"
-              interface="alert"
+              (change)="setStatusFilter($event)"
             >
-              <ion-select-option value="ALL">All status</ion-select-option>
-              <ion-select-option value="ACTIVE">Active</ion-select-option>
-              <ion-select-option value="DISABLED">Disabled</ion-select-option>
-            </ion-select>
+              <o-option value="ALL">All status</o-option>
+              <o-option value="ACTIVE">Active</o-option>
+              <o-option value="DISABLED">Disabled</o-option>
+            </o-select>
           </div>
         </div>
 
@@ -195,12 +180,12 @@
 </app-shell>
 
 <ng-template #personCard let-user>
-  <article class="o-record roster-card">
+  <article class="o-record roster-card" [class.roster-card-self]="isSelf(user)" (click)="openViewer(user)" role="button" tabindex="0" (keydown.enter)="openViewer(user)">
     <div class="record-heading">
       <div class="o-record-head">
         <div class="o-record-tag" aria-hidden="true">{{ user.name?.charAt(0)?.toUpperCase() }}</div>
         <div>
-          <h3>{{ user.name }}</h3>
+          <h3>{{ user.name }} @if (isSelf(user)) { <span class="self-you-badge">You</span> }</h3>
           <p>{{ user.email }}</p>
         </div>
       </div>
@@ -219,12 +204,71 @@
     </div>
 
     <div class="inline-actions inline-actions-compact">
-      <ion-button type="button" size="small" (click)="openEditor(user)">
-        Edit member
+      <ion-button type="button" size="small" fill="clear" (click)="openViewer(user); $event.stopPropagation()">
+        View details
       </ion-button>
     </div>
   </article>
 </ng-template>
+
+@if (viewingUser(); as user) {
+  <div class="sf-popup-overlay" (click)="closeViewer()">
+    <section class="sf-popup-card sf-view-card" (click)="$event.stopPropagation()">
+      <div class="sf-popup-head">
+        <div class="sf-view-avatar-row">
+          <div class="sf-view-avatar">{{ user.name?.charAt(0)?.toUpperCase() }}</div>
+          <div>
+            <h3>{{ user.name }} @if (isSelf(user)) { <span class="self-you-badge">You</span> }</h3>
+            <p>{{ user.email }}</p>
+          </div>
+        </div>
+        <ion-button fill="clear" size="small" (click)="closeViewer()">Close</ion-button>
+      </div>
+
+      <div class="sf-view-details">
+        <div class="sf-view-row">
+          <span class="sf-view-label">Access role</span>
+          <span class="sf-view-value">{{ user.accessRole?.replace('_', ' ') }}</span>
+        </div>
+        @if (user.employeeRole) {
+          <div class="sf-view-row">
+            <span class="sf-view-label">Operational role</span>
+            <span class="sf-view-value">{{ user.employeeRole.replace(/_/g, ' ') }}</span>
+          </div>
+        }
+        <div class="sf-view-row">
+          <span class="sf-view-label">Status</span>
+          <span class="sf-view-value">{{ (user.active ?? true) ? 'Active' : 'Disabled' }}</span>
+        </div>
+        @if (user.phone) {
+          <div class="sf-view-row">
+            <span class="sf-view-label">Phone</span>
+            <span class="sf-view-value">{{ user.phone }}</span>
+          </div>
+        }
+        @if (user.assignedHotelGroup) {
+          <div class="sf-view-row">
+            <span class="sf-view-label">Hotel group</span>
+            <span class="sf-view-value">{{ user.assignedHotelGroup.name }}</span>
+          </div>
+        }
+        @if (user.assignedHotel) {
+          <div class="sf-view-row">
+            <span class="sf-view-label">Hotel</span>
+            <span class="sf-view-value">{{ user.assignedHotel.name }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="o-form-actions">
+        @if (roleOptionsForUser().length > 0) {
+          <ion-button type="button" (click)="editFromViewer()">Edit member</ion-button>
+        }
+        <ion-button type="button" fill="clear" (click)="closeViewer()">Close</ion-button>
+      </div>
+    </section>
+  </div>
+}
 
 @if (editingUser(); as user) {
   @if (user.id != null) {
@@ -250,51 +294,51 @@
           </div>
           <div class="o-field">
             <label>Access Role</label>
-            <ion-select [(ngModel)]="drafts[user.id].accessRole" [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="onRoleChange(user.id)" interface="alert">
+            <o-select [(ngModel)]="drafts[user.id].accessRole" [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="onRoleChange(user.id)">
               @for (role of roleOptionsForUser(); track role) {
-                <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
+                <o-option [value]="role">{{ role.replace(/_/g, ' ') }}</o-option>
               }
-            </ion-select>
+            </o-select>
           </div>
           @if (needsGroupAssignment(drafts[user.id].accessRole)) {
             <div class="o-field">
               <label>Assigned Hotel Group</label>
-              <ion-select [(ngModel)]="drafts[user.id].assignedHotelGroupId"
-                [ngModelOptions]="{ standalone: true }" interface="alert">
-                <ion-select-option [value]="null">Select group</ion-select-option>
+              <o-select [(ngModel)]="drafts[user.id].assignedHotelGroupId"
+                [ngModelOptions]="{ standalone: true }">
+                <o-option [value]="null">Select group</o-option>
                 @for (group of assignableHotelGroups(); track group.id ?? group.name) {
-                  <ion-select-option [value]="group.id ?? null">
+                  <o-option [value]="group.id ?? null">
                     {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                  </ion-select-option>
+                  </o-option>
                 }
-              </ion-select>
+              </o-select>
             </div>
           }
           @if (needsHotelAssignment(drafts[user.id].accessRole)) {
             <div class="o-field">
               <label>Assigned Hotel</label>
-              <ion-select [(ngModel)]="drafts[user.id].assignedHotelId"
-                [ngModelOptions]="{ standalone: true }" interface="alert">
-                <ion-select-option [value]="null">Select hotel</ion-select-option>
+              <o-select [(ngModel)]="drafts[user.id].assignedHotelId"
+                [ngModelOptions]="{ standalone: true }">
+                <o-option [value]="null">Select hotel</o-option>
                 @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
-                  <ion-select-option [value]="hotel.id ?? null">
+                  <o-option [value]="hotel.id ?? null">
                     {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                  </ion-select-option>
+                  </o-option>
                 }
-              </ion-select>
+              </o-select>
             </div>
           }
           @if (needsEmployeeRole(drafts[user.id].accessRole)) {
             <div class="o-field">
               <label>Operational Role</label>
-              <ion-select [(ngModel)]="drafts[user.id].employeeRole"
-                [ngModelOptions]="{ standalone: true }" interface="alert">
-                <ion-select-option [value]="null">Select role</ion-select-option>
+              <o-select [(ngModel)]="drafts[user.id].employeeRole"
+                [ngModelOptions]="{ standalone: true }">
+                <o-option [value]="null">Select role</o-option>
                 @for (role of employeeRoles; track role) {
-                  <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
+                  <o-option [value]="role">{{ role.replace(/_/g, ' ') }}</o-option>
                 }
-              </ion-select>
+              </o-select>
             </div>
           }
           <div class="o-field">

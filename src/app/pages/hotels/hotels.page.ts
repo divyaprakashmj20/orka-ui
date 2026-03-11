@@ -2,9 +2,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonButton,
-  IonSelect,
-  IonSelectOption
+  IonButton
 } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
@@ -21,6 +19,8 @@ type HotelForm = {
   hotelGroupId: number | null;
 };
 
+import { OOptionComponent } from '../../core/components/o-select/o-option.component';
+import { OSelectComponent } from '../../core/components/o-select/o-select.component';
 @Component({
   selector: 'app-hotels-page',
   host: { class: 'ion-page' },
@@ -29,10 +29,10 @@ type HotelForm = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonSelect,
-    IonSelectOption,
     IonButton
-  ],
+  ,
+    OOptionComponent,
+    OSelectComponent],
   templateUrl: './hotels.page.html',
   styleUrl: './hotels.page.scss'
 })

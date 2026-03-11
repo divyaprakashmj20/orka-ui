@@ -3,9 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonCheckbox,
-  IonSelect,
-  IonSelectOption
+  IonCheckbox
 } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -30,6 +28,8 @@ type Draft = {
   assignedHotelId: number | null;
 };
 
+import { OOptionComponent } from '../../core/components/o-select/o-option.component';
+import { OSelectComponent } from '../../core/components/o-select/o-select.component';
 @Component({
   selector: 'app-app-users-page',
   host: { class: 'ion-page' },
@@ -38,11 +38,11 @@ type Draft = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonSelect,
-    IonSelectOption,
     IonCheckbox,
     IonButton
-  ],
+  ,
+    OOptionComponent,
+    OSelectComponent],
   templateUrl: './app-users.page.html',
   styleUrl: './app-users.page.scss'
 })

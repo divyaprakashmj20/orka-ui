@@ -1,41 +1,42 @@
 <app-shell pageTitle="Requests">
 
-  <!-- Sticky header -->
-  <div class="rq-header">
-    <div class="rq-header-counts">
-      <div class="rq-count-chip rq-count-new">
-        <span class="rq-count-dot"></span>
-        <strong>{{ requestCounts().NEW }}</strong>
-        <span>new</span>
+  <!-- Sticky header + tabs -->
+  <div class="rq-sticky">
+    <div class="rq-header">
+      <div class="rq-header-counts">
+        <div class="rq-count-chip rq-count-new">
+          <span class="rq-count-dot"></span>
+          <strong>{{ requestCounts().NEW }}</strong>
+          <span>new</span>
+        </div>
+        <div class="rq-count-chip rq-count-active">
+          <strong>{{ requestCounts().ACCEPTED }}</strong>
+          <span>active</span>
+        </div>
+        <div class="rq-count-chip rq-count-total">
+          <strong>{{ requestCounts().ALL }}</strong>
+          <span>total</span>
+        </div>
       </div>
-      <div class="rq-count-chip rq-count-active">
-        <strong>{{ requestCounts().ACCEPTED }}</strong>
-        <span>active</span>
-      </div>
-      <div class="rq-count-chip rq-count-total">
-        <strong>{{ requestCounts().ALL }}</strong>
-        <span>total</span>
+      <div class="rq-header-right">
+        <div
+          class="rq-sse-pill"
+          [class.is-connected]="sseStatus() === 'connected'"
+          [class.is-error]="sseStatus() === 'error'"
+          [title]="sseStatus() === 'connected' ? 'Live updates active' : sseStatus() === 'connecting' ? 'Connecting…' : 'Reconnecting…'"
+        >
+          <span class="rq-sse-dot"></span>
+          <span class="rq-sse-label">
+            {{ sseStatus() === 'connected' ? 'live' : sseStatus() === 'connecting' ? 'connecting' : 'reconnecting' }}
+          </span>
+        </div>
+        <ion-button fill="clear" size="small" class="rq-refresh-btn" (click)="refreshAll()">
+          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+        </ion-button>
       </div>
     </div>
-    <div class="rq-header-right">
-      <div
-        class="rq-sse-pill"
-        [class.is-connected]="sseStatus() === 'connected'"
-        [class.is-error]="sseStatus() === 'error'"
-        [title]="sseStatus() === 'connected' ? 'Live updates active' : sseStatus() === 'connecting' ? 'Connecting…' : 'Reconnecting…'"
-      >
-        <span class="rq-sse-dot"></span>
-        <span class="rq-sse-label">
-          {{ sseStatus() === 'connected' ? 'live' : sseStatus() === 'connecting' ? 'connecting' : 'reconnecting' }}
-        </span>
-      </div>
-      <ion-button fill="clear" size="small" class="rq-refresh-btn" (click)="refreshAll()">
-        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-      </ion-button>
-    </div>
-  </div>
 
-  <!-- Tab bar -->
+    <!-- Tab bar -->
   <div class="rq-tabs" role="tablist">
     @for (filter of boardFilters; track filter) {
       <button
@@ -53,6 +54,7 @@
     }
     <div class="rq-tab-indicator"></div>
   </div>
+  </div><!-- /.rq-sticky -->
 
   <!-- Error -->
   @if (error()) {

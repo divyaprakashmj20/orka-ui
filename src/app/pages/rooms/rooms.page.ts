@@ -2,9 +2,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  IonButton,
-  IonSelect,
-  IonSelectOption
+  IonButton
 } from '@ionic/angular/standalone';
 import QRCode from 'qrcode';
 import { firstValueFrom } from 'rxjs';
@@ -21,6 +19,8 @@ type RoomForm = {
   hotelId: number | null;
 };
 
+import { OOptionComponent } from '../../core/components/o-select/o-option.component';
+import { OSelectComponent } from '../../core/components/o-select/o-select.component';
 @Component({
   selector: 'app-rooms-page',
   host: { class: 'ion-page' },
@@ -29,10 +29,10 @@ type RoomForm = {
     CommonModule,
     FormsModule,
     ShellComponent,
-    IonSelect,
-    IonSelectOption,
     IonButton
-  ],
+  ,
+    OOptionComponent,
+    OSelectComponent],
   templateUrl: './rooms.page.html',
   styleUrl: './rooms.page.scss'
 })

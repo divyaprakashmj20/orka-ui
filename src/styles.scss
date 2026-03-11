@@ -242,6 +242,43 @@ ion-input {
   }
 }
 
+/* ─── Custom native select (.o-select) ───────────── */
+.o-select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--o-surface-2);
+  border: 1.5px solid var(--o-border-md);
+  border-radius: var(--r-md);
+  color: var(--o-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 10px 36px 10px 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238892a4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+
+  &:hover {
+    border-color: var(--o-border-lg);
+  }
+
+  &:focus {
+    border-color: var(--o-accent);
+    box-shadow: 0 0 0 3px var(--o-accent-glow);
+  }
+
+  option {
+    background: var(--o-surface);
+    color: var(--o-text);
+  }
+}
+
 ion-textarea {
   --background: var(--o-surface-2);
   --border-color: var(--o-border-md);
@@ -711,6 +748,14 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 }
 
 .o-field.span-2 { grid-column: 1 / -1; }
+
+.o-field-hint {
+  font-size: 0.8rem;
+  color: var(--o-text-3);
+  font-style: italic;
+  margin: 0;
+  padding: 10px 0;
+}
 
 /* Badge / pill */
 .o-badge {

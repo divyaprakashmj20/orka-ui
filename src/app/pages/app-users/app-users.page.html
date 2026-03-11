@@ -1,4 +1,4 @@
-<app-shell pageTitle="Users">
+﻿<app-shell pageTitle="Users">
     <div class="o-page-head">
       <div>
         <p class="o-page-eyebrow">Access Control</p>
@@ -55,67 +55,63 @@
                   <div class="approval-grid">
                     <div class="o-field">
                       <label>Role</label>
-                      <ion-select
+                      <o-select
                         [(ngModel)]="drafts[user.id].accessRole"
                         [ngModelOptions]="{ standalone: true }"
                         (ngModelChange)="onRoleChange(user.id)"
-                        interface="alert"
                       >
                         @for (role of roleOptionsForUser(user); track role) {
-                          <ion-select-option [value]="role">{{ role }}</ion-select-option>
+                          <o-option [value]="role">{{ role }}</o-option>
                         }
-                      </ion-select>
+                      </o-select>
                     </div>
 
                     @if (needsGroupAssignment(drafts[user.id].accessRole)) {
                       <div class="o-field">
                         <label>Assign Hotel Group</label>
-                        <ion-select
+                        <o-select
                           [(ngModel)]="drafts[user.id].assignedHotelGroupId"
                           [ngModelOptions]="{ standalone: true }"
-                          interface="alert"
                         >
-                          <ion-select-option [value]="null">Select group</ion-select-option>
+                          <o-option [value]="null">Select group</o-option>
                           @for (group of assignableHotelGroups(); track group.id ?? group.name) {
-                            <ion-select-option [value]="group.id ?? null">
+                            <o-option [value]="group.id ?? null">
                               {{ group.name }}{{ group.code ? ' (' + group.code + ')' : '' }}
-                            </ion-select-option>
+                            </o-option>
                           }
-                        </ion-select>
+                        </o-select>
                       </div>
                     }
 
                     @if (needsHotelAssignment(drafts[user.id].accessRole)) {
                       <div class="o-field">
                         <label>Assign Hotel</label>
-                        <ion-select
+                        <o-select
                           [(ngModel)]="drafts[user.id].assignedHotelId"
                           [ngModelOptions]="{ standalone: true }"
-                          interface="alert"
                         >
-                          <ion-select-option [value]="null">Select hotel</ion-select-option>
+                          <o-option [value]="null">Select hotel</o-option>
                           @for (hotel of filteredHotelsForUser(user.id); track hotel.id ?? hotel.name) {
-                            <ion-select-option [value]="hotel.id ?? null">
+                            <o-option [value]="hotel.id ?? null">
                               {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                            </ion-select-option>
+                            </o-option>
                           }
-                        </ion-select>
+                        </o-select>
                       </div>
                     }
 
                     @if (needsEmployeeRole(drafts[user.id].accessRole)) {
                       <div class="o-field">
                         <label>Operational Role</label>
-                        <ion-select
+                        <o-select
                           [(ngModel)]="drafts[user.id].employeeRole"
                           [ngModelOptions]="{ standalone: true }"
-                          interface="alert"
                         >
-                          <ion-select-option [value]="null">Select role</ion-select-option>
+                          <o-option [value]="null">Select role</o-option>
                           @for (role of employeeRoles; track role) {
-                            <ion-select-option [value]="role">{{ role.replace(/_/g, ' ') }}</ion-select-option>
+                            <o-option [value]="role">{{ role.replace(/_/g, ' ') }}</o-option>
                           }
-                        </ion-select>
+                        </o-select>
                       </div>
                     }
 

@@ -39,14 +39,14 @@
               @if (showHotelSelector()) {
                 <div class="o-field o-field--wide">
                   <label>Hotel</label>
-                  <ion-select [(ngModel)]="form.hotelId" name="hotelId" interface="alert" required>
-                    <ion-select-option [value]="null">Select hotel</ion-select-option>
+                  <o-select [(ngModel)]="form.hotelId" name="hotelId" required>
+                    <o-option [value]="null">Select hotel</o-option>
                     @for (hotel of hotels(); track hotel.id ?? hotel.name) {
-                      <ion-select-option [value]="hotel.id ?? null">
+                      <o-option [value]="hotel.id ?? null">
                         {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                      </ion-select-option>
+                      </o-option>
                     }
-                  </ion-select>
+                  </o-select>
                 </div>
               } @else {
                 <div class="o-field o-field--wide">
@@ -161,14 +161,14 @@
                 @if (showHotelSelector()) {
                   <div class="o-field o-field--wide">
                     <label>Hotel</label>
-                    <ion-select [(ngModel)]="editForm.hotelId" name="editHotelId" interface="alert" required>
-                      <ion-select-option [value]="null">Select hotel</ion-select-option>
+                    <o-select [(ngModel)]="editForm.hotelId" name="editHotelId" required>
+                      <o-option [value]="null">Select hotel</o-option>
                       @for (hotel of hotels(); track hotel.id ?? hotel.name) {
-                        <ion-select-option [value]="hotel.id ?? null">
+                        <o-option [value]="hotel.id ?? null">
                           {{ hotel.name }}{{ hotel.code ? ' (' + hotel.code + ')' : '' }}
-                        </ion-select-option>
+                        </o-option>
                       }
-                    </ion-select>
+                    </o-select>
                   </div>
                 } @else {
                   <div class="o-field o-field--wide">

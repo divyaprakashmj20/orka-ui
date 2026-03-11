@@ -376,11 +376,11 @@ export class RequestsPage implements OnInit, OnDestroy {
     this.api.saveRequest(payload, requestId).subscribe({
       next: (saved) => {
         this.acting.set(false);
-        // Update the detail sheet immediately from the REST response so the user
-        // sees the change without waiting for the SSE broadcast roundtrip.
-        // Do NOT patch items here — SSE broadcast is the authoritative source
-        // and will arrive momentarily, preventing a double-update flicker.
-        this.selectedRequest.set(saved);
+        // Only refresh the detail sheet if the user already has it open.
+        // Action buttons should NOT auto-open details — the user opens them deliberately.
+        if (this.selectedRequest() != null) {
+          this.selectedRequest.set(saved);
+        }
       },
       error: () => {
         this.acting.set(false);
@@ -414,7 +414,19 @@ export class RequestsPage implements OnInit, OnDestroy {
   }
 
   private sortedRequests(items: ServiceRequest[]): ServiceRequest[] {
+    // NEW and ACCEPTED are "active" — interleaved by recency
+    // CANCELLED sits in the middle, COMPLETED always last
+    const statusPriority: Record<string, number> = {
+      NEW:       0,
+      ACCEPTED:  0,
+      CANCELLED: 1,
+      COMPLETED: 2,
+    };
     return [...items].sort((a, b) => {
+      const aPrio = statusPriority[a.status ?? 'NEW'] ?? 0;
+      const bPrio = statusPriority[b.status ?? 'NEW'] ?? 0;
+      if (aPrio !== bPrio) return aPrio - bPrio;
+      // Within the same priority group: most recent first
       const aTime = Date.parse(a.createdAt ?? '') || 0;
       const bTime = Date.parse(b.createdAt ?? '') || 0;
       return bTime - aTime;
