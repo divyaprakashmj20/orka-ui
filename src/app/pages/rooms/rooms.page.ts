@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser, Hotel, Room } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
 import { ShellComponent } from '../../core/shell/shell.component';
 
 type RoomForm = {
@@ -38,6 +39,7 @@ import { OSelectComponent } from '../../core/components/o-select/o-select.compon
 })
 export class RoomsPage implements OnInit {
   private readonly auth = inject(FirebaseAuthService);
+  private readonly network = inject(NetworkStatusService);
   protected readonly items = signal<Room[]>([]);
   protected readonly hotels = signal<Hotel[]>([]);
   protected readonly currentAppUser = signal<AppUser | null>(null);
@@ -147,6 +149,10 @@ export class RoomsPage implements OnInit {
   }
 
   protected save(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to create or edit rooms.');
+      return;
+    }
     const roomNumber = this.form.number.trim();
     const hotelId = this.fixedHotelId() ?? this.form.hotelId;
     if (!roomNumber || hotelId == null) {
@@ -197,6 +203,10 @@ export class RoomsPage implements OnInit {
   }
 
   protected saveEdit(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to update rooms.');
+      return;
+    }
     const roomId = this.editForm.id;
     const roomNumber = this.editForm.number.trim();
     const hotelId = this.fixedHotelId() ?? this.editForm.hotelId;
@@ -231,6 +241,10 @@ export class RoomsPage implements OnInit {
   }
 
   protected remove(item: Room): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to delete rooms.');
+      return;
+    }
     if (item.id == null) {
       return;
     }

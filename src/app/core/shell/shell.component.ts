@@ -31,6 +31,8 @@ import { FirebaseAuthService } from '../auth/firebase-auth.service';
 import { AppUser, AccessRole, ServiceRequest } from '../models/orca.models';
 import { PushNotificationsService } from '../notifications/push-notifications.service';
 import { OrcaApiService } from '../services/orca-api.service';
+import { NetworkStatusService } from '../services/network-status.service';
+import { OfflineSyncService } from '../services/offline-sync.service';
 import { OrkaSseService } from '../services/orka-sse.service';
 
 type NavItem = {
@@ -68,6 +70,8 @@ export class ShellComponent implements OnInit, OnDestroy {
   private readonly api       = inject(OrcaApiService);
   private readonly router    = inject(Router);
   private readonly push      = inject(PushNotificationsService);
+  protected readonly network = inject(NetworkStatusService);
+  protected readonly offlineSync = inject(OfflineSyncService);
 
   private readonly sseService = inject(OrkaSseService);
   private toastSub?: Subscription;
@@ -77,7 +81,6 @@ export class ShellComponent implements OnInit, OnDestroy {
   protected readonly loggingOut  = signal(false);
   protected readonly logoutError = signal('');
   protected readonly isDark      = signal(true);
-  protected readonly isOnline    = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
   protected readonly requestsUnreadCount = toSignal(this.sseService.unreadCount$, { initialValue: 0 });
   /** The request shown in the toast. Null = toast hidden. */
   protected readonly toastRequest = signal<ServiceRequest | null>(null);
@@ -107,6 +110,17 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.appUser()?.name ?? this.auth.user()?.email ?? '—'
   );
 
+  protected readonly syncErrorMessage = computed(() => {
+    const error = this.offlineSync.lastError();
+    if (!error) {
+      return '';
+    }
+    if (error.includes('another device')) {
+      return 'Some offline request changes failed to sync because the request state changed on another device.';
+    }
+    return error;
+  });
+
   constructor() {
     addIcons({
       homeOutline, sparklesOutline, bedOutline, peopleOutline,
@@ -121,11 +135,6 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.isDark.set(dark);
     this.applyTheme(dark);
 
-    // Track online/offline state
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online',  () => this.isOnline.set(true));
-      window.addEventListener('offline', () => this.isOnline.set(false));
-    }
   }
 
   ngOnInit(): void {
@@ -153,6 +162,10 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   protected toastTypeLabel(req: ServiceRequest): string {
     return req.type?.replace(/_/g, ' ') ?? 'Request';
+  }
+
+  protected retryOfflineSync(): void {
+    void this.offlineSync.flushQueue(true);
   }
 
   protected toggleTheme(): void {

@@ -306,6 +306,19 @@ ion-content { --background: var(--o-bg); }
   line-height: 1.5;
 }
 
+.guest-inline-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--o-warning-dim);
+  border: 1px solid rgba(245,158,11,0.25);
+  color: var(--o-warning);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 /* Submit button */
 .guest-form-card ion-button {
   margin: 0;
@@ -344,6 +357,20 @@ ion-content { --background: var(--o-bg); }
   color: var(--o-muted);
   line-height: 1.5;
   font-size: 0.88rem;
+}
+
+.guest-pending-chip {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--o-warning);
+  background: var(--o-warning-dim);
+  border: 1px solid rgba(245,158,11,0.25);
 }
 
 /* ─── State cards (loading / error) ─────────────── */

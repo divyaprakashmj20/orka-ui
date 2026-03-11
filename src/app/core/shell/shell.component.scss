@@ -226,6 +226,64 @@ ion-content { --background: var(--o-bg); }
   ion-icon { font-size: 1rem; flex-shrink: 0; }
 }
 
+.o-offline-copy {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+
+  small {
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.82;
+  }
+}
+
+.o-offline-action {
+  border: none;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.16);
+  color: #1a1000;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 8px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.o-sync-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(239, 68, 68, 0.16);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--o-danger);
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+.o-sync-error-copy {
+  display: grid;
+  gap: 2px;
+
+  small {
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.88;
+  }
+}
+
 /* ── New-request toast ───────────────────────────── */
 @keyframes toast-in {
   from { transform: translateY(100%); opacity: 0; }

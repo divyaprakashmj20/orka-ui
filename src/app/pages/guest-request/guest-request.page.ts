@@ -26,6 +26,8 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { GuestRoomContext, RequestStatus, RequestType, ServiceRequest } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
+import { OfflineSyncService } from '../../core/services/offline-sync.service';
 
 @Component({
   selector: 'app-guest-request-page',
@@ -47,6 +49,8 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   private readonly api      = inject(OrcaApiService);
   private readonly document = inject(DOCUMENT);
   private readonly router   = inject(Router);
+  protected readonly network = inject(NetworkStatusService);
+  private readonly offlineSync = inject(OfflineSyncService);
 
   private pollInterval: ReturnType<typeof setInterval> | null = null;
   private sessionExpiryTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -57,6 +61,7 @@ export class GuestRequestPage implements OnInit, OnDestroy {
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly success = signal(false);
+  protected readonly successMessage = signal('Your hotel team has received the request.');
   protected readonly sessionExpired = signal(false);
   protected readonly sessionExpiresAt = signal<string | null>(null);
   protected readonly context = signal<GuestRoomContext | null>(null);
@@ -136,16 +141,37 @@ export class GuestRequestPage implements OnInit, OnDestroy {
 
     this.saving.set(true);
     this.error.set('');
+    const payload = {
+      sessionToken,
+      type,
+      message: this.message.trim() || null
+    };
     try {
+      if (!this.network.isOnline()) {
+        await this.offlineSync.enqueueGuestRequest(token, payload);
+        const optimistic = [this.buildPendingGuestRequest(type), ...this.requests()];
+        this.requests.set(optimistic);
+        this.successMessage.set('Saved offline. We will send this request automatically when internet returns.');
+        this.success.set(true);
+        this.message = '';
+        const current = this.context();
+        if (current) {
+          this.api.primeGuestSessionCache(token, {
+            sessionToken,
+            sessionExpiresAt: this.sessionExpiresAt() ?? new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+            context: current,
+            requests: optimistic
+          });
+        }
+        return;
+      }
+
       await firstValueFrom(
-        this.api.createGuestRequest(token, {
-          sessionToken,
-          type,
-          message: this.message.trim() || null
-        })
+        this.api.createGuestRequest(token, payload)
       );
       await this.bootstrap(token);
       this.snapshotStatuses();
+      this.successMessage.set('Your hotel team has received the request.');
       this.success.set(true);
       this.message = '';
       void this.requestNotificationPermission();
@@ -293,6 +319,7 @@ export class GuestRequestPage implements OnInit, OnDestroy {
     this.requests.set(result.requests);
     this.sessionExpiresAt.set(result.sessionExpiresAt);
     this.storeGuestAccess(token, result.sessionToken, result.sessionExpiresAt);
+    this.api.primeGuestSessionCache(token, result);
     this.scheduleSessionExpiry(token, result.sessionExpiresAt);
 
     if (!this.selectedType() && result.context.availableRequestTypes.length) {
@@ -307,6 +334,17 @@ export class GuestRequestPage implements OnInit, OnDestroy {
     }
 
     this.error.set('This room link is invalid or no longer available.');
+  }
+
+  private buildPendingGuestRequest(type: RequestType): ServiceRequest {
+    return {
+      localOnlyId: `guest-${Date.now()}`,
+      type,
+      message: this.message.trim() || null,
+      status: 'NEW',
+      createdAt: new Date().toISOString(),
+      localState: 'PENDING_SYNC'
+    };
   }
 
   private scheduleSessionExpiry(roomToken: string, expiresAt: string | null | undefined): void {

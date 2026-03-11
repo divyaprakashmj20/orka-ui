@@ -3,9 +3,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonButton, IonToggle } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
-import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
+import { OfflineSyncService } from '../../core/services/offline-sync.service';
 import { ShellComponent } from '../../core/shell/shell.component';
 
 @Component({
@@ -18,7 +19,8 @@ import { ShellComponent } from '../../core/shell/shell.component';
 })
 export class ProfilePage implements OnInit {
   private readonly api  = inject(OrcaApiService);
-  private readonly auth = inject(FirebaseAuthService);
+  private readonly network = inject(NetworkStatusService);
+  private readonly offlineSync = inject(OfflineSyncService);
 
   protected readonly loading = signal(true);
   protected readonly saving  = signal(false);
@@ -48,15 +50,29 @@ export class ProfilePage implements OnInit {
     this.saving.set(true);
     this.error.set('');
     this.success.set(false);
+    const payload = {
+      name:       this.form.name.trim() || undefined,
+      phone:      this.form.phone.trim() || null,
+      fcmEnabled: this.form.fcmEnabled
+    };
     try {
+      if (!this.network.isOnline()) {
+        await this.offlineSync.enqueueProfileUpdate(payload);
+        const current = this.user();
+        if (current) {
+          const optimistic = { ...current, ...payload, name: payload.name ?? current.name };
+          this.user.set(optimistic);
+          this.api.primeMyProfileCache(optimistic);
+        }
+        this.success.set(true);
+        return;
+      }
+
       const updated = await firstValueFrom(
-        this.api.updateMyProfile({
-          name:       this.form.name.trim() || undefined,
-          phone:      this.form.phone.trim() || null,
-          fcmEnabled: this.form.fcmEnabled
-        })
+        this.api.updateMyProfile(payload)
       );
       this.user.set(updated);
+      this.api.primeMyProfileCache(updated);
       this.success.set(true);
     } catch {
       this.error.set('Failed to save changes. Please try again.');

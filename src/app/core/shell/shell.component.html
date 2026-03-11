@@ -90,10 +90,41 @@
       </header>
 
       <div class="o-body">
-        @if (!isOnline()) {
+        @if (!network.isOnline() || offlineSync.pendingCount() > 0) {
           <div class="o-offline-banner" role="alert">
             <ion-icon name="wifi-outline"></ion-icon>
-            You are offline — live updates paused. Reconnecting when network returns.
+            <div class="o-offline-copy">
+              @if (!network.isOnline()) {
+                <span>You are offline — live updates paused.</span>
+              } @else {
+                <span>{{ offlineSync.pendingCount() }} change(s) waiting to sync.</span>
+              }
+              <small>
+                @if (!network.isOnline()) {
+                  Reconnecting when network returns.
+                } @else if (offlineSync.syncing()) {
+                  Syncing queued changes…
+                } @else {
+                  We will retry automatically on reconnect and app resume.
+                }
+              </small>
+            </div>
+            @if (network.isOnline() && offlineSync.pendingCount() > 0) {
+              <button type="button" class="o-offline-action" (click)="retryOfflineSync()" [disabled]="offlineSync.syncing()">
+                {{ offlineSync.syncing() ? 'Syncing…' : 'Retry sync' }}
+              </button>
+            }
+          </div>
+        }
+        @if (offlineSync.lastError()) {
+          <div class="o-sync-error-banner" role="alert">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <div class="o-sync-error-copy">
+              <span>{{ syncErrorMessage() }}</span>
+              @if (offlineSync.failedCount() > 0) {
+                <small>{{ offlineSync.failedCount() }} change(s) need manual attention. Refresh the page to see the latest request state.</small>
+              }
+            </div>
           </div>
         }
         <ng-content></ng-content>

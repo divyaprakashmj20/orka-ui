@@ -51,6 +51,7 @@ export interface Room {
 
 export interface ServiceRequest {
   id?: number;
+  version?: number | null;
   hotel?: HotelRef | null;
   room?: RoomRef | null;
   type?: RequestType | null;
@@ -62,11 +63,14 @@ export interface ServiceRequest {
   assignee?: AppUserRef | null;
   rating?: number | null;
   comments?: string | null;
+  localState?: 'PENDING_SYNC' | 'SYNC_FAILED' | null;
+  localOnlyId?: string | null;
 }
 
 export interface RequestWritePayload {
   hotelId: number;
   roomId: number;
+  version?: number | null;
   type: RequestType | null;
   message?: string | null;
   status?: RequestStatus | null;

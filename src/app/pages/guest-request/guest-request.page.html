@@ -16,10 +16,17 @@
         <section class="guest-success-toast" (click)="$event.stopPropagation()">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
           <h2>Request submitted</h2>
-          <p>Your hotel team has received the request.</p>
+          <p>{{ successMessage() }}</p>
           <ion-button expand="block" (click)="resetSuccess()">Okay</ion-button>
         </section>
       </div>
+    }
+
+    @if (!network.isOnline()) {
+      <section class="guest-inline-banner" role="alert">
+        <ion-icon name="time-outline"></ion-icon>
+        Offline mode — requests will be saved on this device and sent when internet returns.
+      </section>
     }
 
     @if (loading()) {
@@ -131,6 +138,9 @@
                       [class.cancelled]="request.status === 'CANCELLED'"
                     >{{ requestStatusLabel(request.status) }}</span>
                   </div>
+                  @if (request.localState === 'PENDING_SYNC') {
+                    <span class="guest-pending-chip">Pending sync</span>
+                  }
                   @if (request.message) {
                     <p class="guest-history-message">{{ request.message }}</p>
                   }

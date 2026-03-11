@@ -211,6 +211,18 @@
   ion-icon { font-size: 1rem; flex-shrink: 0; }
 }
 
+.rq-notice-bar {
+  background: rgba(59, 130, 246, 0.10);
+  border-color: rgba(59, 130, 246, 0.28);
+  color: #60a5fa;
+}
+
+.rq-warning-bar {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.28);
+  color: #fbbf24;
+}
+
 /* --- Card list ------------------------------------------- */
 .rq-list {
   display: flex;
@@ -358,6 +370,20 @@
   color: var(--o-accent);
   border: 1px solid rgba(99,102,241,0.2);
   white-space: nowrap;
+}
+
+.rq-sync-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--o-warning);
+  background: var(--o-warning-dim);
+  border: 1px solid rgba(245,158,11,0.28);
 }
 
 .rq-hotel-name {
@@ -663,6 +689,10 @@
   &.chip-accepted  { background: var(--o-warning-dim);  border-color: rgba(251,191,36,.3);  color: var(--o-warning); }
   &.chip-completed { background: var(--o-success-dim);  border-color: rgba(74,222,128,.3);  color: var(--o-success); }
   &.chip-cancelled { background: rgba(255,255,255,.04); border-color: var(--o-border);      color: var(--o-muted); }
+}
+
+.rq-sync-chip-sheet {
+  font-size: 0.68rem;
 }
 
 /* Guest note in sheet */

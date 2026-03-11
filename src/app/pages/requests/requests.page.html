@@ -62,6 +62,11 @@
       <ion-icon name="warning-outline"></ion-icon>
       {{ error() }}
     </div>
+  } @else if (notice()) {
+    <div class="rq-error-bar" [class.rq-notice-bar]="noticeTone() === 'info'" [class.rq-warning-bar]="noticeTone() === 'warning'">
+      <ion-icon [name]="noticeTone() === 'warning' ? 'warning-outline' : 'time-outline'"></ion-icon>
+      {{ notice() }}
+    </div>
   }
 
   <!-- Card list -->
@@ -98,6 +103,9 @@
             <div class="rq-card-info">
               <div class="rq-card-info-top">
                 <span class="rq-type-chip">{{ typeLabel(item) }}</span>
+                @if (hasPendingSync(item)) {
+                  <span class="rq-sync-chip">Offline saved</span>
+                }
                 <span class="rq-hotel-name">{{ item.hotel?.name || 'Hotel' }}</span>
               </div>
               @if (item.message) {
@@ -219,6 +227,9 @@
             <p>{{ item.hotel?.name || 'Hotel' }}</p>
             <div class="rq-sheet-chips">
               <span class="rq-status-pill" [ngClass]="statusClass(item)">{{ statusLabel(item) }}</span>
+              @if (hasPendingSync(item)) {
+                <span class="rq-sync-chip rq-sync-chip-sheet">Offline saved</span>
+              }
             </div>
           </div>
           <button type="button" class="rq-sheet-close" (click)="closeRequest()">

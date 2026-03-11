@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser, Hotel, HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
 import { ShellComponent } from '../../core/shell/shell.component';
 
 type HotelForm = {
@@ -38,6 +39,7 @@ import { OSelectComponent } from '../../core/components/o-select/o-select.compon
 })
 export class HotelsPage implements OnInit {
   private readonly auth = inject(FirebaseAuthService);
+  private readonly network = inject(NetworkStatusService);
   protected readonly items = signal<Hotel[]>([]);
   protected readonly hotelGroups = signal<HotelGroup[]>([]);
   protected readonly currentAppUser = signal<AppUser | null>(null);
@@ -79,6 +81,10 @@ export class HotelsPage implements OnInit {
   }
 
   protected save(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to create or edit hotels.');
+      return;
+    }
     const name = this.form.name.trim();
     const hotelGroupId = this.fixedHotelGroupId() ?? this.form.hotelGroupId;
     if (!name || hotelGroupId == null) {
@@ -130,6 +136,10 @@ export class HotelsPage implements OnInit {
   }
 
   protected saveEdit(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to update hotels.');
+      return;
+    }
     const name = this.editForm.name.trim();
     const hotelGroupId = this.fixedHotelGroupId() ?? this.editForm.hotelGroupId;
     if (!name || hotelGroupId == null) { this.error.set('Name and hotel group are required.'); return; }
@@ -149,6 +159,10 @@ export class HotelsPage implements OnInit {
   }
 
   protected remove(item: Hotel): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to delete hotels.');
+      return;
+    }
     if (item.id == null) {
       return;
     }

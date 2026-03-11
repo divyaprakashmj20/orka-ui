@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   IonButton,
@@ -7,6 +7,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmarkDoneOutline, checkmarkOutline, closeCircleOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline } from 'ionicons/icons';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import {
@@ -19,6 +20,8 @@ import {
 import { ShellComponent } from '../../core/shell/shell.component';
 import { PushEventsService } from '../../core/notifications/push-events.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
+import { OfflineSyncService } from '../../core/services/offline-sync.service';
 import { OrkaSseService, SseConnectionStatus } from '../../core/services/orka-sse.service';
 
 type RequestBoardFilter = 'ALL' | RequestStatus;
@@ -47,6 +50,8 @@ export class RequestsPage implements OnInit, OnDestroy {
   private readonly pushEvents = inject(PushEventsService);
   private readonly auth = inject(FirebaseAuthService);
   private readonly sseService = inject(OrkaSseService);
+  private readonly network = inject(NetworkStatusService);
+  private readonly offlineSync = inject(OfflineSyncService);
 
   protected readonly items = signal<ServiceRequest[]>([]);
   protected readonly sseStatus = signal<SseConnectionStatus>('connecting');
@@ -54,10 +59,14 @@ export class RequestsPage implements OnInit, OnDestroy {
   protected readonly loading = signal(false);
   protected readonly acting = signal(false);
   protected readonly error = signal('');
+  protected readonly notice = signal('');
+  protected readonly noticeTone = signal<'info' | 'warning'>('info');
   protected readonly activeFilter = signal<RequestBoardFilter>('ALL');
   protected readonly selectedRequest = signal<ServiceRequest | null>(null);
   protected readonly requestStatuses = REQUEST_STATUSES;
   protected readonly boardFilters: RequestBoardFilter[] = ['ALL', ...REQUEST_STATUSES];
+  private noticeTimeout: ReturnType<typeof globalThis.setTimeout> | null = null;
+  private readonly noticeMode = signal<'offline-save' | null>(null);
   protected readonly filteredItems = computed(() => {
     const filter = this.activeFilter();
     if (filter === 'ALL') {
@@ -84,6 +93,43 @@ export class RequestsPage implements OnInit, OnDestroy {
 
   constructor(private readonly api: OrcaApiService) {
     addIcons({ checkmarkOutline, checkmarkDoneOutline, closeCircleOutline, closeOutline, personOutline, refreshOutline, timeOutline, warningOutline });
+
+    effect(() => {
+      if (this.noticeMode() !== 'offline-save') {
+        return;
+      }
+
+      const isOnline = this.network.isOnline();
+      const pendingCount = this.offlineSync.pendingCount();
+      const failedCount = this.offlineSync.failedCount();
+      const syncing = this.offlineSync.syncing();
+      const lastSyncedAt = this.offlineSync.lastSyncedAt();
+
+      if (!isOnline) {
+        this.setStickyNotice('No internet — request change saved offline and will sync automatically.', 'info');
+        return;
+      }
+
+      if (syncing || pendingCount > 0) {
+        this.setStickyNotice('Back online — syncing offline changes…', 'info');
+        return;
+      }
+
+      if (failedCount > 0) {
+        this.noticeMode.set(null);
+        this.notice.set('');
+        return;
+      }
+
+      if (lastSyncedAt) {
+        this.noticeMode.set(null);
+        this.showNotice('Offline changes synced.', 'info', 4000);
+        return;
+      }
+
+      this.noticeMode.set(null);
+      this.notice.set('');
+    });
   }
 
   ngOnInit(): void {
@@ -122,6 +168,7 @@ export class RequestsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sseService.setRequestsPageActive(false);
+    this.clearNoticeTimer();
   }
 
   protected refreshAll(): void {
@@ -134,6 +181,7 @@ export class RequestsPage implements OnInit, OnDestroy {
     this.api.listRequests().subscribe({
       next: (items) => {
         // Push into service so it stays in sync as the single source of truth.
+        this.api.primeRequestsCache(items);
         this.sseService.items$.next(items);
         this.loading.set(false);
       },
@@ -244,7 +292,8 @@ export class RequestsPage implements OnInit, OnDestroy {
   }
 
   protected statusLabel(item: ServiceRequest): string {
-    return item.status ?? 'NEW';
+    const base = item.status ?? 'NEW';
+    return item.localState === 'PENDING_SYNC' ? `${base} · Pending sync` : base;
   }
 
   protected typeLabel(item: ServiceRequest): string {
@@ -356,6 +405,10 @@ export class RequestsPage implements OnInit, OnDestroy {
     return diffMs > 30 * 60 * 1000; // urgent if > 30 min
   }
 
+  protected hasPendingSync(item: ServiceRequest): boolean {
+    return item.localState === 'PENDING_SYNC';
+  }
+
   private async loadCurrentAppUserAndRefresh(): Promise<void> {
     try {
       const firebaseUser = this.auth.currentUser() ?? (await firstValueFrom(this.auth.authState$));
@@ -371,6 +424,11 @@ export class RequestsPage implements OnInit, OnDestroy {
   }
 
   private saveAction(payload: RequestWritePayload, requestId: number): void {
+    if (!this.network.isOnline()) {
+      void this.queueOfflineAction(payload, requestId);
+      return;
+    }
+
     this.acting.set(true);
     this.error.set('');
     this.api.saveRequest(payload, requestId).subscribe({
@@ -382,11 +440,35 @@ export class RequestsPage implements OnInit, OnDestroy {
           this.selectedRequest.set(saved);
         }
       },
-      error: () => {
+      error: (error: unknown) => {
         this.acting.set(false);
+        if (!this.network.isOnline()) {
+          void this.queueOfflineAction(payload, requestId);
+          return;
+        }
+        if (error instanceof HttpErrorResponse && error.status === 409) {
+          this.showNotice('This request changed on another device. Refresh to load the latest state.', 'warning');
+          return;
+        }
         this.error.set('Request update failed. Refresh and try again.');
       }
     });
+  }
+
+  private async queueOfflineAction(payload: RequestWritePayload, requestId: number): Promise<void> {
+    await this.offlineSync.enqueueRequestUpdate(requestId, payload);
+    const optimistic = this.sortedRequests(
+      this.items().map((item) => (item.id === requestId ? this.applyOfflinePatch(item, payload) : item))
+    );
+    this.items.set(optimistic);
+    this.api.primeRequestsCache(optimistic);
+    this.sseService.items$.next(optimistic);
+    if (this.selectedRequest() != null) {
+      this.selectedRequest.set(optimistic.find((item) => item.id === requestId) ?? null);
+    }
+    this.error.set('');
+    this.noticeMode.set('offline-save');
+    this.setStickyNotice('No internet — request change saved offline and will sync automatically.', 'info');
   }
 
   private buildRequestPayload(
@@ -396,6 +478,7 @@ export class RequestsPage implements OnInit, OnDestroy {
     return {
       hotelId: item.hotel?.id ?? 0,
       roomId: item.room?.id ?? 0,
+      version: item.version ?? null,
       type: item.type ?? null,
       message: item.message ?? null,
       status: overrides.status ?? item.status ?? null,
@@ -410,6 +493,36 @@ export class RequestsPage implements OnInit, OnDestroy {
             : item.assignee?.id ?? null,
       rating: item.rating ?? null,
       comments: item.comments ?? null
+    };
+  }
+
+  private applyOfflinePatch(item: ServiceRequest, payload: RequestWritePayload): ServiceRequest {
+    const currentUser = this.currentAppUser();
+    const assignee =
+      payload.assigneeId === null
+        ? null
+        : payload.assigneeId != null
+          ? item.assignee?.id === payload.assigneeId
+            ? item.assignee
+            : currentUser?.id === payload.assigneeId
+              ? {
+                  id: currentUser.id,
+                  name: currentUser.name,
+                  employeeRole: currentUser.employeeRole,
+                  accessRole: currentUser.accessRole,
+                  active: currentUser.active
+                }
+              : item.assignee
+          : item.assignee;
+
+    return {
+      ...item,
+      status: payload.status ?? item.status ?? null,
+      acceptedAt: payload.acceptedAt ?? item.acceptedAt ?? null,
+      completedAt: payload.completedAt ?? item.completedAt ?? null,
+      assignee,
+      version: payload.version ?? item.version ?? null,
+      localState: 'PENDING_SYNC'
     };
   }
 
@@ -443,5 +556,31 @@ export class RequestsPage implements OnInit, OnDestroy {
 
   private nowIso(): string {
     return new Date().toISOString();
+  }
+
+  private showNotice(message: string, tone: 'info' | 'warning', duration = 8000): void {
+    this.clearNoticeTimer();
+    this.notice.set(message);
+    this.noticeTone.set(tone);
+
+    if (duration > 0 && typeof window !== 'undefined') {
+      this.noticeTimeout = globalThis.setTimeout(() => {
+        this.notice.set('');
+        this.noticeTimeout = null;
+      }, duration);
+    }
+  }
+
+  private setStickyNotice(message: string, tone: 'info' | 'warning'): void {
+    this.clearNoticeTimer();
+    this.notice.set(message);
+    this.noticeTone.set(tone);
+  }
+
+  private clearNoticeTimer(): void {
+    if (this.noticeTimeout != null) {
+      clearTimeout(this.noticeTimeout);
+      this.noticeTimeout = null;
+    }
   }
 }

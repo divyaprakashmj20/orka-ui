@@ -1,11 +1,12 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton
 } from '@ionic/angular/standalone';
 import { HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
+import { NetworkStatusService } from '../../core/services/network-status.service';
 import { ShellComponent } from '../../core/shell/shell.component';
 
 type HotelGroupForm = {
@@ -28,6 +29,7 @@ type HotelGroupForm = {
   styleUrl: './hotel-groups.page.scss'
 })
 export class HotelGroupsPage implements OnInit {
+  private readonly network = inject(NetworkStatusService);
   protected readonly items = signal<HotelGroup[]>([]);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -59,6 +61,10 @@ export class HotelGroupsPage implements OnInit {
   }
 
   protected save(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to create or edit hotel groups.');
+      return;
+    }
     const name = this.form.name.trim();
     if (!name) {
       this.error.set('Name is required.');
@@ -102,6 +108,10 @@ export class HotelGroupsPage implements OnInit {
   }
 
   protected saveEdit(): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to update hotel groups.');
+      return;
+    }
     const name = this.editForm.name.trim();
     if (!name) { this.error.set('Name is required.'); return; }
     this.modalSaving.set(true);
@@ -114,6 +124,10 @@ export class HotelGroupsPage implements OnInit {
   }
 
   protected remove(item: HotelGroup): void {
+    if (!this.network.isOnline()) {
+      this.error.set('Internet is required to delete hotel groups.');
+      return;
+    }
     if (item.id == null) {
       return;
     }
