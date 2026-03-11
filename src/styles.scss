@@ -129,6 +129,14 @@
   --o-text-muted:    #8a8aa4;
   --o-surface-hover: hsl(var(--orka-neutral-hue) 19% calc(var(--orka-l-bg-l) * 1% - 5%));
   --o-topbar-bg:     hsl(var(--orka-neutral-hue) 19% calc(var(--orka-l-bg-l) * 1%) / 0.88);
+
+  /* ── Re-pin Ionic danger token so prefers-color-scheme:light can't wash it out ── */
+  --ion-color-danger:              #ef4444;
+  --ion-color-danger-rgb:          239,68,68;
+  --ion-color-danger-contrast:     #ffffff;
+  --ion-color-danger-contrast-rgb: 255,255,255;
+  --ion-color-danger-shade:        #dc2626;
+  --ion-color-danger-tint:         #f87171;
 }
 
 /* ─ 2. Reset & Base ──────────────────────────────── */
@@ -1149,5 +1157,36 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
       border-color: transparent;
       box-shadow: 0 3px 10px rgba(0,0,0,0.10), 0 0 0 1.5px rgba(99,102,241,0.35);
     }
+  }
+
+  /* ── Page popup overlays (hotels, hotel-groups, rooms, staff) ── */
+  .ht-popup-overlay,
+  .hg-popup-overlay,
+  .room-popup-overlay,
+  .sf-popup-overlay {
+    background: rgba(15,23,42,.45);
+  }
+
+  .ht-popup-card,
+  .hg-popup-card,
+  .room-popup-card,
+  .sf-popup-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 32px 64px rgba(0,0,0,.18);
+    color: #1e293b;
+
+    h3 { color: #1e293b; }
+    p  { color: #64748b; }
+    label { color: #475569; }
+  }
+
+  /* ── Danger (delete) buttons stay red in light mode ── */
+  ion-button[color="danger"] {
+    --background:           #ef4444;
+    --background-hover:     #dc2626;
+    --background-activated: #dc2626;
+    --background-focused:   #dc2626;
+    --color:                #ffffff;
   }
 }

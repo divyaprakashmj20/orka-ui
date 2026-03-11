@@ -217,8 +217,11 @@
       <div class="sf-popup-head">
         <div class="sf-view-avatar-row">
           <div class="sf-view-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
-          <div>
-            <h3>{{ user.name }} @if (isSelf(user)) { <span class="self-you-badge">You</span> }</h3>
+          <div class="sf-view-copy">
+            <div class="sf-view-title-row">
+              <h3>{{ user.name }}</h3>
+              @if (isSelf(user)) { <span class="self-you-badge">You</span> }
+            </div>
             <p>{{ user.email }}</p>
           </div>
         </div>

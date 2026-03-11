@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "android:local": "set ORKA_CAP_MODE=local && ng build --configuration local && cap sync android && cap run android",
+    "android:prod": "set ORKA_CAP_MODE=prod && ng build --configuration production && cap sync android && cap run android",
+    "android:open": "cap open android"
   },
   "prettier": {
     "printWidth": 100,
