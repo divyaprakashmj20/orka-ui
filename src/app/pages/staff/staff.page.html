@@ -1,5 +1,4 @@
-﻿<app-shell pageTitle="Staff">
-    <div class="o-page-head">
+﻿    <div class="o-page-head">
       <div>
         <p class="o-page-eyebrow">Team Operations</p>
         <h1>Staff management</h1>
@@ -177,7 +176,6 @@
         </div>
       </section>
     }
-</app-shell>
 
 <ng-template #personCard let-user>
   <article class="o-record roster-card" [class.roster-card-self]="isSelf(user)" (click)="openViewer(user)" role="button" tabindex="0" (keydown.enter)="openViewer(user)">

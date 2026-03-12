@@ -54,6 +54,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Profile',        path: '/profile',     icon: 'person-circle-outline',roles: ['SUPERADMIN','HOTEL_GROUP_ADMIN','HOTEL_ADMIN','ADMIN','STAFF'] },
 ];
 
+const MOBILE_DOCK_PRIORITY = ['/', '/requests', '/app-users', '/reports', '/profile', '/staff'];
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -89,6 +91,15 @@ export class ShellComponent implements OnInit, OnDestroy {
     const role = this.appUser()?.accessRole;
     if (!role) return [];
     return NAV_ITEMS.filter(n => n.roles.includes(role));
+  });
+
+  protected readonly mobileDockNav = computed(() => {
+    const visible = this.visibleNav();
+    const prioritized = MOBILE_DOCK_PRIORITY
+      .map((path) => visible.find((item) => item.path === path))
+      .filter((item): item is NavItem => item != null);
+
+    return prioritized.slice(0, 4);
   });
 
   protected readonly userInitials = computed(() => {
@@ -191,6 +202,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.closeSidebar();
     void this.router.navigateByUrl(path);
   }
+
 
   protected isActive(path: string): boolean {
     if (path === '/') return this.router.url === '/';

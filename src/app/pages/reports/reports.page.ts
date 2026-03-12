@@ -6,7 +6,6 @@ import {
   AppUser, Hotel, HotelGroup, RequestStatus, RequestType, ServiceRequest
 } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 import { OOptionComponent } from '../../core/components/o-select/o-option.component';
 import { OSelectComponent } from '../../core/components/o-select/o-select.component';
 
@@ -25,7 +24,7 @@ export interface StaffStat {
   selector: 'app-reports-page',
   standalone: true,
   host: { class: 'ion-page' },
-  imports: [CommonModule, ShellComponent, OSelectComponent, OOptionComponent],
+  imports: [CommonModule, OSelectComponent, OOptionComponent],
   templateUrl: './reports.page.html',
   styleUrl: './reports.page.scss'
 })

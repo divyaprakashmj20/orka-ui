@@ -7,7 +7,6 @@ import {
 import { HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 import { NetworkStatusService } from '../../core/services/network-status.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 
 type HotelGroupForm = {
   id: number | null;
@@ -22,7 +21,6 @@ type HotelGroupForm = {
   imports: [
     CommonModule,
     FormsModule,
-    ShellComponent,
     IonButton
   ],
   templateUrl: './hotel-groups.page.html',

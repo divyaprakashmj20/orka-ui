@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { IonIcon, IonButton } from '@ionic/angular/standalone';
@@ -15,11 +15,11 @@ import {
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 import { AppUser, AccessRole } from '../../core/models/orca.models';
 import { PushNotificationsService } from '../../core/notifications/push-notifications.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 import { OrkaSseService } from '../../core/services/orka-sse.service';
+import { ShellHeaderService } from '../../core/shell/shell-header.service';
 
 type DashboardTab = 'overview' | 'operations' | 'admin';
 
@@ -39,18 +39,19 @@ type DashboardSection = {
   imports: [
     CommonModule,
     IonIcon,
-    IonButton,
-    ShellComponent
+    IonButton
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss'
 })
 export class HomePage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
   private readonly auth = inject(FirebaseAuthService);
   private readonly pushNotifications = inject(PushNotificationsService);
   private readonly api = inject(OrcaApiService);
   private readonly router = inject(Router);
+  private readonly shellHeader = inject(ShellHeaderService);
 
   protected readonly loggingOut = signal(false);
   protected readonly loadingProfile = signal(true);
@@ -195,6 +196,38 @@ export class HomePage implements OnInit {
     () => this.appUser()?.accessRole === 'SUPERADMIN'
   );
 
+  constructor() {
+    addIcons({ homeOutline, sparklesOutline, bedOutline, peopleOutline, personAddOutline, businessOutline, chevronForwardOutline });
+
+    effect(() => {
+      this.shellHeader.setHeader({
+        title: 'Dashboard',
+        subtitle: this.summaryText()
+      });
+    });
+
+    effect(() => {
+      const el = this.document.documentElement;
+      el.style.setProperty('--orka-hue',          String(this.paletteHue()));
+      el.style.setProperty('--orka-success-hue',   String(this.successHue()));
+      el.style.setProperty('--orka-warning-hue',   String(this.warningHue()));
+      el.style.setProperty('--orka-danger-hue',    String(this.dangerHue()));
+      el.style.setProperty('--orka-neutral-hue',   String(this.neutralHue()));
+      el.style.setProperty('--orka-d-bg-l',        String(this.darkBgL()));
+      el.style.setProperty('--orka-d-surf-l',      String(this.darkSurfL()));
+      el.style.setProperty('--orka-d-text-l',      String(this.darkTextL()));
+      el.style.setProperty('--orka-d-border-a',    String(this.darkBorderA()));
+      el.style.setProperty('--orka-l-bg-l',        String(this.lightBgL()));
+      el.style.setProperty('--orka-l-surf-l',      String(this.lightSurfL()));
+      el.style.setProperty('--orka-l-text-l',      String(this.lightTextL()));
+      el.style.setProperty('--orka-l-border-a',    String(this.lightBorderA()));
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.shellHeader.clear();
+    });
+  }
+
   protected timeGreeting(): string {
     const hour = new Date().getHours();
     if (hour < 5)  return 'Good night.';
@@ -220,26 +253,6 @@ export class HomePage implements OnInit {
       { label: '--o-danger-dim',   swatch: `hsl(${d} 84% 60% / 0.5)`, value: `hsl(${d} 84% 60%/.12)` },
     ];
   });
-
-  constructor() {
-    addIcons({ homeOutline, sparklesOutline, bedOutline, peopleOutline, personAddOutline, businessOutline, chevronForwardOutline });
-    effect(() => {
-      const el = this.document.documentElement;
-      el.style.setProperty('--orka-hue',          String(this.paletteHue()));
-      el.style.setProperty('--orka-success-hue',   String(this.successHue()));
-      el.style.setProperty('--orka-warning-hue',   String(this.warningHue()));
-      el.style.setProperty('--orka-danger-hue',    String(this.dangerHue()));
-      el.style.setProperty('--orka-neutral-hue',   String(this.neutralHue()));
-      el.style.setProperty('--orka-d-bg-l',        String(this.darkBgL()));
-      el.style.setProperty('--orka-d-surf-l',      String(this.darkSurfL()));
-      el.style.setProperty('--orka-d-text-l',      String(this.darkTextL()));
-      el.style.setProperty('--orka-d-border-a',    String(this.darkBorderA()));
-      el.style.setProperty('--orka-l-bg-l',        String(this.lightBgL()));
-      el.style.setProperty('--orka-l-surf-l',      String(this.lightSurfL()));
-      el.style.setProperty('--orka-l-text-l',      String(this.lightTextL()));
-      el.style.setProperty('--orka-l-border-a',    String(this.lightBorderA()));
-    });
-  }
 
   ngOnInit(): void {
     const load = (key: string, fallback: number): number => {

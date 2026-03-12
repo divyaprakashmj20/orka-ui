@@ -7,13 +7,12 @@ import { AppUser } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 import { NetworkStatusService } from '../../core/services/network-status.service';
 import { OfflineSyncService } from '../../core/services/offline-sync.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   host: { class: 'ion-page' },
-  imports: [CommonModule, FormsModule, ShellComponent, IonButton, IonToggle],
+  imports: [CommonModule, FormsModule, IonButton, IonToggle],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss'
 })

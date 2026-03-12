@@ -17,7 +17,6 @@ import {
   RequestStatus,
   ServiceRequest
 } from '../../core/models/orca.models';
-import { ShellComponent } from '../../core/shell/shell.component';
 import { PushEventsService } from '../../core/notifications/push-events.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 import { NetworkStatusService } from '../../core/services/network-status.service';
@@ -38,7 +37,6 @@ type RequestActionPatch = {
   standalone: true,
   imports: [
     CommonModule,
-    ShellComponent,
     IonButton,
     IonIcon
   ],

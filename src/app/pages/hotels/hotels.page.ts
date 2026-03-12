@@ -9,7 +9,6 @@ import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { AppUser, Hotel, HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
 import { NetworkStatusService } from '../../core/services/network-status.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 
 type HotelForm = {
   id: number | null;
@@ -29,7 +28,6 @@ import { OSelectComponent } from '../../core/components/o-select/o-select.compon
   imports: [
     CommonModule,
     FormsModule,
-    ShellComponent,
     IonButton
   ,
     OOptionComponent,

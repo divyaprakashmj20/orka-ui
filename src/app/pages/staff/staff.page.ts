@@ -9,7 +9,6 @@ import { firstValueFrom } from 'rxjs';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { ACCESS_ROLES, AccessRole, AppUser, EMPLOYEE_ROLES, EmployeeRole, Hotel, HotelGroup } from '../../core/models/orca.models';
 import { OrcaApiService } from '../../core/services/orca-api.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 
 type Draft = {
   name: string;
@@ -30,7 +29,6 @@ import { OSelectComponent } from '../../core/components/o-select/o-select.compon
   imports: [
     CommonModule,
     FormsModule,
-    ShellComponent,
     IonCheckbox,
     IonButton
   ,

@@ -18,7 +18,6 @@ import {
 } from '../../core/models/orca.models';
 import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 import { OrcaApiService } from '../../core/services/orca-api.service';
-import { ShellComponent } from '../../core/shell/shell.component';
 
 type Draft = {
   accessRole: AccessRole;
@@ -37,7 +36,6 @@ import { OSelectComponent } from '../../core/components/o-select/o-select.compon
   imports: [
     CommonModule,
     FormsModule,
-    ShellComponent,
     IonCheckbox,
     IonButton
   ,

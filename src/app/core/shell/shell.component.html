@@ -156,6 +156,27 @@
         </div>
       }
 
+      @if (mobileDockNav().length > 0) {
+        <nav class="o-mobile-dock" aria-label="Quick navigation" [style.grid-template-columns]="'repeat(' + mobileDockNav().length + ', minmax(0, 1fr))'">
+          @for (item of mobileDockNav(); track item.path) {
+            <button
+              type="button"
+              class="o-mobile-dock-item"
+              [class.is-active]="isActive(item.path)"
+              (click)="navigate(item.path)"
+            >
+              <span class="o-mobile-dock-icon-wrap">
+                <ion-icon [name]="item.icon"></ion-icon>
+                @if (item.path === '/requests' && requestsUnreadCount() > 0) {
+                  <span class="o-mobile-dock-badge">{{ requestsUnreadCount() > 99 ? '99+' : requestsUnreadCount() }}</span>
+                }
+              </span>
+              <span class="o-mobile-dock-label">{{ item.label }}</span>
+            </button>
+          }
+        </nav>
+      }
+
     </div>
   </div>
 </ion-content>

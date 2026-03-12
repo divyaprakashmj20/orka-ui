@@ -1,6 +1,4 @@
-﻿<app-shell [pageTitle]="'Dashboard'" [pageSubtitle]="summaryText()">
-
-  @if (loadingProfile()) {
+﻿  @if (loadingProfile()) {
     <div class="o-loading">Loading your workspace...</div>
   } @else if (authError()) {
     <div class="o-error">{{ authError() }}</div>
@@ -208,4 +206,3 @@
 
   }
 
-</app-shell>

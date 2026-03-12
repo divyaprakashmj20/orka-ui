@@ -166,7 +166,29 @@ h1, h2, h3, h4, h5, h6 {
 p { margin: 0; }
 a { color: var(--o-accent-lt); text-decoration: none; }
 a:hover { text-decoration: underline; }
-button { cursor: pointer; font-family: inherit; }
+button,
+a,
+[role="button"],
+input,
+textarea,
+select {
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus,
+[role="button"]:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--o-accent) 70%, white 10%);
+  outline-offset: 2px;
+}
 
 /* ─ 3. Ionic Overrides ───────────────────────────── */
 ion-app { --background: var(--o-bg); height: 100%; }
@@ -182,12 +204,31 @@ ion-content {
 ion-button {
   --border-radius: var(--r-md);
   --transition: background 0.15s ease, opacity 0.15s ease;
+  --background-activated: transparent;
+  --background-activated-opacity: 0;
+  --background-focused: transparent;
+  --background-focused-opacity: 0;
+  --box-shadow: none;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
   font-size: 0.875rem;
   margin: 0;
+}
+
+ion-button::part(native) {
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: none;
+}
+
+ion-button::part(native):focus {
+  outline: none;
+}
+
+ion-button::part(native):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--o-accent) 70%, white 10%);
+  outline-offset: 2px;
 }
 
 ion-input {
@@ -1121,7 +1162,7 @@ ion-select-popover { --background: var(--o-surface); font-family: 'Inter', sans-
 
   .o-main { margin-left: 0; }
   .o-burger { display: flex; }
-  .o-body { padding: 18px 16px calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .o-body { padding: 18px 16px calc(92px + env(safe-area-inset-bottom, 0px)); }
   /* only override horizontal padding — preserve safe-area padding-top set on the base rule */
   .o-topbar { padding-left: 16px; padding-right: 16px; }
   /* subtitle adds no value in the narrow topbar on mobile — hide it */
