@@ -547,6 +547,7 @@ export class RequestsPage implements OnInit, OnDestroy {
   private canManageRequestState(user: AppUser | null): boolean {
     return (
       user?.accessRole === 'SUPERADMIN' ||
+      user?.accessRole === 'HOTEL_GROUP_ADMIN' ||
       user?.accessRole === 'HOTEL_ADMIN' ||
       user?.accessRole === 'ADMIN'
     );
